@@ -1,3 +1,11 @@
+//
+// DISCLAIMER
+//
+// Copyright 2020 ArangoDB Inc, Cologne, Germany
+//
+// Author Joerg Schad, Gergely Brautigam
+//
+
 package main
 
 import (
