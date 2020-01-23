@@ -44,7 +44,6 @@ bootstrap:
 docker:
 	docker build \
 		--build-arg=GOARCH=amd64 \
-		--build-arg=ROLEID=$(VAULT_ROLE_ID) \
 		-t $(DOCKERIMAGE) .
 
 docker-push:
