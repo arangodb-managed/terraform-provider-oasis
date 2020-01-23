@@ -30,32 +30,68 @@ Explain how to:
 provider "oasis" {
   api_key_id = "xx"
   api_key_secret  = "xxx"
-}
-
-resource "oasis_deployment" "my_deployment" {
   organization = "190765105"
+  project = "foo"
+}
 
-  project = "190765139"
-
+// Example of oneshard deployment
+resource "oasis_deployment" "my_oneshard_deployment" {
+  project = "190765139" // If set here, overrides project in provider
   location = {
-    provider = ""
-    region = ""
+    provider = "gcp" // Required
+    region = "gcp-eu-west4" // Required
   }
-
   version = {
-    db_version = ""
-    ca_certificate = ""
-    ip_whitelist = ""
+    db_version = "3.6.0" // Required
+    ca_certificate = "" // If not set, uses default certificate from project
+    ip_whitelist = "" // If not set, no whitelist is configured
   }
-
   configuration = {
-    sharded =  false
-    node_memory_gb = 4
-    node_disk_gb = 10
-    num_nodes = 3
+    model = "oneshard"
+    node_size_id = "a4"
+    node_disk_size = 20
   }
 }
 
+// Example of a sharded deployment
+resource "oasis_deployment" "my_sharded_deployment" {
+  project = "190765139" // If set here, overrides project in provider
+  location = {
+    provider = "gcp" // Required
+    region = "gcp-eu-west4" // Required
+  }
+  version = {
+    db_version = "3.6.0" // Required
+    ca_certificate = "" // If not set, uses default certificate from project
+    ip_whitelist = "" // If not set, no whitelist is configured
+  }
+  configuration = {
+    model = "sharded"
+    node_size_id = "a4"
+    node_disk_size = 20
+    num_nodes = 5
+  }
+}
+resource "oasis_deployment" "my_flexible_deployment" {
+  project = "190765139" // If set here, overrides project in provider
+  location = {
+    provider = "gcp" // Required
+    region = "gcp-eu-west4" // Required
+  }
+  version = {
+    db_version = "3.6.0" // Required
+    ca_certificate = "" // If not set, uses default certificate from project
+    ip_whitelist = "" // If not set, no whitelist is configured
+  }
+  configuration = {
+    model = "flexible"
+    coordinator_memory_size = 3
+    dbserver_memory_size = 8
+    dbserver_disk_size = 64
+    num_coordinators = 3
+    num_dbservers = 5
+  }
+}
 
 ```
 
