@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB Inc, Cologne, Germany
+// Copyright 2020 ArangoDB GmbH, Cologne, Germany
 //
 // Author Joerg Schad, Gergely Brautigam
 //
