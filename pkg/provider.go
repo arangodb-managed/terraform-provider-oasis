@@ -1,9 +1,18 @@
-package oasis
+//
+// DISCLAIMER
+//
+// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+//
+// Author Joerg Schad
+//
+
+package pkg
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
+// Provider defines an ArangoDB Oasis Terraform provider.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{

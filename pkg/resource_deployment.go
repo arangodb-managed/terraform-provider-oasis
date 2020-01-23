@@ -1,4 +1,12 @@
-package oasis
+//
+// DISCLAIMER
+//
+// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+//
+// Author Joerg Schad, Gergely Brautigam
+//
+
+package pkg
 
 import "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
@@ -111,7 +119,10 @@ func resourceDeployment() *schema.Resource {
 }
 
 func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
-	m.(*Client).Connect()
+	err := m.(*Client).Connect()
+	if err != nil {
+		return err
+	}
 	return resourceDeploymentRead(d, m)
 }
 

@@ -1,0 +1,56 @@
+version: 2.1
+executors:
+  go-executor:
+    docker:
+      - image: arangodboasis/golang-ci:latest
+jobs:
+  build:
+    parameters:
+      update_modules:
+        type: boolean
+        default: false
+    executor: go-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: cp go.sum go.sum.orig
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum.orig" }}
+      - run: |
+          go get
+          make bootstrap
+      - when:
+          condition: <<parameters.update_modules>>
+          steps:
+            - run: |
+                make update-modules
+      - run: |
+          make all
+      - run: |
+          make test
+      - store_test_results:
+          path: bin/test/
+      - store_artifacts: # upload test summary for display in Artifacts
+          path: bin/test/
+          destination: raw-test-output
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum.orig" }}
+          paths:
+            - "/go/pkg/mod"
+
+workflows:
+  version: 2
+  build_test_store_artifacts:
+    jobs:
+      - build
+  nightly:
+    triggers:
+      - schedule:
+          cron: "30 3 * * *" # format: <minute> <hour> <day-month> <month> <day-week> -- so every day at 03:30
+          filters:
+            branches:
+              only: master
+    jobs:
+      - build:
+          update_modules: true
