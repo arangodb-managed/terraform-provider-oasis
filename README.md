@@ -39,7 +39,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   project = "190765139" // If set here, overrides project in provider
   location = {
     provider = "gcp" // Required
-    region = "gcp-eu-west4" // Required
+    region = "gcp-europe-west4" // Required
   }
   version = {
     db_version = "3.6.0" // Required
