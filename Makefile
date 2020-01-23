@@ -1,5 +1,5 @@
 SHELL = bash
-PROJECT := terraform-oasis
+PROJECT := terraform-provider-oasis
 
 COMMIT := $(shell zutano repo build)
 VERSION := $(shell zutano repo version)
