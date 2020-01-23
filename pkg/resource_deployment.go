@@ -9,6 +9,8 @@
 package pkg
 
 import (
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -36,6 +38,11 @@ func resourceDeployment() *schema.Resource {
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+			},
+
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"location": &schema.Schema{
@@ -136,31 +143,35 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	nodeCount, _ := strconv.Atoi(d.Get("configuration").(map[string]interface{})["num_nodes"].(string))
+	nodeDiskSize, _ := strconv.Atoi(d.Get("configuration").(map[string]interface{})["node_disk_gb"].(string))
+
 	datac := data.NewDataServiceClient(client.conn)
-	deployment, err := datac.CreateDeployment(client.ctxWithToken, &data.Deployment{
+	depl := data.Deployment{
 		ProjectId:   d.Get("project").(string),
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
-		RegionId:    d.Get("location").(*schema.ResourceData).Get("region").(string),
-		Version:     d.Get("version").(*schema.ResourceData).Get("db_version").(string),
+		RegionId:    d.Get("location").(map[string]interface{})["region"].(string),
+		Version:     d.Get("version").(map[string]interface{})["db_version"].(string),
 		Certificates: &data.Deployment_CertificateSpec{
-			CaCertificateId: d.Get("version").(*schema.ResourceData).Get("ca_certificate").(string),
+			CaCertificateId: d.Get("version").(map[string]interface{})["ca_certificate"].(string),
 		},
-		IpwhitelistId: d.Get("version").(*schema.ResourceData).Get("ip_whitelist").(string),
+		IpwhitelistId: d.Get("version").(map[string]interface{})["ip_whitelist"].(string),
 		Servers: &data.Deployment_ServersSpec{
-			Coordinators:          d.Get("configuration").(*schema.ResourceData).Get("num_coordinators").(int32),
-			CoordinatorMemorySize: d.Get("configuration").(*schema.ResourceData).Get("coordinator_memory_size").(int32),
-			Dbservers:             d.Get("configuration").(*schema.ResourceData).Get("num_dbservers").(int32),
-			DbserverMemorySize:    d.Get("configuration").(*schema.ResourceData).Get("dbserver_memory_size").(int32),
-			DbserverDiskSize:      d.Get("configuration").(*schema.ResourceData).Get("dbserver_disk_size").(int32),
+			Coordinators:          3,
+			CoordinatorMemorySize: 4,
+			Dbservers:             3,
+			DbserverMemorySize:    4,
+			DbserverDiskSize:      32,
 		},
 		Model: &data.Deployment_ModelSpec{
-			Model:        d.Get("configuration").(*schema.ResourceData).Get("model").(string),
-			NodeSizeId:   d.Get("configuration").(*schema.ResourceData).Get("node_size_id").(string),
-			NodeCount:    d.Get("configuration").(*schema.ResourceData).Get("num_nodes").(int32),
-			NodeDiskSize: d.Get("configuration").(*schema.ResourceData).Get("node_disk_gb").(int32),
+			Model:        d.Get("configuration").(map[string]interface{})["model"].(string),
+			NodeSizeId:   d.Get("configuration").(map[string]interface{})["node_size_id"].(string),
+			NodeCount:    int32(nodeCount),
+			NodeDiskSize: int32(nodeDiskSize),
 		},
-	})
+	}
+	deployment, err := datac.CreateDeployment(client.ctxWithToken, &depl)
 	if err != nil {
 		return err
 	}
@@ -178,7 +189,6 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	datac := data.NewDataServiceClient(client.conn)
-
 	deployment, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 
 	if err != nil {
