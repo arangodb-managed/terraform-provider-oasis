@@ -9,8 +9,6 @@
 package pkg
 
 import (
-	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -181,7 +179,7 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 
 	datac := data.NewDataServiceClient(client.conn)
 
-	deployment, err := datac.GetDeployment(context.Background(), &common.IDOptions{Id: d.Id()})
+	deployment, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 
 	if err != nil {
 		return err
