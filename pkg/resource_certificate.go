@@ -124,5 +124,17 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
+	client := m.(*Client)
+	err := client.Connect()
+	if err != nil {
+		return err
+	}
+
+	cryptoc := crypto.NewCryptoServiceClient(client.conn)
+	_, err = cryptoc.DeleteCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	if err != nil {
+		return err
+	}
+	d.SetId("") // called automatically, but added to be explicit
 	return nil
 }
