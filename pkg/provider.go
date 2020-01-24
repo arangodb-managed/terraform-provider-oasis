@@ -54,7 +54,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"oasis_deployment": resourceDeployment(),
+			"oasis_deployment":  resourceDeployment(),
+			"oasis_certificate": resourceCertificate(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
