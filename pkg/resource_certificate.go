@@ -115,7 +115,43 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return nil
 	}
-	// TODO: Map to schema
+
+	if err := flattenCertificateResource(d, cert); err != nil {
+		return err
+	}
+	return nil
+}
+
+// setValue is a wrapper for d.Set to avoid a lot of if err != nil {} lines
+type setValue struct {
+	err error
+	d   *schema.ResourceData
+}
+
+// set will set a value using the provided resource data
+func (s *setValue) set(key string, v interface{}) {
+	if s.err != nil {
+		return
+	}
+
+	err := s.d.Set(key, v)
+	if err != nil {
+		s.err = err
+	}
+}
+
+// flattenCertificateResource will map a certificate resource to resource data
+func flattenCertificateResource(d *schema.ResourceData, cert *crypto.CACertificate) error {
+	s := setValue{d: d}
+	s.set("name", cert.GetName())
+	s.set("description", cert.GetDescription())
+	s.set("project", cert.GetProjectId())
+	s.set("well_known_certificate", cert.GetUseWellKnownCertificate())
+	//s.set("lifetime", cert.GetLifetime())
+	// TODO: Add deleted, created at, and such
+	if s.err != nil {
+		return s.err
+	}
 	return nil
 }
 
