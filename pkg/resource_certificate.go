@@ -46,6 +46,11 @@ func resourceCertificate() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+
+			"well_known_certificate": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -60,7 +65,8 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
-	projectId := d.Get("project_id").(string)
+	projectId := d.Get("project").(string)
+	useWellKnownCertificate := d.Get("well_known_certificate").(bool)
 	lifetime, err := strconv.Atoi(d.Get("lifetime").(string))
 	if err != nil {
 		return err
@@ -70,10 +76,11 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 		lt = types.DurationProto(time.Duration(lifetime))
 	}
 	result, err := cryptoc.CreateCACertificate(client.ctxWithToken, &crypto.CACertificate{
-		Name:        name,
-		Description: description,
-		ProjectId:   projectId,
-		Lifetime:    lt,
+		Name:                    name,
+		Description:             description,
+		ProjectId:               projectId,
+		Lifetime:                lt,
+		UseWellKnownCertificate: useWellKnownCertificate,
 	})
 	if err != nil {
 		return err

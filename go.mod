@@ -1,44 +1,70 @@
 module github.com/arangodb-managed/terraform-provider-oasis
 
 require (
-	github.com/agext/levenshtein v1.2.2
-	github.com/apparentlymart/go-cidr v1.0.1
-	github.com/apparentlymart/go-textseg v1.0.0
-	github.com/arangodb-managed/apis v0.24.6
-	github.com/aws/aws-sdk-go v1.25.3
+	github.com/arangodb-managed/apis v0.33.5
 	github.com/gogo/protobuf v1.3.0
-	github.com/golang/protobuf v1.3.2
-	github.com/google/go-cmp v0.3.1
-	github.com/google/uuid v1.1.1
-	github.com/hashicorp/errwrap v1.0.0
-	github.com/hashicorp/go-cleanhttp v0.5.1
-	github.com/hashicorp/go-getter v1.4.0
-	github.com/hashicorp/go-hclog v0.9.2
-	github.com/hashicorp/go-multierror v1.0.0
-	github.com/hashicorp/go-plugin v1.0.1
-	github.com/hashicorp/go-uuid v1.0.1
-	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.0.0
 	github.com/hashicorp/terraform-plugin-sdk v1.4.1
-	github.com/hashicorp/terraform-svchost v0.0.0-20191011084731-65d371908596
-	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
-	github.com/mattn/go-colorable v0.1.1
-	github.com/mattn/go-isatty v0.0.5
-	github.com/mitchellh/cli v1.0.0
-	github.com/mitchellh/copystructure v1.0.0
-	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mitchellh/mapstructure v1.1.2
-	github.com/mitchellh/reflectwalk v1.0.1
 	github.com/rs/zerolog v1.17.2
-	github.com/spf13/afero v1.2.2
-	github.com/vmihailenco/msgpack v4.0.1+incompatible
-	github.com/zclconf/go-cty v1.1.0
-	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586
-	golang.org/x/net v0.0.0-20191009170851-d66e71096ffb
-	golang.org/x/text v0.3.2
 	google.golang.org/grpc v1.23.0
 )
 
 go 1.13
+
+replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.0+incompatible
+
+replace github.com/arangodb/kube-arangodb => github.com/arangodb/kube-arangodb v0.0.0-20191016152103-3151c1d2d3b1
+
+replace github.com/coreos/go-systemd => github.com/coreos/go-systemd v0.0.0-20190620071333-e64a0ec8b42a
+
+replace github.com/coreos/prometheus-operator => github.com/coreos/prometheus-operator v0.31.1
+
+replace github.com/golang/lint => golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3
+
+replace github.com/hashicorp/vault/api => github.com/hashicorp/vault/api v1.0.2-0.20190424005855-e25a8a1c7480
+
+replace github.com/hashicorp/vault/sdk => github.com/hashicorp/vault/sdk v0.1.10
+
+replace github.com/hashicorp/vault => github.com/hashicorp/vault v1.1.2
+
+replace github.com/kamilsk/retry => github.com/kamilsk/retry/v3 v3.4.2
+
+replace github.com/nats-io/go-nats-streaming => github.com/nats-io/go-nats-streaming v0.4.4
+
+replace github.com/nats-io/go-nats => github.com/nats-io/go-nats v1.7.2
+
+replace github.com/testcontainers/testcontainer-go => github.com/testcontainers/testcontainers-go v0.0.0-20190108154635-47c0da630f72
+
+replace github.com/ugorji/go => github.com/ugorji/go v0.0.0-20181204163529-d75b2dcb6bc8
+
+replace golang.org/x/sys => golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e
+
+replace google.golang.org/api => google.golang.org/api v0.7.0
+
+replace google.golang.org/grpc => google.golang.org/grpc v1.21.1
+
+replace k8s.io/api => k8s.io/api v0.0.0-20190409021203-6e4e0e4f393b
+
+replace k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20190409022649-727a075fdec8
+
+replace k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
+
+replace k8s.io/apiserver => k8s.io/apiserver v0.0.0-20190409021813-1ec86e4da56c
+
+replace k8s.io/client-go => k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
+
+replace k8s.io/cloud-provider => k8s.io/cloud-provider v0.0.0-20190409023720-1bc0c81fa51d
+
+replace k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.0.0-20190409023614-027c502bb854
+
+replace k8s.io/code-generator => k8s.io/code-generator v0.0.0-20190311093542-50b561225d70
+
+replace k8s.io/component-base => k8s.io/component-base v0.0.0-20190409021516-bd2732e5c3f7
+
+replace k8s.io/kubernetes => k8s.io/kubernetes v1.14.1
+
+replace k8s.io/metrics => k8s.io/metrics v0.0.0-20190409022812-850dadb8b49c
+
+replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.2.0-beta.2
+
+replace sourcegraph.com/sourcegraph/go-diff => github.com/sourcegraph/go-diff v0.5.0
