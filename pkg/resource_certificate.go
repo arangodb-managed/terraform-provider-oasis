@@ -9,7 +9,6 @@
 package pkg
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/gogo/protobuf/types"
@@ -34,7 +33,7 @@ func resourceCertificate() *schema.Resource {
 
 			"project": { // If set here, overrides project in provider
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 
 			"description": { // If set here, overrides project in provider
@@ -64,17 +63,26 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 
 	name := d.Get("name").(string)
-	description := d.Get("description").(string)
 	projectId := d.Get("project").(string)
-	useWellKnownCertificate := d.Get("well_known_certificate").(bool)
-	lifetime, err := strconv.Atoi(d.Get("lifetime").(string))
-	if err != nil {
-		return err
+	var (
+		description             string
+		lifetime                int
+		useWellKnownCertificate bool
+		lt                      *types.Duration
+	)
+	if v, ok := d.GetOk("description"); ok {
+		description = v.(string)
 	}
-	var lt *types.Duration
-	if lifetime > 0 {
-		lt = types.DurationProto(time.Duration(lifetime))
+	if v, ok := d.GetOk("lifetime"); ok {
+		lifetime = v.(int)
+		if lifetime > 0 {
+			lt = types.DurationProto(time.Duration(lifetime))
+		}
 	}
+	if v, ok := d.GetOk("well_known_certificate"); ok {
+		useWellKnownCertificate = v.(bool)
+	}
+
 	result, err := cryptoc.CreateCACertificate(client.ctxWithToken, &crypto.CACertificate{
 		Name:                    name,
 		Description:             description,
