@@ -26,29 +26,43 @@ func resourceCertificate() *schema.Resource {
 		Delete: resourceCertificateDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": { // If set here, overrides project in provider
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
 			"project": { // If set here, overrides project in provider
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
-			"description": { // If set here, overrides project in provider
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"lifetime": { // If set here, overrides project in provider
+			"lifetime": {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
 
-			"well_known_certificate": {
+			"use_well_known_certificate": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+
+			"is_default": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"expires_at": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -79,7 +93,7 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 			lt = types.DurationProto(time.Duration(lifetime))
 		}
 	}
-	if v, ok := d.GetOk("well_known_certificate"); ok {
+	if v, ok := d.GetOk("use_well_known_certificate"); ok {
 		useWellKnownCertificate = v.(bool)
 	}
 
@@ -91,6 +105,7 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 		UseWellKnownCertificate: useWellKnownCertificate,
 	})
 	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to create certificate")
 		return err
 	}
 	if result != nil {
@@ -109,9 +124,11 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 	cert, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
+		client.log.Error().Err(err).Str("certificate-id", d.Id()).Msg("Failed to find certificate")
 		return err
 	}
 	if cert == nil {
+		client.log.Error().Str("certificate-id", d.Id()).Msg("Failed to find certificate")
 		d.SetId("")
 		return nil
 	}
@@ -146,9 +163,11 @@ func flattenCertificateResource(d *schema.ResourceData, cert *crypto.CACertifica
 	s.set("name", cert.GetName())
 	s.set("description", cert.GetDescription())
 	s.set("project", cert.GetProjectId())
-	s.set("well_known_certificate", cert.GetUseWellKnownCertificate())
-	//s.set("lifetime", cert.GetLifetime())
-	// TODO: Add deleted, created at, and such
+	s.set("use_well_known_certificate", cert.GetUseWellKnownCertificate())
+	s.set("lifetime", int(cert.GetLifetime().GetSeconds()))
+	s.set("is_default", cert.GetIsDefault())
+	s.set("expires_at", cert.GetExpiresAt().String())
+	s.set("created_at", cert.GetCreatedAt().String())
 	if s.err != nil {
 		return s.err
 	}
@@ -156,7 +175,39 @@ func flattenCertificateResource(d *schema.ResourceData, cert *crypto.CACertifica
 }
 
 func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
+	client := m.(*Client)
+	err := client.Connect()
+	if err != nil {
+		return err
+	}
+
+	cryptoc := crypto.NewCryptoServiceClient(client.conn)
+	cert, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	if err != nil {
+		return err
+	}
+	if cert == nil {
+		client.log.Error().Str("certificate-id", d.Id()).Msg("Failed to find certificate")
+		d.SetId("")
+		return nil
+	}
+
+	if d.HasChange("name") {
+		cert.Name = d.Get("name").(string)
+	}
+	if d.HasChange("description") {
+		cert.Description = d.Get("description").(string)
+	}
+	if d.HasChange("use_well_known_certificate") {
+		cert.UseWellKnownCertificate = d.Get("use_well_known_certificate").(bool)
+	}
+	res, err := cryptoc.UpdateCACertificate(client.ctxWithToken, cert)
+	if err != nil {
+		client.log.Error().Err(err).Str("certificate-id", d.Id()).Msg("Failed to update certificate")
+		return err
+	}
+	d.SetId(res.Id)
+	return resourceCertificateRead(d, m)
 }
 
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
@@ -169,6 +220,7 @@ func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 	_, err = cryptoc.DeleteCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
+		client.log.Error().Err(err).Str("certificate-id", d.Id()).Msg("Failed to delete certificate")
 		return err
 	}
 	d.SetId("") // called automatically, but added to be explicit

@@ -29,6 +29,7 @@ type Client struct {
 	ApiPortSuffix string
 	ctxWithToken  context.Context
 	conn          *grpc.ClientConn
+	log           zerolog.Logger
 }
 
 // Connect connects to oasis api
@@ -37,6 +38,7 @@ func (c *Client) Connect() error {
 	log := zerolog.New(zerolog.ConsoleWriter{
 		Out: os.Stderr,
 	})
+	c.log = log
 
 	var err error
 	c.conn, err = c.mustDialAPI(log)
