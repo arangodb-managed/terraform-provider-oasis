@@ -5,11 +5,12 @@ import (
 	"os"
 	"testing"
 
-	common "github.com/arangodb-managed/apis/common/v1"
-	crypto "github.com/arangodb-managed/apis/crypto/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+
+	common "github.com/arangodb-managed/apis/common/v1"
+	crypto "github.com/arangodb-managed/apis/crypto/v1"
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -58,7 +59,7 @@ func testAccCheckDestroyCertificate(s *terraform.State) error {
 			continue
 		}
 
-		_, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+		_, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.Attributes["id"]})
 		if err == nil {
 			return fmt.Errorf("certificate still present")
 		}
