@@ -53,7 +53,7 @@ func resourceCertificate() *schema.Resource {
 
 			"is_default": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 
 			"created_at": {
