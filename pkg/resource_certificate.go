@@ -3,7 +3,7 @@
 //
 // Copyright 2020 ArangoDB GmbH, Cologne, Germany
 //
-// AuthorGergely Brautigam
+// Author Gergely Brautigam
 //
 
 package pkg
@@ -151,9 +151,11 @@ func (s *setValue) set(key string, v interface{}) {
 		return
 	}
 
-	err := s.d.Set(key, v)
-	if err != nil {
-		s.err = err
+	if _, ok := s.d.GetOk(key); ok {
+		err := s.d.Set(key, v)
+		if err != nil {
+			s.err = err
+		}
 	}
 }
 
@@ -200,6 +202,9 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	if d.HasChange("use_well_known_certificate") {
 		cert.UseWellKnownCertificate = d.Get("use_well_known_certificate").(bool)
+	}
+	if d.HasChange("lifetime") {
+		cert.Lifetime = types.DurationProto(time.Duration(d.Get("lifetime").(int)))
 	}
 	res, err := cryptoc.UpdateCACertificate(client.ctxWithToken, cert)
 	if err != nil {

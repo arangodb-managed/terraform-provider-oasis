@@ -23,16 +23,14 @@ check:
 
 .PHONY: test
 test:
-ifndef CIRCLECI
-	docker run -d --name $(PROJECT)-test-db -e ARANGO_NO_AUTH=1 -p 8529:8529 arangodb:3.4
-endif
 	mkdir -p bin/test
 	go test -coverprofile=bin/test/coverage.out -v ./... | tee bin/test/test-output.txt ; exit "$${PIPESTATUS[0]}"
 	cat bin/test/test-output.txt | go-junit-report > bin/test/unit-tests.xml
 	go tool cover -html=bin/test/coverage.out -o bin/test/coverage.html
-ifndef CIRCLECI
-	docker rm -vf $(PROJECT)-test-db
-endif
+
+.PHONY: test-acc
+test-acc:
+	TF_ACC=1 go test -v ./...
 
 bootstrap:
 	go get github.com/arangodb-managed/zutano
