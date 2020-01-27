@@ -142,7 +142,7 @@ func TestExpandingCertificateResource(t *testing.T) {
 	assert.Equal(t, raw["description"], cert.GetDescription())
 	assert.Equal(t, raw["project"], cert.GetProjectId())
 	assert.Equal(t, raw["use_well_known_certificate"], cert.GetUseWellKnownCertificate())
-	assert.Equal(t, raw["lifetime"], int(cert.GetLifetime().Seconds))
+	assert.Equal(t, raw["lifetime"], int(cert.GetLifetime().GetSeconds()))
 }
 
 func testAccCheckDestroyCertificate(s *terraform.State) error {
