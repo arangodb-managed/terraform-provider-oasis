@@ -37,6 +37,9 @@ func init() {
 }
 
 func TestResourceCertificate_Basic(t *testing.T) {
+	if _, ok := os.LookupEnv("TF_ACC"); !ok {
+		t.Skip()
+	}
 	t.Parallel()
 	res := "test-cert-" + acctest.RandString(10)
 	name := "terraform-cert-" + acctest.RandString(10)
