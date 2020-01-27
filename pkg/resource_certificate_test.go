@@ -7,12 +7,11 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/types"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/stretchr/testify/assert"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
@@ -42,22 +41,28 @@ func TestResourceCertificate_Basic(t *testing.T) {
 	}
 	t.Parallel()
 	res := "test-cert-" + acctest.RandString(10)
-	name := "terraform-cert-" + acctest.RandString(10)
+	certName := "terraform-cert-" + acctest.RandString(10)
 	id, err := getOrCreateProject()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteTestProject()
+	defer func() {
+		if err := deleteTestProject(); err != nil {
+			// Note: this is a t.Error because t.Fatal would mask any panics that the test
+			// could potentionally produce.
+			t.Error("Failed to defer delete project: ", err)
+		}
+	}()
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCertificate,
 		Steps: []resource.TestStep{
 			{
-				Config: testBasicConfig(res, name, id),
+				Config: testBasicConfig(res, certName, id),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("oasis_certificate."+res, "description"),
-					resource.TestCheckResourceAttr("oasis_certificate."+res, "name", name),
+					resource.TestCheckResourceAttrSet("oasis_certificate."+res, description),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, name, certName),
 				),
 			},
 		},
@@ -70,8 +75,8 @@ func getOrCreateProject() (string, error) {
 	}
 
 	client := testAccProvider.Meta().(*Client)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return "", err
 	}
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
@@ -82,6 +87,7 @@ func getOrCreateProject() (string, error) {
 		OrganizationId: testOrganizationId,
 	})
 	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to create project")
 		return "", err
 	}
 	testProject = proj
@@ -90,26 +96,26 @@ func getOrCreateProject() (string, error) {
 
 func deleteTestProject() error {
 	client := testAccProvider.Meta().(*Client)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return err
 	}
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	_, err = rmc.DeleteProject(client.ctxWithToken, &common.IDOptions{Id: testProject.GetId()})
+	_, err := rmc.DeleteProject(client.ctxWithToken, &common.IDOptions{Id: testProject.GetId()})
 	testProject = nil
 	return err
 }
 
 func TestFlattenCertificateResource(t *testing.T) {
 	expected := map[string]interface{}{
-		"name":                       "test-name",
-		"description":                "test-description",
-		"project":                    "123456789",
-		"use_well_known_certificate": true,
-		"lifetime":                   3600,
-		"is_default":                 false,
-		"expires_at":                 "1980-03-10T01:01:01Z",
-		"created_at":                 "1980-03-03T01:01:01Z",
+		name:                    "test-name",
+		description:             "test-description",
+		project:                 "123456789",
+		useWellKnownCertificate: true,
+		lifetime:                3600,
+		isDefault:               false,
+		expiresAt:               "1980-03-10T01:01:01Z",
+		createdAt:               "1980-03-03T01:01:01Z",
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
@@ -130,26 +136,26 @@ func TestFlattenCertificateResource(t *testing.T) {
 
 func TestExpandingCertificateResource(t *testing.T) {
 	raw := map[string]interface{}{
-		"name":                       "test-name",
-		"description":                "test-description",
-		"project":                    "123456789",
-		"use_well_known_certificate": true,
-		"lifetime":                   3600,
+		name:                    "test-name",
+		description:             "test-description",
+		project:                 "123456789",
+		useWellKnownCertificate: true,
+		lifetime:                3600,
 	}
 	s := resourceCertificate().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
 	cert := expandToCertificate(data)
-	assert.Equal(t, raw["name"], cert.GetName())
-	assert.Equal(t, raw["description"], cert.GetDescription())
-	assert.Equal(t, raw["project"], cert.GetProjectId())
-	assert.Equal(t, raw["use_well_known_certificate"], cert.GetUseWellKnownCertificate())
-	assert.Equal(t, raw["lifetime"], int(cert.GetLifetime().GetSeconds()))
+	assert.Equal(t, raw[name], cert.GetName())
+	assert.Equal(t, raw[description], cert.GetDescription())
+	assert.Equal(t, raw[project], cert.GetProjectId())
+	assert.Equal(t, raw[useWellKnownCertificate], cert.GetUseWellKnownCertificate())
+	assert.Equal(t, raw[lifetime], int(cert.GetLifetime().GetSeconds()))
 }
 
 func testAccCheckDestroyCertificate(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return err
 	}
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
@@ -159,8 +165,7 @@ func testAccCheckDestroyCertificate(s *terraform.State) error {
 			continue
 		}
 
-		_, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID})
-		if err == nil {
+		if _, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); err == nil {
 			return fmt.Errorf("certificate still present")
 		}
 	}

@@ -18,6 +18,19 @@ import (
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
 )
 
+const (
+	// Certificate fields
+	name                    = "name"
+	project                 = "project"
+	description             = "description"
+	lifetime                = "lifetime"
+	useWellKnownCertificate = "use_well_known_certificate"
+	isDefault               = "is_default"
+	createdAt               = "created_at"
+	expiresAt               = "expires_at"
+)
+
+// resourceCertificate defines the Certificate terraform resource Schema.
 func resourceCertificate() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCertificateCreate,
@@ -26,41 +39,41 @@ func resourceCertificate() *schema.Resource {
 		Delete: resourceCertificateDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			name: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"project": { // If set here, overrides project in provider
+			project: { // If set here, overrides project in provider
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"description": {
+			description: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"lifetime": {
+			lifetime: {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
 
-			"use_well_known_certificate": {
+			useWellKnownCertificate: {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			"is_default": {
+			isDefault: {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
 
-			"created_at": {
+			createdAt: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"expires_at": {
+			expiresAt: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -68,10 +81,12 @@ func resourceCertificate() *schema.Resource {
 	}
 }
 
+// resourceCertificateCreate handles the creation lifecycle of the certificate resource.
+// sets the ID of a given certificate once the creation is successful. This will be stored in local terraform store.
 func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return err
 	}
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
@@ -87,10 +102,12 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceCertificateRead(d, m)
 }
 
+// resourceCertificateRead handles storing and showing data about the certificate given a stored ID.
+// This function should always be called from create and update.
 func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return err
 	}
 
@@ -108,8 +125,7 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 
 	for k, v := range flattenCertificateResource(cert) {
 		if _, ok := d.GetOk(k); ok {
-			err := d.Set(k, v)
-			if err != nil {
+			if err := d.Set(k, v); err != nil {
 				return err
 			}
 		}
@@ -120,59 +136,62 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 // flattenCertificateResource flattens the certificate data into a map interface for easy storage.
 func flattenCertificateResource(cert *crypto.CACertificate) map[string]interface{} {
 	flatted := map[string]interface{}{
-		"name":                       cert.GetName(),
-		"description":                cert.GetDescription(),
-		"project":                    cert.GetProjectId(),
-		"use_well_known_certificate": cert.GetUseWellKnownCertificate(),
-		"lifetime":                   int(cert.GetLifetime().GetSeconds()),
-		"is_default":                 cert.GetIsDefault(),
-		"expires_at":                 cert.GetExpiresAt().String(),
-		"created_at":                 cert.GetCreatedAt().String(),
+		name:                    cert.GetName(),
+		description:             cert.GetDescription(),
+		project:                 cert.GetProjectId(),
+		useWellKnownCertificate: cert.GetUseWellKnownCertificate(),
+		lifetime:                int(cert.GetLifetime().GetSeconds()),
+		isDefault:               cert.GetIsDefault(),
+		expiresAt:               cert.GetExpiresAt().String(),
+		createdAt:               cert.GetCreatedAt().String(),
 	}
 	return flatted
 }
 
 // expandToCertificate creates a certificate resource from resource data.
 func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
-	name := d.Get("name").(string)
-	projectId := d.Get("project").(string)
+	n := d.Get(name).(string)
+	pid := d.Get(project).(string)
 	var (
-		description             string
-		lifetime                int
-		useWellKnownCertificate bool
-		lt                      *types.Duration
+		desc         string
+		lifeTime     int
+		useWellKnown bool
+		lt           *types.Duration
 	)
-	if v, ok := d.GetOk("description"); ok {
-		description = v.(string)
+	if v, ok := d.GetOk(description); ok {
+		desc = v.(string)
 	}
-	if v, ok := d.GetOk("lifetime"); ok {
-		lifetime = v.(int)
-		if lifetime > 0 {
-			lt = types.DurationProto(time.Duration(lifetime) * time.Second)
+	if v, ok := d.GetOk(lifetime); ok {
+		lifeTime = v.(int)
+		if lifeTime > 0 {
+			lt = types.DurationProto(time.Duration(lifeTime) * time.Second)
 		}
 	}
-	if v, ok := d.GetOk("use_well_known_certificate"); ok {
-		useWellKnownCertificate = v.(bool)
+	if v, ok := d.GetOk(useWellKnownCertificate); ok {
+		useWellKnown = v.(bool)
 	}
 	return &crypto.CACertificate{
-		Name:                    name,
-		Description:             description,
-		ProjectId:               projectId,
+		Name:                    n,
+		Description:             desc,
+		ProjectId:               pid,
 		Lifetime:                lt,
-		UseWellKnownCertificate: useWellKnownCertificate,
+		UseWellKnownCertificate: useWellKnown,
 	}
 }
 
+// resourceCertificateUpdate handles events in case there is change to the certificate data.
+// Only relevant fields are checked for update. Computed fields are ignored.
 func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return err
 	}
 
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 	cert, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
+		client.log.Error().Err(err).Msg("Failed get certificate")
 		return err
 	}
 	if cert == nil {
@@ -181,17 +200,17 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	if d.HasChange("name") {
-		cert.Name = d.Get("name").(string)
+	if d.HasChange(name) {
+		cert.Name = d.Get(name).(string)
 	}
-	if d.HasChange("description") {
-		cert.Description = d.Get("description").(string)
+	if d.HasChange(description) {
+		cert.Description = d.Get(description).(string)
 	}
-	if d.HasChange("use_well_known_certificate") {
-		cert.UseWellKnownCertificate = d.Get("use_well_known_certificate").(bool)
+	if d.HasChange(useWellKnownCertificate) {
+		cert.UseWellKnownCertificate = d.Get(useWellKnownCertificate).(bool)
 	}
-	if d.HasChange("lifetime") {
-		cert.Lifetime = types.DurationProto(time.Duration(d.Get("lifetime").(int)))
+	if d.HasChange(lifetime) {
+		cert.Lifetime = types.DurationProto(time.Duration(d.Get(lifetime).(int)))
 	}
 	res, err := cryptoc.UpdateCACertificate(client.ctxWithToken, cert)
 	if err != nil {
@@ -202,16 +221,16 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceCertificateRead(d, m)
 }
 
+// resourceCertificateDelete will be called once the resource is destroyed.
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	err := client.Connect()
-	if err != nil {
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return err
 	}
 
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
-	_, err = cryptoc.DeleteCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
-	if err != nil {
+	if _, err := cryptoc.DeleteCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
 		client.log.Error().Err(err).Str("certificate-id", d.Id()).Msg("Failed to delete certificate")
 		return err
 	}

@@ -11,7 +11,6 @@ package pkg
 import (
 	"context"
 	"crypto/tls"
-	"os"
 
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
@@ -19,6 +18,7 @@ import (
 
 	"github.com/arangodb-managed/apis/common/auth"
 	iam "github.com/arangodb-managed/apis/iam/v1"
+	lh "github.com/arangodb-managed/log-helper"
 )
 
 // Client is responsible for connecting to the Oasis API
@@ -35,20 +35,17 @@ type Client struct {
 // Connect connects to oasis api
 func (c *Client) Connect() error {
 	ctx := context.Background()
-	log := zerolog.New(zerolog.ConsoleWriter{
-		Out: os.Stderr,
-	})
-	c.log = log
+	c.log = lh.MustNew(lh.DefaultConfig())
 
 	var err error
-	c.conn, err = c.mustDialAPI(log)
+	c.conn, err = c.mustDialAPI()
 	if err != nil {
 		return err
 	}
 
-	token, err := c.getToken(ctx, log, c.ApiKeyID, c.ApiKeySecret)
+	token, err := c.getToken(ctx, c.ApiKeyID, c.ApiKeySecret)
 	if err != nil {
-		log.Error().Err(err).Msg("Could not get Auth Token")
+		c.log.Error().Err(err).Msg("Could not get Auth Token")
 		return err
 	}
 
@@ -57,18 +54,18 @@ func (c *Client) Connect() error {
 }
 
 // mustDialAPI dials the ArangoDB Oasis API
-func (c *Client) mustDialAPI(log zerolog.Logger) (*grpc.ClientConn, error) {
+func (c *Client) mustDialAPI() (*grpc.ClientConn, error) {
 	// Set up a connection to the server.
 	tc := credentials.NewTLS(&tls.Config{})
 	conn, err := grpc.Dial(c.ApiEndpoint+c.ApiPortSuffix, grpc.WithTransportCredentials(tc))
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to connect to ArangoDB Oasis API")
+		c.log.Error().Err(err).Msg("Failed to connect to ArangoDB Oasis API")
 		return nil, err
 	}
 	return conn, nil
 }
 
-func (c *Client) getToken(ctx context.Context, log zerolog.Logger, apiKeyID, apiKeySecret string) (string, error) {
+func (c *Client) getToken(ctx context.Context, apiKeyID, apiKeySecret string) (string, error) {
 
 	iamc := iam.NewIAMServiceClient(c.conn)
 
@@ -77,9 +74,9 @@ func (c *Client) getToken(ctx context.Context, log zerolog.Logger, apiKeyID, api
 		Secret: apiKeySecret,
 	})
 	if err != nil {
-		log.Error().Err(err).Msg("Authentication failed")
+		c.log.Error().Err(err).Msg("Authentication failed")
 		return "", err
 	}
-	log.Print("Retrieved Auth token successfully.")
+	c.log.Print("Retrieved Auth token successfully.")
 	return resp.GetToken(), nil
 }
