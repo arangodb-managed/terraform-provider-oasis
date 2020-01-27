@@ -117,7 +117,7 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-// flattenCertificateResource will map a certificate resource to resource data
+// flattenCertificateResource flattens the certificate data into a map interface for easy storage.
 func flattenCertificateResource(cert *crypto.CACertificate) map[string]interface{} {
 	flatted := map[string]interface{}{
 		"name":                       cert.GetName(),
@@ -132,6 +132,7 @@ func flattenCertificateResource(cert *crypto.CACertificate) map[string]interface
 	return flatted
 }
 
+// expandToCertificate creates a certificate resource from resource data.
 func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
 	name := d.Get("name").(string)
 	projectId := d.Get("project").(string)
