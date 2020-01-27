@@ -24,7 +24,6 @@ var (
 	testAccProvider    *schema.Provider
 	testOrganizationId string
 	testProject        *rm.Project
-	testClient         *Client
 )
 
 func init() {
@@ -34,12 +33,7 @@ func init() {
 	}
 	testOrganizationId = os.Getenv("OASIS_TEST_ORGANIZATION_ID")
 	// Initialize Client with connection settings
-	testClient = &Client{
-		ApiKeyID:      os.Getenv("OASIS_API_KEY_ID"),
-		ApiKeySecret:  os.Getenv("OASIS_API_KEY_SECRET"),
-		ApiEndpoint:   "api.cloud.adbtest.xyz",
-		ApiPortSuffix: ":443",
-	}
+	testAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
 }
 
 func TestResourceCertificate_Basic(t *testing.T) {
@@ -72,13 +66,14 @@ func getOrCreateProject() (string, error) {
 		return testProject.GetId(), nil
 	}
 
-	err := testClient.Connect()
+	client := testAccProvider.Meta().(*Client)
+	err := client.Connect()
 	if err != nil {
 		return "", err
 	}
-	rmc := rm.NewResourceManagerServiceClient(testClient.conn)
+	rmc := rm.NewResourceManagerServiceClient(client.conn)
 
-	proj, err := rmc.CreateProject(testClient.ctxWithToken, &rm.Project{
+	proj, err := rmc.CreateProject(client.ctxWithToken, &rm.Project{
 		Name:           "terraform-test-project",
 		Description:    "This is a project used by terraform acceptance tests. PLEASE DO NOT DELETE!",
 		OrganizationId: testOrganizationId,
@@ -91,12 +86,13 @@ func getOrCreateProject() (string, error) {
 }
 
 func deleteTestProject() error {
-	err := testClient.Connect()
+	client := testAccProvider.Meta().(*Client)
+	err := client.Connect()
 	if err != nil {
 		return err
 	}
-	rmc := rm.NewResourceManagerServiceClient(testClient.conn)
-	_, err = rmc.DeleteProject(testClient.ctxWithToken, &common.IDOptions{Id: testProject.GetId()})
+	rmc := rm.NewResourceManagerServiceClient(client.conn)
+	_, err = rmc.DeleteProject(client.ctxWithToken, &common.IDOptions{Id: testProject.GetId()})
 	testProject = nil
 	return err
 }
