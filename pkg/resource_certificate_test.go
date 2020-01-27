@@ -26,6 +26,7 @@ func init() {
 
 func TestResourceCertificate_Basic(t *testing.T) {
 	t.Parallel()
+	res := "test-cert-" + acctest.RandString(10)
 	name := "terraform-cert-" + acctest.RandString(10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -33,10 +34,10 @@ func TestResourceCertificate_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyCertificate,
 		Steps: []resource.TestStep{
 			{
-				Config: testBasicConfig(name),
+				Config: testBasicConfig(res, name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("oasis_certificate.my_oasis_cert", "description"),
-					resource.TestCheckResourceAttr("oasis_certificate.my_oasis_cert", "name", name),
+					resource.TestCheckResourceAttrSet("oasis_certificate."+res, "description"),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, "name", name),
 				),
 			},
 		},
@@ -65,13 +66,13 @@ func testAccCheckDestroyCertificate(s *terraform.State) error {
 	return nil
 }
 
-func testBasicConfig(name string) string {
-	return fmt.Sprintf(`resource "oasis_certificate" "my_oasis_cert" {
+func testBasicConfig(resource, name string) string {
+	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
   name = "%s"
   description = "Terraform Updated Generated Certificate"
   project      = "168594080"
   use_well_known_certificate = false
-}`, name)
+}`, resource, name)
 }
 
 func testAccPreCheck(t *testing.T) {
