@@ -16,15 +16,27 @@ import (
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
+	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
 var testAccProvider *schema.Provider
+var testOrganizationId string
+var testProject *rm.Project
+var testClient *Client
 
 func init() {
 	testAccProvider = Provider()
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"oasis": testAccProvider,
+	}
+	testOrganizationId = os.Getenv("OASIS_TEST_ORGANIZATION_ID")
+	// Initialize Client with connection settings
+	testClient = &Client{
+		ApiKeyID:      os.Getenv("OASIS_API_KEY_ID"),
+		ApiKeySecret:  os.Getenv("OASIS_API_KEY_SECRET"),
+		ApiEndpoint:   "api.cloud.adbtest.xyz",
+		ApiPortSuffix: ":443",
 	}
 }
 
@@ -32,13 +44,18 @@ func TestResourceCertificate_Basic(t *testing.T) {
 	t.Parallel()
 	res := "test-cert-" + acctest.RandString(10)
 	name := "terraform-cert-" + acctest.RandString(10)
+	id, err := getOrCreateProject()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteTestProject()
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCertificate,
 		Steps: []resource.TestStep{
 			{
-				Config: testBasicConfig(res, name),
+				Config: testBasicConfig(res, name, id),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("oasis_certificate."+res, "description"),
 					resource.TestCheckResourceAttr("oasis_certificate."+res, "name", name),
@@ -46,6 +63,40 @@ func TestResourceCertificate_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func getOrCreateProject() (string, error) {
+	if testProject != nil {
+		return testProject.GetId(), nil
+	}
+
+	err := testClient.Connect()
+	if err != nil {
+		return "", err
+	}
+	rmc := rm.NewResourceManagerServiceClient(testClient.conn)
+
+	proj, err := rmc.CreateProject(testClient.ctxWithToken, &rm.Project{
+		Name:           "terraform-test-project",
+		Description:    "This is a project used by terraform acceptance tests. PLEASE DO NOT DELETE!",
+		OrganizationId: testOrganizationId,
+	})
+	if err != nil {
+		return "", err
+	}
+	testProject = proj
+	return testProject.GetId(), nil
+}
+
+func deleteTestProject() error {
+	err := testClient.Connect()
+	if err != nil {
+		return err
+	}
+	rmc := rm.NewResourceManagerServiceClient(testClient.conn)
+	_, err = rmc.DeleteProject(testClient.ctxWithToken, &common.IDOptions{Id: testProject.GetId()})
+	testProject = nil
+	return err
 }
 
 func TestFlattenCertificateResource(t *testing.T) {
@@ -116,17 +167,20 @@ func testAccCheckDestroyCertificate(s *terraform.State) error {
 	return nil
 }
 
-func testBasicConfig(resource, name string) string {
+func testBasicConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
   name = "%s"
   description = "Terraform Updated Generated Certificate"
-  project      = "168594080"
+  project      = "%s"
   use_well_known_certificate = false
-}`, resource, name)
+}`, resource, name, project)
 }
 
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("OASIS_API_KEY_ID"); v == "" {
 		t.Fatal("the test needs a test account key to run")
+	}
+	if v := os.Getenv("OASIS_TEST_ORGANIZATION_ID"); v == "" {
+		t.Fatal("the test needs an organization id to use for testing")
 	}
 }
