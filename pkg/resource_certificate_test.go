@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/gogo/protobuf/types"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -42,6 +46,34 @@ func TestResourceCertificate_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestFlattenCertificateResource(t *testing.T) {
+	expected := map[string]interface{}{
+		"name":                       "test-name",
+		"description":                "test-description",
+		"project":                    "123456789",
+		"use_well_known_certificate": true,
+		"lifetime":                   3600,
+		"is_default":                 false,
+		"expires_at":                 "1980-03-10T01:01:01Z",
+		"created_at":                 "1980-03-03T01:01:01Z",
+	}
+
+	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
+	expires, _ := types.TimestampProto(time.Date(1980, 03, 10, 1, 1, 1, 0, time.UTC))
+	cert := crypto.CACertificate{
+		Name:                    "test-name",
+		Description:             "test-description",
+		ProjectId:               "123456789",
+		Lifetime:                types.DurationProto(1 * time.Hour),
+		CreatedAt:               created,
+		ExpiresAt:               expires,
+		IsDefault:               false,
+		UseWellKnownCertificate: true,
+	}
+	got := flattenCertificateResource(&cert)
+	assert.Equal(t, expected, got)
 }
 
 func testAccCheckDestroyCertificate(s *terraform.State) error {
