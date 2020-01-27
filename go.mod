@@ -5,6 +5,7 @@ require (
 	github.com/apparentlymart/go-cidr v1.0.1
 	github.com/apparentlymart/go-textseg v1.0.0
 	github.com/arangodb-managed/apis v0.24.6
+	github.com/arangodb-managed/log-helper v0.1.4
 	github.com/aws/aws-sdk-go v1.25.3
 	github.com/gogo/protobuf v1.3.0
 	github.com/golang/protobuf v1.3.2
@@ -32,7 +33,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.1
 	github.com/rs/zerolog v1.17.2
 	github.com/spf13/afero v1.2.2
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.4.0
 	github.com/vmihailenco/msgpack v4.0.1+incompatible
 	github.com/zclconf/go-cty v1.1.0
 	github.com/zclconf/go-cty-yaml v1.0.1

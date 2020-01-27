@@ -29,10 +29,10 @@ func TestOasisProjectDataSource_Basic(t *testing.T) {
 			{
 				Config: testBasicOasisProjectDataSourceConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", "id"),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", "name"),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", "created_at"),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", "url"),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", id),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", name),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", createdAt),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", url),
 				),
 			},
 		},
@@ -46,21 +46,21 @@ func testAccDataSourcePreCheck(t *testing.T) {
 }
 
 func TestFlattenProjectDataSource(t *testing.T) {
-	createdAt, _ := types.TimestampProto(time.Date(1980, 1, 1, 1, 1, 1, 0, time.UTC))
+	createdAtTimeStamp, _ := types.TimestampProto(time.Date(1980, 1, 1, 1, 1, 1, 0, time.UTC))
 	proj := rm.Project{
 		Id:             "test-id",
 		Url:            "https://test.url",
 		Name:           "test-name",
 		Description:    "test-description",
 		OrganizationId: "org-id",
-		CreatedAt:      createdAt,
+		CreatedAt:      createdAtTimeStamp,
 	}
 	expected := map[string]interface{}{
-		"id":          "test-id",
-		"name":        "test-name",
-		"description": "test-description",
-		"url":         "https://test.url",
-		"created_at":  "1980-01-01T01:01:01Z",
+		id:          "test-id",
+		name:        "test-name",
+		description: "test-description",
+		url:         "https://test.url",
+		createdAt:   "1980-01-01T01:01:01Z",
 	}
 	got := flattenProjectObject(&proj)
 	assert.Equal(t, expected, got)
