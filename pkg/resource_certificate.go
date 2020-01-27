@@ -148,7 +148,7 @@ func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
 	if v, ok := d.GetOk("lifetime"); ok {
 		lifetime = v.(int)
 		if lifetime > 0 {
-			lt = types.DurationProto(time.Duration(lifetime))
+			lt = types.DurationProto(time.Duration(lifetime) * time.Second)
 		}
 	}
 	if v, ok := d.GetOk("use_well_known_certificate"); ok {

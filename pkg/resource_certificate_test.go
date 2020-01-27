@@ -76,6 +76,24 @@ func TestFlattenCertificateResource(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
+func TestExpandingCertificateResource(t *testing.T) {
+	raw := map[string]interface{}{
+		"name":                       "test-name",
+		"description":                "test-description",
+		"project":                    "123456789",
+		"use_well_known_certificate": true,
+		"lifetime":                   3600,
+	}
+	s := resourceCertificate().Schema
+	data := schema.TestResourceDataRaw(t, s, raw)
+	cert := expandToCertificate(data)
+	assert.Equal(t, raw["name"], cert.GetName())
+	assert.Equal(t, raw["description"], cert.GetDescription())
+	assert.Equal(t, raw["project"], cert.GetProjectId())
+	assert.Equal(t, raw["use_well_known_certificate"], cert.GetUseWellKnownCertificate())
+	assert.Equal(t, raw["lifetime"], int(cert.GetLifetime().Seconds))
+}
+
 func testAccCheckDestroyCertificate(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 	err := client.Connect()
