@@ -32,6 +32,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.1
 	github.com/rs/zerolog v1.17.2
 	github.com/spf13/afero v1.2.2
+	github.com/stretchr/testify v1.3.0
 	github.com/vmihailenco/msgpack v4.0.1+incompatible
 	github.com/zclconf/go-cty v1.1.0
 	github.com/zclconf/go-cty-yaml v1.0.1

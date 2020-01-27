@@ -92,7 +92,16 @@ resource "oasis_deployment" "my_flexible_deployment" {
     num_dbservers = 5
   }
 }
-
 ```
 
+## Project Data Source
 
+To define and use a project as data source, use the following terraform configuration:
+
+```
+# Find the latest available AMI that is tagged with Component = web
+data "oasis_project" "my_project" {
+  name = "MyProject"
+  
+}
+```
