@@ -19,11 +19,13 @@ import (
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
-var testAccProviders map[string]terraform.ResourceProvider
-var testAccProvider *schema.Provider
-var testOrganizationId string
-var testProject *rm.Project
-var testClient *Client
+var (
+	testAccProviders   map[string]terraform.ResourceProvider
+	testAccProvider    *schema.Provider
+	testOrganizationId string
+	testProject        *rm.Project
+	testClient         *Client
+)
 
 func init() {
 	testAccProvider = Provider()
