@@ -96,12 +96,16 @@ resource "oasis_deployment" "my_flexible_deployment" {
 
 ## Project Data Source
 
-To define and use a project as data source, use the following terraform configuration:
+To define and use a project as data source, consider the following terraform configuration:
 
 ```
-# Find the latest available AMI that is tagged with Component = web
 data "oasis_project" "my_project" {
   name = "MyProject"
-  
+  id = "123456789"
+}
+
+resource "oasis_deployment" "my_flexible_deployment" {
+  project = data.oasis_project.my_project.id
+  ...
 }
 ```
