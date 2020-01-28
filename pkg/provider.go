@@ -56,6 +56,9 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"oasis_deployment": resourceDeployment(),
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"oasis_organization": dataSourceOasisOrganization(),
+		},
 		ConfigureFunc: providerConfigure,
 	}
 }
