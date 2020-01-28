@@ -9,8 +9,6 @@
 package pkg
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -64,7 +62,7 @@ func dataSourceOasisOrganization() *schema.Resource {
 				Computed: true,
 			},
 			tierFieldName: {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -132,15 +130,20 @@ func flattenOrganizationObject(org *rm.Organization) map[string]interface{} {
 	return ret
 }
 
-// flattenTierObject will produce an accepted transformation of the tier struct to terraform schema.
-// Note that boolean values are transformed to string, because at the time of this, 0.12 terraform
-// does not support different value types inside a map structure.
-func flattenTierObject(tier *rm.Tier) interface{} {
-	return map[string]interface{}{
+// flattenTierObject will produce a schema set which can be interpreted by terraform for type safety.
+// Contrary to first look, tier is not handled as TypeMap because in terraform 0.12, there is no support
+// for different embedded types. The hash for the set is based on the definition of the schema for tier.
+func flattenTierObject(tier *rm.Tier) *schema.Set {
+	s := &schema.Set{
+		F: schema.HashResource(dataSourceOasisOrganization().Schema[tierFieldName].Elem.(*schema.Resource)),
+	}
+	tierMap := map[string]interface{}{
 		tierIdFieldName:                         tier.GetId(),
 		tierNameFieldName:                       tier.GetName(),
-		tierHasSupportPlansFieldName:            fmt.Sprintf("%t", tier.GetHasSupportPlans()),
-		tierHasBackupUploadsFieldName:           fmt.Sprintf("%t", tier.GetHasBackupUploads()),
-		tierRequiresTermsAndConditionsFieldName: fmt.Sprintf("%t", tier.GetRequiresTermsAndConditions()),
+		tierHasSupportPlansFieldName:            tier.GetHasSupportPlans(),
+		tierHasBackupUploadsFieldName:           tier.GetHasBackupUploads(),
+		tierRequiresTermsAndConditionsFieldName: tier.GetRequiresTermsAndConditions(),
 	}
+	s.Add(tierMap)
+	return s
 }

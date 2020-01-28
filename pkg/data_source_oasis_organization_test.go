@@ -14,13 +14,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/stretchr/testify/assert"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
+	"github.com/gogo/protobuf/types"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestOasisOrganizationDataSource_Basic(t *testing.T) {
@@ -93,22 +93,23 @@ func TestFlattenOrganizationDataSource(t *testing.T) {
 			RequiresTermsAndConditions: true,
 		},
 	}
+	flattenedTier := flattenTierObject(org.Tier)
 	expected := map[string]interface{}{
 		idFieldName:          "test-id",
 		nameFieldName:        "test-name",
 		descriptionFieldName: "test-description",
 		urlFieldName:         "https://test.url",
 		createdAtFieldName:   "1980-01-01T01:01:01Z",
-		tierFieldName: map[string]interface{}{
-			tierIdFieldName:                         "free",
-			tierNameFieldName:                       "Free to try",
-			tierHasSupportPlansFieldName:            "true",
-			tierHasBackupUploadsFieldName:           "true",
-			tierRequiresTermsAndConditionsFieldName: "true",
-		},
+		tierFieldName:        flattenedTier,
 	}
 	got := flattenOrganizationObject(&org)
-	assert.Equal(t, expected, got)
+	assert.Equal(t, expected[idFieldName], got[idFieldName])
+	assert.Equal(t, expected[nameFieldName], got[nameFieldName])
+	assert.Equal(t, expected[descriptionFieldName], got[descriptionFieldName])
+	assert.Equal(t, expected[urlFieldName], got[urlFieldName])
+	assert.Equal(t, expected[createdAtFieldName], got[createdAtFieldName])
+	assert.True(t, flattenedTier.Equal(got[tierFieldName]))
+
 }
 
 func testBasicOasisOrganizationDataSourceConfig(id string) string {
