@@ -21,10 +21,23 @@ Requirements
 
 Usage
 ---------------------
-TODOs:
-Explain how to:
-* Create/Retrieve API Key
-* Retrieve relevant ids (org, project, provider, ca_certificate, ip_whitelist)
+
+Retrieving API Keys
+--------------------
+
+Api keys can be generated and viewed under the user's dashboard view on the API Keys tab.
+On a logged in view, navigate to [API Keys](https://cloud.arangodb.com/dashboard/user/api-keys) and hit the button
+labelled `New API key`. This will generate a set of keys which can be used with ArangoDB's public API.
+
+Retrieving relevant IDs
+-----------------------
+
+After a key has been obtained, the relevant api can be called to list organizations, projects etc. 
+
+Configuration
+-------------
+
+The following is an example of a terraform deployment configuration:
 
 ```
 provider "oasis" {
@@ -68,7 +81,7 @@ resource "oasis_deployment" "my_sharded_deployment" {
   configuration = {
     model = "sharded"
     node_size_id = "a4"
-    node_disk_size = 20
+    node_disk_gb = 20
     num_nodes = 5
   }
 }
@@ -94,7 +107,9 @@ resource "oasis_deployment" "my_flexible_deployment" {
 }
 ```
 
-## Project Data Source
+## Data sources
+
+### Project Data Source
 
 To define and use a project as data source, consider the following terraform configuration:
 
@@ -109,7 +124,7 @@ resource "oasis_deployment" "my_flexible_deployment" {
 }
 ```
 
-## Organization Data Source
+### Organization Data Source
 
 To define and use an organization as data source, consider the following terraform configuration:
 
@@ -123,4 +138,28 @@ resource "oasis_deployment" "my_flexible_deployment" {
   organization = data.oasis_organization.my_organization.id
   ...
 }
+```
+
+# Running Acceptance Tests
+
+In order to run acceptance tests, the following make target needs to be executed:
+
+```bash
+make test-acc
+```
+
+It is recommended that on a schema addition / deprecation and general larger refactorings the acceptance tests are
+executed. *NOTE* that these tests create real deployments, projects and organizations.
+
+Some of them may require additional environment properties to work. I.e.:
+
+```dotenv
+OASIS_TEST_ORGANIZATION_ID=123456789
+```
+
+All of them require the following two environment properties to be set:
+
+```dotenv
+OASIS_API_KEY_ID=<your_key_id>
+OASIS_API_KEY_SECRET=<your_key_secret>
 ```
