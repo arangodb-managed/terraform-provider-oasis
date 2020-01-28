@@ -16,18 +16,30 @@ import (
 
 	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/stretchr/testify/assert"
 
+	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
 func TestOasisProjectDataSource_Basic(t *testing.T) {
+	if _, ok := os.LookupEnv("TF_ACC"); !ok {
+		t.Skip()
+	}
+	if _, ok := os.LookupEnv("OASIS_TEST_ORGANIZATION_ID"); !ok {
+		t.Skip("This test requires an organization id to be set.")
+	}
+	pid, err := fetchProjectID()
+	if err != nil {
+		t.Fatal(err)
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccDataSourcePreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testBasicOasisProjectDataSourceConfig(),
+				Config: testBasicOasisProjectDataSourceConfig(pid),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.oasis_project.test", id),
 					resource.TestCheckResourceAttrSet("data.oasis_project.test", name),
@@ -37,6 +49,30 @@ func TestOasisProjectDataSource_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+// fetchProjectID finds and retrieves the first project ID it finds in the given Organization.
+func fetchProjectID() (string, error) {
+	// Initialize Client with connection settings
+	if err := testAccProvider.Configure(terraform.NewResourceConfigRaw(nil)); err != nil {
+		return "", err
+	}
+	client := testAccProvider.Meta().(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return "", err
+	}
+	rmc := rm.NewResourceManagerServiceClient(client.conn)
+	orgID := os.Getenv("OASIS_TEST_ORGANIZATION_ID")
+	if proj, err := rmc.ListProjects(client.ctxWithToken, &common.ListOptions{ContextId: orgID}); err != nil {
+		client.log.Error().Err(err).Msg("Failed to list projects")
+		return "", err
+	} else if len(proj.Items) < 1 {
+		client.log.Error().Err(err).Msg("No projects found in organization")
+		return "", nil
+	} else {
+		return proj.Items[0].GetId(), nil
+	}
 }
 
 func testAccDataSourcePreCheck(t *testing.T) {
@@ -66,8 +102,8 @@ func TestFlattenProjectDataSource(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
-func testBasicOasisProjectDataSourceConfig() string {
+func testBasicOasisProjectDataSourceConfig(pid string) string {
 	return fmt.Sprintf(`data "oasis_project" "test" {
-	id = "168594080"
-}`)
+	id = "%s"
+}`, pid)
 }
