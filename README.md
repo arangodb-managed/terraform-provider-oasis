@@ -95,4 +95,17 @@ resource "oasis_deployment" "my_flexible_deployment" {
 
 ```
 
+## Organization Data Source
 
+To define and use an organization as data source, consider the following terraform configuration:
+
+```
+data "oasis_organization" "my_organization" {
+  name = "MyOrganization"
+  id = "123456789"
+}
+resource "oasis_deployment" "my_flexible_deployment" {
+  organization = data.oasis_organization.my_organization.id
+  ...
+}
+```
