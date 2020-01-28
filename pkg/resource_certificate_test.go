@@ -61,22 +61,22 @@ func TestResourceCertificate(t *testing.T) {
 			{
 				Config: testBasicConfig(res, certName, id),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("oasis_certificate."+res, description),
-					resource.TestCheckResourceAttr("oasis_certificate."+res, name, certName),
+					resource.TestCheckResourceAttrSet("oasis_certificate."+res, descriptionFieldName),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, nameFieldName, certName),
 				),
 			},
 			{
 				Config: testUseWellKnownConfig(res, certName, id),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("oasis_certificate."+res, description),
-					resource.TestCheckResourceAttr("oasis_certificate."+res, name, certName),
-					resource.TestCheckResourceAttr("oasis_certificate."+res, useWellKnownCertificate, "true"),
+					resource.TestCheckResourceAttrSet("oasis_certificate."+res, descriptionFieldName),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, nameFieldName, certName),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, useWellKnownCertificateFieldName, "true"),
 				),
 			},
 			{
 				Config: testOptionalFieldsConfig(res, certName, id),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("oasis_certificate."+res, name, certName),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, nameFieldName, certName),
 				),
 			},
 		},
@@ -122,14 +122,14 @@ func deleteTestProject() error {
 
 func TestFlattenCertificateResource(t *testing.T) {
 	expected := map[string]interface{}{
-		name:                    "test-name",
-		description:             "test-description",
-		project:                 "123456789",
-		useWellKnownCertificate: true,
-		lifetime:                3600,
-		isDefault:               false,
-		expiresAt:               "1980-03-10T01:01:01Z",
-		createdAt:               "1980-03-03T01:01:01Z",
+		nameFieldName:                    "test-name",
+		descriptionFieldName:             "test-description",
+		projectFieldName:                 "123456789",
+		useWellKnownCertificateFieldName: true,
+		lifetimeFieldName:                3600,
+		isDefaultFieldName:               false,
+		expiresAtFieldName:               "1980-03-10T01:01:01Z",
+		createdAtFieldName:               "1980-03-03T01:01:01Z",
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
@@ -150,20 +150,20 @@ func TestFlattenCertificateResource(t *testing.T) {
 
 func TestExpandingCertificateResource(t *testing.T) {
 	raw := map[string]interface{}{
-		name:                    "test-name",
-		description:             "test-description",
-		project:                 "123456789",
-		useWellKnownCertificate: true,
-		lifetime:                3600,
+		nameFieldName:                    "test-name",
+		descriptionFieldName:             "test-description",
+		projectFieldName:                 "123456789",
+		useWellKnownCertificateFieldName: true,
+		lifetimeFieldName:                3600,
 	}
 	s := resourceCertificate().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
 	cert := expandToCertificate(data)
-	assert.Equal(t, raw[name], cert.GetName())
-	assert.Equal(t, raw[description], cert.GetDescription())
-	assert.Equal(t, raw[project], cert.GetProjectId())
-	assert.Equal(t, raw[useWellKnownCertificate], cert.GetUseWellKnownCertificate())
-	assert.Equal(t, raw[lifetime], int(cert.GetLifetime().GetSeconds()))
+	assert.Equal(t, raw[nameFieldName], cert.GetName())
+	assert.Equal(t, raw[descriptionFieldName], cert.GetDescription())
+	assert.Equal(t, raw[projectFieldName], cert.GetProjectId())
+	assert.Equal(t, raw[useWellKnownCertificateFieldName], cert.GetUseWellKnownCertificate())
+	assert.Equal(t, raw[lifetimeFieldName], int(cert.GetLifetime().GetSeconds()))
 }
 
 func testAccCheckDestroyCertificate(s *terraform.State) error {

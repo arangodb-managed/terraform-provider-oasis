@@ -20,14 +20,14 @@ import (
 
 const (
 	// Certificate fields
-	name                    = "name"
-	project                 = "project"
-	description             = "description"
-	lifetime                = "lifetime"
-	useWellKnownCertificate = "use_well_known_certificate"
-	isDefault               = "is_default"
-	createdAt               = "created_at"
-	expiresAt               = "expires_at"
+	nameFieldName                    = "name"
+	projectFieldName                 = "project"
+	descriptionFieldName             = "description"
+	lifetimeFieldName                = "lifetime"
+	useWellKnownCertificateFieldName = "use_well_known_certificate"
+	isDefaultFieldName               = "is_default"
+	createdAtFieldName               = "created_at"
+	expiresAtFieldName               = "expires_at"
 )
 
 // resourceCertificate defines the Certificate terraform resource Schema.
@@ -39,41 +39,41 @@ func resourceCertificate() *schema.Resource {
 		Delete: resourceCertificateDelete,
 
 		Schema: map[string]*schema.Schema{
-			name: {
+			nameFieldName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			project: { // If set here, overrides project in provider
+			projectFieldName: { // If set here, overrides project in provider
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			description: {
+			descriptionFieldName: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			lifetime: {
+			lifetimeFieldName: {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
 
-			useWellKnownCertificate: {
+			useWellKnownCertificateFieldName: {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			isDefault: {
+			isDefaultFieldName: {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
 
-			createdAt: {
+			createdAtFieldName: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			expiresAt: {
+			expiresAtFieldName: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -136,46 +136,46 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 // flattenCertificateResource flattens the certificate data into a map interface for easy storage.
 func flattenCertificateResource(cert *crypto.CACertificate) map[string]interface{} {
 	flatted := map[string]interface{}{
-		name:                    cert.GetName(),
-		description:             cert.GetDescription(),
-		project:                 cert.GetProjectId(),
-		useWellKnownCertificate: cert.GetUseWellKnownCertificate(),
-		lifetime:                int(cert.GetLifetime().GetSeconds()),
-		isDefault:               cert.GetIsDefault(),
-		expiresAt:               cert.GetExpiresAt().String(),
-		createdAt:               cert.GetCreatedAt().String(),
+		nameFieldName:                    cert.GetName(),
+		descriptionFieldName:             cert.GetDescription(),
+		projectFieldName:                 cert.GetProjectId(),
+		useWellKnownCertificateFieldName: cert.GetUseWellKnownCertificate(),
+		lifetimeFieldName:                int(cert.GetLifetime().GetSeconds()),
+		isDefaultFieldName:               cert.GetIsDefault(),
+		expiresAtFieldName:               cert.GetExpiresAt().String(),
+		createdAtFieldName:               cert.GetCreatedAt().String(),
 	}
 	return flatted
 }
 
 // expandToCertificate creates a certificate resource from resource data.
 func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
-	n := d.Get(name).(string)
-	pid := d.Get(project).(string)
+	n := d.Get(nameFieldName).(string)
+	pid := d.Get(projectFieldName).(string)
 	var (
-		desc         string
-		lifeTime     int
-		useWellKnown bool
-		lt           *types.Duration
+		description             string
+		lifetime                int
+		useWellKnownCertificate bool
+		lt                      *types.Duration
 	)
-	if v, ok := d.GetOk(description); ok {
-		desc = v.(string)
+	if v, ok := d.GetOk(descriptionFieldName); ok {
+		description = v.(string)
 	}
-	if v, ok := d.GetOk(lifetime); ok {
-		lifeTime = v.(int)
-		if lifeTime > 0 {
-			lt = types.DurationProto(time.Duration(lifeTime) * time.Second)
+	if v, ok := d.GetOk(lifetimeFieldName); ok {
+		lifetime = v.(int)
+		if lifetime > 0 {
+			lt = types.DurationProto(time.Duration(lifetime) * time.Second)
 		}
 	}
-	if v, ok := d.GetOk(useWellKnownCertificate); ok {
-		useWellKnown = v.(bool)
+	if v, ok := d.GetOk(useWellKnownCertificateFieldName); ok {
+		useWellKnownCertificate = v.(bool)
 	}
 	return &crypto.CACertificate{
 		Name:                    n,
-		Description:             desc,
+		Description:             description,
 		ProjectId:               pid,
 		Lifetime:                lt,
-		UseWellKnownCertificate: useWellKnown,
+		UseWellKnownCertificate: useWellKnownCertificate,
 	}
 }
 
@@ -200,17 +200,17 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	if d.HasChange(name) {
-		cert.Name = d.Get(name).(string)
+	if d.HasChange(nameFieldName) {
+		cert.Name = d.Get(nameFieldName).(string)
 	}
-	if d.HasChange(description) {
-		cert.Description = d.Get(description).(string)
+	if d.HasChange(descriptionFieldName) {
+		cert.Description = d.Get(descriptionFieldName).(string)
 	}
-	if d.HasChange(useWellKnownCertificate) {
-		cert.UseWellKnownCertificate = d.Get(useWellKnownCertificate).(bool)
+	if d.HasChange(useWellKnownCertificateFieldName) {
+		cert.UseWellKnownCertificate = d.Get(useWellKnownCertificateFieldName).(bool)
 	}
-	if d.HasChange(lifetime) {
-		cert.Lifetime = types.DurationProto(time.Duration(d.Get(lifetime).(int)))
+	if d.HasChange(lifetimeFieldName) {
+		cert.Lifetime = types.DurationProto(time.Duration(d.Get(lifetimeFieldName).(int)))
 	}
 	res, err := cryptoc.UpdateCACertificate(client.ctxWithToken, cert)
 	if err != nil {
