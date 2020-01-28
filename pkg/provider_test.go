@@ -10,7 +10,22 @@ package pkg
 
 import (
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
+
+var (
+	testAccProviders map[string]terraform.ResourceProvider
+	testAccProvider  *schema.Provider
+)
+
+func init() {
+	testAccProvider = Provider()
+	testAccProviders = map[string]terraform.ResourceProvider{
+		"oasis": testAccProvider,
+	}
+}
 
 func TestProvider(t *testing.T) {
 }
