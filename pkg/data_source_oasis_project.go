@@ -17,11 +17,11 @@ import (
 
 const (
 	// project data source fields
-	id          = "id"
-	name        = "name"
-	description = "description"
-	url         = "url"
-	createdAt   = "created_at"
+	idFieldName          = "id"
+	nameFieldName        = "name"
+	descriptionFieldName = "description"
+	urlFieldName         = "url"
+	createdAtFieldName   = "created_at"
 )
 
 // dataSourceOasisProject defines a Project datasource terraform type.
@@ -30,23 +30,23 @@ func dataSourceOasisProject() *schema.Resource {
 		Read: dataSourceOasisProjectRead,
 
 		Schema: map[string]*schema.Schema{
-			id: {
+			idFieldName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			name: {
+			nameFieldName: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			description: {
+			descriptionFieldName: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			url: {
+			urlFieldName: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			createdAt: {
+			createdAtFieldName: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -63,7 +63,7 @@ func dataSourceOasisProjectRead(data *schema.ResourceData, m interface{}) error 
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	pid := data.Get(id).(string)
+	pid := data.Get(idFieldName).(string)
 	proj, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: pid})
 	if err != nil {
 		return err
@@ -81,10 +81,10 @@ func dataSourceOasisProjectRead(data *schema.ResourceData, m interface{}) error 
 // flattenProjectObject creates a map from an Oasis Project for easy digestion by the terraform schema.
 func flattenProjectObject(proj *rm.Project) map[string]interface{} {
 	return map[string]interface{}{
-		id:          proj.GetId(),
-		name:        proj.GetName(),
-		description: proj.GetDescription(),
-		url:         proj.GetUrl(),
-		createdAt:   proj.GetCreatedAt().String(),
+		idFieldName:          proj.GetId(),
+		nameFieldName:        proj.GetName(),
+		descriptionFieldName: proj.GetDescription(),
+		urlFieldName:         proj.GetUrl(),
+		createdAtFieldName:   proj.GetCreatedAt().String(),
 	}
 }

@@ -41,10 +41,10 @@ func TestOasisProjectDataSource_Basic(t *testing.T) {
 			{
 				Config: testBasicOasisProjectDataSourceConfig(pid),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", id),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", name),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", createdAt),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", url),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", idFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", nameFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", createdAtFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", urlFieldName),
 				),
 			},
 		},
@@ -92,11 +92,11 @@ func TestFlattenProjectDataSource(t *testing.T) {
 		CreatedAt:      createdAtTimeStamp,
 	}
 	expected := map[string]interface{}{
-		id:          "test-id",
-		name:        "test-name",
-		description: "test-description",
-		url:         "https://test.url",
-		createdAt:   "1980-01-01T01:01:01Z",
+		idFieldName:          "test-id",
+		nameFieldName:        "test-name",
+		descriptionFieldName: "test-description",
+		urlFieldName:         "https://test.url",
+		createdAtFieldName:   "1980-01-01T01:01:01Z",
 	}
 	got := flattenProjectObject(&proj)
 	assert.Equal(t, expected, got)
