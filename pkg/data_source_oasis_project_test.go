@@ -35,16 +35,16 @@ func TestOasisProjectDataSource_Basic(t *testing.T) {
 		t.Fatal(err)
 	}
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccDataSourcePreCheck(t) },
+		PreCheck:  func() { testProjectAccDataSourcePreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testBasicOasisProjectDataSourceConfig(pid),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", idFieldName),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", nameFieldName),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", createdAtFieldName),
-					resource.TestCheckResourceAttrSet("data.oasis_project.test", urlFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", projIdFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", projNameFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", projCreatedAtFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_project.test", projUrlFieldName),
 				),
 			},
 		},
@@ -75,7 +75,7 @@ func fetchProjectID() (string, error) {
 	}
 }
 
-func testAccDataSourcePreCheck(t *testing.T) {
+func testProjectAccDataSourcePreCheck(t *testing.T) {
 	if v := os.Getenv("OASIS_API_KEY_ID"); v == "" {
 		t.Fatal("the test needs a test account key to run")
 	}
@@ -92,11 +92,11 @@ func TestFlattenProjectDataSource(t *testing.T) {
 		CreatedAt:      createdAtTimeStamp,
 	}
 	expected := map[string]interface{}{
-		idFieldName:          "test-id",
-		nameFieldName:        "test-name",
-		descriptionFieldName: "test-description",
-		urlFieldName:         "https://test.url",
-		createdAtFieldName:   "1980-01-01T01:01:01Z",
+		projIdFieldName:          "test-id",
+		projNameFieldName:        "test-name",
+		projDescriptionFieldName: "test-description",
+		projUrlFieldName:         "https://test.url",
+		projCreatedAtFieldName:   "1980-01-01T01:01:01Z",
 	}
 	got := flattenProjectObject(&proj)
 	assert.Equal(t, expected, got)
