@@ -35,7 +35,7 @@ func init() {
 	testAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
 }
 
-func TestResourceCertificate_Basic(t *testing.T) {
+func TestResourceCertificate(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
 	}
@@ -62,6 +62,20 @@ func TestResourceCertificate_Basic(t *testing.T) {
 				Config: testBasicConfig(res, certName, id),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("oasis_certificate."+res, description),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, name, certName),
+				),
+			},
+			{
+				Config: testUseWellKnownConfig(res, certName, id),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("oasis_certificate."+res, description),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, name, certName),
+					resource.TestCheckResourceAttr("oasis_certificate."+res, useWellKnownCertificate, "true"),
+				),
+			},
+			{
+				Config: testOptionalFieldsConfig(res, certName, id),
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_certificate."+res, name, certName),
 				),
 			},
@@ -179,6 +193,22 @@ func testBasicConfig(resource, name, project string) string {
   description = "Terraform Updated Generated Certificate"
   project      = "%s"
   use_well_known_certificate = false
+}`, resource, name, project)
+}
+
+func testUseWellKnownConfig(resource, name, project string) string {
+	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
+  name = "%s"
+  description = "Terraform Updated Generated Certificate"
+  project      = "%s"
+  use_well_known_certificate = true
+}`, resource, name, project)
+}
+
+func testOptionalFieldsConfig(resource, name, project string) string {
+	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
+  name = "%s"
+  project      = "%s"
 }`, resource, name, project)
 }
 
