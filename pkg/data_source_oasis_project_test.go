@@ -69,7 +69,7 @@ func fetchProjectID() (string, error) {
 		return "", err
 	} else if len(proj.Items) < 1 {
 		client.log.Error().Err(err).Msg("No projects found in organization")
-		return "", nil
+		return "", fmt.Errorf("no projects found in organization %s", orgID)
 	} else {
 		return proj.Items[0].GetId(), nil
 	}
