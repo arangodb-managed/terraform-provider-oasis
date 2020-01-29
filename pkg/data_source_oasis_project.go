@@ -44,7 +44,7 @@ func dataSourceOasisProject() *schema.Resource {
 			},
 			projUrlFieldName: {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			projCreatedAtFieldName: {
 				Type:     schema.TypeString,

@@ -27,7 +27,7 @@ Retrieving API Keys
 
 Api keys can be generated and viewed under the user's dashboard view on the API Keys tab.
 On a logged in view, navigate to [API Keys](https://cloud.arangodb.com/dashboard/user/api-keys) and hit the button
-labelled `New API key`. This will generate a set of keys which can be used with ArangoDB's public API.
+labeled `New API key`. This will generate a set of keys which can be used with ArangoDB's public API.
 
 Retrieving relevant IDs
 -----------------------
