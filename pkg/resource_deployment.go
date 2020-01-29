@@ -8,7 +8,33 @@
 
 package pkg
 
-import "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
+	data "github.com/arangodb-managed/apis/data/v1"
+)
+
+const (
+	deplOrganizationFieldName              = "organization"
+	deplProjectFieldName                   = "project"
+	deplLocationFieldName                  = "location"
+	deplLocationProiderFieldName           = "provider"
+	deplLocationRegionFieldName            = "region"
+	deplVersionFieldName                   = "version"
+	deplVersionDbVersionFieldName          = "db_version"
+	deplVersionCaCertificateFieldName      = "ca_certificate"
+	deplVersionIpWhitelistFieldName        = "ip_whitelist"
+	deplConfigurationFieldName             = "configuration"
+	deplConfigurationModelFieldName        = "model"
+	deplConfigurationNodeSizeIdFieldName   = "node_size_id"
+	deplConfigurationNodeCountFieldName    = "node_count"
+	deplConfigurationNodeDiskSizeFieldName = "node_disk_size"
+	deplConfigurationCoordinatrosFieldName = "coordinators"
+	deplConfigurationCoordinatorMemroySize = "coordinator_memory_size"
+	deplConfigurationDbServerCount         = "dbserver_count"
+	deplConfigurationDbServerMemorySize    = "dbserver_memory_size"
+	deplConfigurationDbServerDiskSize      = "dbserver_disk_size"
+)
 
 func resourceDeployment() *schema.Resource {
 	return &schema.Resource{
@@ -18,26 +44,26 @@ func resourceDeployment() *schema.Resource {
 		Delete: resourceDeploymentDelete,
 
 		Schema: map[string]*schema.Schema{
-			"organization": &schema.Schema{ // If set here, overrides project in provider
-				Type:     schema.TypeString,
-				Required: true,
-			},
-
-			"project": &schema.Schema{ // If set here, overrides project in provider
+			deplOrganizationFieldName: { // If set here, overrides orgranization in provider
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"location": &schema.Schema{
-				Type:     schema.TypeMap,
+			deplProjectFieldName: { // If set here, overrides project in provider
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			deplLocationFieldName: {
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"provider": {
+						deplLocationProiderFieldName: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"region": {
+						deplLocationRegionFieldName: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
@@ -45,20 +71,20 @@ func resourceDeployment() *schema.Resource {
 				},
 			},
 
-			"version": &schema.Schema{
-				Type:     schema.TypeMap,
+			deplVersionFieldName: {
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"db_version": {
+						deplVersionDbVersionFieldName: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"ca_certificate": {
+						deplVersionCaCertificateFieldName: {
 							Type:     schema.TypeString,
 							Optional: true, // If not set, uses default certificate from project
 						},
-						"ip_whitelist": {
+						deplVersionIpWhitelistFieldName: {
 							Type:     schema.TypeString,
 							Optional: true, // If not set, no whitelist is configured
 						},
@@ -66,49 +92,57 @@ func resourceDeployment() *schema.Resource {
 				},
 			},
 
-			"configuration": &schema.Schema{
-				Type:     schema.TypeMap,
+			deplConfigurationFieldName: {
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"model": {
+						deplConfigurationModelFieldName: {
 							Type:     schema.TypeString,
+							Default:  data.ModelOneShard,
 							Required: true,
 						},
 						// OneShard model
-						"node_disk_gb": {
-							Type:     schema.TypeInt,
-							Required: false,
-						},
 						// Size of nodes being used, e.g., a4
-						"node_size_id": {
+						deplConfigurationNodeSizeIdFieldName: {
 							Type:     schema.TypeString,
 							Required: false,
 						},
-						"num_nodes": {
-							Type:     schema.TypeString,
+						deplConfigurationNodeCountFieldName: {
+							Type:     schema.TypeInt,
+							Default:  3,
+							Required: false,
+						},
+						deplConfigurationNodeDiskSizeFieldName: {
+							Type:     schema.TypeInt,
+							Default:  0,
 							Required: false,
 						},
 
 						// Flexible model
-						"num_coordinators": {
+						deplConfigurationCoordinatrosFieldName: {
 							Type:     schema.TypeInt,
+							Default:  3,
 							Required: false,
 						},
-						"coordinator_memory_size": {
+						deplConfigurationCoordinatorMemroySize: {
 							Type:     schema.TypeInt,
+							Default:  4,
 							Required: false,
 						},
-						"num_dbservers": {
+						deplConfigurationDbServerCount: {
 							Type:     schema.TypeInt,
+							Default:  3,
 							Required: false,
 						},
-						"dbserver_memory_size": {
+						deplConfigurationDbServerMemorySize: {
 							Type:     schema.TypeInt,
+							Default:  4,
 							Required: false,
 						},
-						"dbserver_disk_size": {
+						deplConfigurationDbServerDiskSize: {
 							Type:     schema.TypeInt,
+							Default:  32,
 							Required: false,
 						},
 					},
