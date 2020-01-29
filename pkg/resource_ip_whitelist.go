@@ -106,7 +106,6 @@ func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*securi
 	project := defaultProject
 	var (
 		description string
-		isDeleted   bool
 	)
 	if v, ok := d.GetOk(ipDescriptionFieldName); ok {
 		description = v.(string)
@@ -115,16 +114,12 @@ func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*securi
 	if v, ok := d.GetOk(ipProjectFieldName); ok {
 		project = v.(string)
 	}
-	if v, ok := d.GetOk(isDeletedFieldName); ok {
-		isDeleted = v.(bool)
-	}
 
 	return &security.IPWhitelist{
 		Name:        name,
 		Description: description,
 		ProjectId:   project,
 		CidrRanges:  cidrRange,
-		IsDeleted:   isDeleted,
 	}, nil
 }
 
