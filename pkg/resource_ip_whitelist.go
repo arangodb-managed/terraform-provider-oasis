@@ -95,7 +95,7 @@ func resourceIPWhitelistCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceIPWhitelistRead(d, m)
 }
 
-// expandToIPWhitelist creates an ip whitelist.
+// expandToIPWhitelist creates an ip whitelist oasis structure out of a terraform schema.
 func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*security.IPWhitelist, error) {
 	// no need to getok here since these are required fields
 	name := d.Get(ipNameFieldName).(string)
@@ -128,6 +128,8 @@ func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*securi
 	}, nil
 }
 
+// expandStringList creates a string list of items from an interface slice. It also
+// verifies if a given string item is empty or not. In case it's empty, an error is thrown.
 func expandStringList(list []interface{}) ([]string, error) {
 	cidr := make([]string, 0)
 	for _, v := range list {
@@ -200,7 +202,7 @@ func resourceIPWhitelistDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-// resourceIPWhitelistCreate handles the update lifecycle of the IPWhitelist resource.
+// resourceIPWhitelistUpdate handles the update lifecycle of the IPWhitelist resource.
 func resourceIPWhitelistUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
