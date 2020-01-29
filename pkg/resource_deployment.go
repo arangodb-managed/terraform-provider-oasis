@@ -169,7 +169,6 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 
 	datac := data.NewDataServiceClient(client.conn)
 	expandedDepl := expandDeploymentResource(d, client.ProjectID)
-
 	if expandedDepl.Certificates.CaCertificateId == "" {
 		cryptoc := crypto.NewCryptoServiceClient(client.conn)
 		list, err := cryptoc.ListCACertificates(client.ctxWithToken, &common.ListOptions{ContextId: expandedDepl.GetProjectId()})
@@ -181,11 +180,17 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 			client.log.Error().Err(err).Msg("Failed to find any CA certificates")
 			return fmt.Errorf("failed to find any CA certificates for project %s", expandedDepl.GetProjectId())
 		}
+		certificateSelected := false
 		for _, c := range list.GetItems() {
 			if c.GetIsDefault() {
 				expandedDepl.Certificates.CaCertificateId = c.GetId()
+				certificateSelected = true
 				break
 			}
+		}
+		if !certificateSelected {
+			client.log.Error().Err(err).Str("project-id", expandedDepl.ProjectId).Msg("Unable to find default certificate for project. Please select one manually.")
+			return fmt.Errorf("Unable to find default certificate for project %s. Please select one manually.", expandedDepl.GetProjectId())
 		}
 	}
 
