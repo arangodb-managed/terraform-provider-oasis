@@ -14,20 +14,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
-	common "github.com/arangodb-managed/apis/common/v1"
-	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/stretchr/testify/assert"
+
+	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
 func TestOasisOrganizationDataSource_Basic(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
 	}
-	organizationID, err := fetchOrganizationID()
+	organizationID, err := FetchOrganizationID(testAccProvider)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,29 +44,6 @@ func TestOasisOrganizationDataSource_Basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-// fetchOrganizationID finds and retrieves the first Organization ID it finds in the given Organization.
-func fetchOrganizationID() (string, error) {
-	// Initialize Client with connection settings
-	if err := testAccProvider.Configure(terraform.NewResourceConfigRaw(nil)); err != nil {
-		return "", err
-	}
-	client := testAccProvider.Meta().(*Client)
-	if err := client.Connect(); err != nil {
-		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return "", err
-	}
-	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	if organizations, err := rmc.ListOrganizations(client.ctxWithToken, &common.ListOptions{}); err != nil {
-		client.log.Error().Err(err).Msg("Failed to list Organizations")
-		return "", err
-	} else if len(organizations.GetItems()) < 1 {
-		client.log.Error().Err(err).Msg("No Organizations found")
-		return "", fmt.Errorf("no organizations found")
-	} else {
-		return organizations.GetItems()[0].GetId(), nil
-	}
 }
 
 func testAccDataSourcePreCheck(t *testing.T) {
