@@ -97,16 +97,22 @@ func resourceIPWhitelistCreate(d *schema.ResourceData, m interface{}) error {
 
 // expandToIPWhitelist creates an ip whitelist oasis structure out of a terraform schema.
 func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*security.IPWhitelist, error) {
-	// no need to getok here since these are required fields
-	name := d.Get(ipNameFieldName).(string)
-	cidrRange, err := expandStringList(d.Get(ipCIDRRangeFieldName).([]interface{}))
-	if err != nil {
-		return nil, err
+	var (
+		name        string
+		description string
+		cidrRange   []string
+		err         error
+	)
+	if v, ok := d.GetOk(ipNameFieldName); ok {
+		name = v.(string)
+	}
+	if v, ok := d.GetOk(ipCIDRRangeFieldName); ok {
+		cidrRange, err = expandStringList(v.([]interface{}))
+		if err != nil {
+			return nil, err
+		}
 	}
 	project := defaultProject
-	var (
-		description string
-	)
 	if v, ok := d.GetOk(ipDescriptionFieldName); ok {
 		description = v.(string)
 	}
