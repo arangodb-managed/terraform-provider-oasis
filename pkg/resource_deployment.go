@@ -115,7 +115,6 @@ func resourceDeployment() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						deplConfigurationModelFieldName: {
 							Type:     schema.TypeString,
-							Default:  data.ModelOneShard,
 							Required: true,
 						},
 						// OneShard model
