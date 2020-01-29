@@ -160,6 +160,7 @@ func resourceDeployment() *schema.Resource {
 	}
 }
 
+// resourceDeploymentCreate creates an oasis deployment given a project id.
 func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
@@ -280,6 +281,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 	}
 }
 
+// expandLocation gathers location data from the location set in terraform schema
 func expandLocation(s *schema.Set) (loc location) {
 	for _, v := range s.List() {
 		item := v.(map[string]interface{})
@@ -293,6 +295,7 @@ func expandLocation(s *schema.Set) (loc location) {
 	return
 }
 
+// expandVersion gathers version data from the version set in terraform schema
 func expandVersion(s *schema.Set) (ver version) {
 	for _, v := range s.List() {
 		item := v.(map[string]interface{})
@@ -309,6 +312,7 @@ func expandVersion(s *schema.Set) (ver version) {
 	return
 }
 
+// expandConfiguration gathers configuration data from the configuration set in terraform schema
 func expandConfiguration(s *schema.Set) (conf configuration) {
 	for _, v := range s.List() {
 		item := v.(map[string]interface{})
@@ -343,14 +347,160 @@ func expandConfiguration(s *schema.Set) (conf configuration) {
 	return
 }
 
+// resourceDeploymentRead retrieves deployment information from terraform stores.
 func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
+	client := m.(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+
+	datac := data.NewDataServiceClient(client.conn)
+	depl, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to find deployment")
+		d.SetId("")
+		return err
+	}
+	for k, v := range flattenDeployment(depl) {
+		if _, ok := d.GetOk(k); ok {
+			if err := d.Set(k, v); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
+// flattenDeployment creates a map from a deployment for easy storage on terraform.
+func flattenDeployment(depl *data.Deployment) map[string]interface{} {
+	conf := flattenConfigurationData(depl)
+	loc := flattenLocationData(depl)
+	ver := flattenVersionData(depl)
+
+	return map[string]interface{}{
+		deplNameFieldName:          depl.GetName(),
+		deplProjectFieldName:       depl.GetProjectId(),
+		deplConfigurationFieldName: conf,
+		deplLocationFieldName:      loc,
+		deplVersionFieldName:       ver,
+	}
+}
+
+// flattenVersionData takes the version part of a deployment and creates a sub map for terraform schema.
+func flattenVersionData(depl *data.Deployment) *schema.Set {
+	s := &schema.Set{
+		F: schema.HashResource(resourceDeployment().Schema[deplVersionFieldName].Elem.(*schema.Resource)),
+	}
+	versionMap := map[string]interface{}{
+		deplVersionDbVersionFieldName:     depl.GetVersion(),
+		deplVersionCaCertificateFieldName: depl.GetCertificates().GetCaCertificateId(),
+		deplVersionIpWhitelistFieldName:   depl.GetIpwhitelistId(),
+	}
+	s.Add(versionMap)
+	return s
+}
+
+// flattenLocationData takes the location part of a deployment and creates a sub map for terraform schema.
+func flattenLocationData(depl *data.Deployment) *schema.Set {
+	s := &schema.Set{
+		F: schema.HashResource(resourceDeployment().Schema[deplLocationFieldName].Elem.(*schema.Resource)),
+	}
+	locationMap := map[string]interface{}{
+		deplLocationRegionFieldName: depl.GetRegionId(),
+	}
+	s.Add(locationMap)
+	return s
+}
+
+// flattenConfigurationData takes the configuration part of a deployment and creates a sub map for terraform schema.
+func flattenConfigurationData(depl *data.Deployment) *schema.Set {
+	s := &schema.Set{
+		F: schema.HashResource(resourceDeployment().Schema[deplConfigurationFieldName].Elem.(*schema.Resource)),
+	}
+
+	configMap := map[string]interface{}{
+		deplConfigurationModelFieldName:        depl.GetModel().GetModel(),
+		deplConfigurationCoordinatorsFieldName: int(depl.GetServers().GetCoordinators()),
+		deplConfigurationCoordinatorMemorySize: int(depl.GetServers().GetCoordinatorMemorySize()),
+		deplConfigurationDbServerCount:         int(depl.GetServers().GetDbservers()),
+		deplConfigurationDbServerMemorySize:    int(depl.GetServers().GetDbserverMemorySize()),
+		deplConfigurationDbServerDiskSize:      int(depl.GetServers().GetDbserverDiskSize()),
+	}
+	if depl.GetModel().GetModel() != data.ModelFlexible {
+		configMap[deplConfigurationNodeSizeIdFieldName] = depl.GetModel().GetNodeSizeId()
+		configMap[deplConfigurationNodeDiskSizeFieldName] = int(depl.GetModel().GetNodeDiskSize())
+		configMap[deplConfigurationNodeCountFieldName] = int(depl.GetModel().GetNodeCount())
+	}
+
+	s.Add(configMap)
+	return s
+}
+
+// resourceDeploymentUpdate checks fields for differences and updates a deployment if necessary.
 func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
+	client := m.(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+	datac := data.NewDataServiceClient(client.conn)
+	depl, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to find deployment")
+		d.SetId("")
+		return err
+	}
+
+	if d.HasChange(deplNameFieldName) {
+		depl.Name = d.Get(deplNameFieldName).(string)
+	}
+	if d.HasChange(deplDescriptionFieldName) {
+		depl.Description = d.Get(deplDescriptionFieldName).(string)
+	}
+	if d.HasChange(deplVersionFieldName) {
+		// No need to check for individual field change via set.Difference since the values should
+		// be that of the deployments if there is no change.
+		ver := expandVersion(d.Get(deplVersionFieldName).(*schema.Set))
+		depl.Certificates.CaCertificateId = ver.caCertificate
+		depl.Version = ver.dbVersion
+		depl.IpwhitelistId = ver.ipWhitelist
+	}
+	if d.HasChange(deplConfigurationFieldName) {
+		// No need to check for individual field change via set.Difference since the values should
+		// be that of the deployments if there is no change.
+		conf := expandConfiguration(d.Get(deplConfigurationFieldName).(*schema.Set))
+		depl.Model.Model = conf.model
+		depl.Model.NodeSizeId = conf.nodeSizeId
+		depl.Model.NodeDiskSize = int32(conf.nodeDiskSize)
+		depl.Model.NodeCount = int32(conf.nodeCount)
+		depl.Servers.DbserverMemorySize = int32(conf.dbServerMemorySize)
+		depl.Servers.DbserverDiskSize = int32(conf.dbServerDiskSize)
+		depl.Servers.Dbservers = int32(conf.dbServerCount)
+	}
+
+	res, err := datac.UpdateDeployment(client.ctxWithToken, depl)
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to update deployment")
+		return err
+	}
+
+	d.SetId(res.GetId())
+	return resourceDeploymentRead(d, m)
 }
 
 func resourceDeploymentDelete(d *schema.ResourceData, m interface{}) error {
+	client := m.(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+
+	datac := data.NewDataServiceClient(client.conn)
+	if _, err := datac.DeleteDeployment(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
+		client.log.Error().Err(err).Str("deployment-id", d.Id()).Msg("Failed to delete deployment")
+		return err
+	}
+	d.SetId("") // called automatically, but added to be explicit
 	return nil
 }
