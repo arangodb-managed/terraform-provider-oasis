@@ -125,39 +125,32 @@ func resourceDeployment() *schema.Resource {
 						},
 						deplConfigurationNodeCountFieldName: {
 							Type:     schema.TypeInt,
-							Default:  3,
 							Optional: true,
 						},
 						deplConfigurationNodeDiskSizeFieldName: {
 							Type:     schema.TypeInt,
-							Default:  0,
 							Optional: true,
 						},
 
 						// Flexible model
 						deplConfigurationCoordinatorsFieldName: {
 							Type:     schema.TypeInt,
-							Default:  3,
 							Optional: true,
 						},
 						deplConfigurationCoordinatorMemorySize: {
 							Type:     schema.TypeInt,
-							Default:  4,
 							Optional: true,
 						},
 						deplConfigurationDbServerCount: {
 							Type:     schema.TypeInt,
-							Default:  3,
 							Optional: true,
 						},
 						deplConfigurationDbServerMemorySize: {
 							Type:     schema.TypeInt,
-							Default:  4,
 							Optional: true,
 						},
 						deplConfigurationDbServerDiskSize: {
 							Type:     schema.TypeInt,
-							Default:  32,
 							Optional: true,
 						},
 					},
