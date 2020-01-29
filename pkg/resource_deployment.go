@@ -196,6 +196,7 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 
 	if depl, err := datac.CreateDeployment(client.ctxWithToken, expandedDepl); err != nil {
 		client.log.Error().Err(err).Msg("Failed to create deplyoment.")
+		return err
 	} else {
 		d.SetId(depl.GetId())
 	}
