@@ -19,14 +19,12 @@ import (
 )
 
 const (
-	deplOrganizationFieldName              = "organization"
 	deplProjectFieldName                   = "project"
 	deplNameFieldName                      = "name"
 	deplDescriptionFieldName               = "description"
 	deplLocationFieldName                  = "location"
-	deplLocationProiderFieldName           = "provider"
 	deplLocationRegionFieldName            = "region"
-	deplVersionFieldName                   = "version"
+	deplVersionFieldName                   = "version_and_security"
 	deplVersionDbVersionFieldName          = "db_version"
 	deplVersionCaCertificateFieldName      = "ca_certificate"
 	deplVersionIpWhitelistFieldName        = "ip_whitelist"
@@ -50,11 +48,6 @@ func resourceDeployment() *schema.Resource {
 		Delete: resourceDeploymentDelete,
 
 		Schema: map[string]*schema.Schema{
-			deplOrganizationFieldName: { // If set here, overrides orgranization in provider
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			deplProjectFieldName: { // If set here, overrides project in provider
 				Type:     schema.TypeString,
 				Optional: true,
@@ -75,10 +68,6 @@ func resourceDeployment() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						deplLocationProiderFieldName: {
-							Type:     schema.TypeString,
-							Required: true,
-						},
 						deplLocationRegionFieldName: {
 							Type:     schema.TypeString,
 							Required: true,
@@ -118,7 +107,6 @@ func resourceDeployment() *schema.Resource {
 							Required: true,
 						},
 						// OneShard model
-						// Size of nodes being used, e.g., a4
 						deplConfigurationNodeSizeIdFieldName: {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -206,8 +194,7 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 
 // location is a convenient wrapper around the location schema for easy parsing
 type location struct {
-	region   string
-	provider string
+	region string
 }
 
 // version is a convenient wrapper around the version schema for easy parsing
@@ -285,9 +272,6 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 func expandLocation(s *schema.Set) (loc location) {
 	for _, v := range s.List() {
 		item := v.(map[string]interface{})
-		if i, ok := item[deplLocationProiderFieldName]; ok {
-			loc.provider = i.(string)
-		}
 		if i, ok := item[deplLocationRegionFieldName]; ok {
 			loc.region = i.(string)
 		}
@@ -322,25 +306,25 @@ func expandConfiguration(s *schema.Set) (conf configuration) {
 		if i, ok := item[deplConfigurationNodeSizeIdFieldName]; ok {
 			conf.nodeSizeId = i.(string)
 		}
-		if i, ok := item[deplConfigurationNodeCountFieldName]; ok {
+		if i, ok := item[deplConfigurationNodeCountFieldName]; ok && i.(int) != 0 {
 			conf.nodeCount = i.(int)
 		}
-		if i, ok := item[deplConfigurationNodeDiskSizeFieldName]; ok {
+		if i, ok := item[deplConfigurationNodeDiskSizeFieldName]; ok && i.(int) != 0 {
 			conf.nodeDiskSize = i.(int)
 		}
-		if i, ok := item[deplConfigurationCoordinatorsFieldName]; ok {
+		if i, ok := item[deplConfigurationCoordinatorsFieldName]; ok && i.(int) != 0 {
 			conf.coordinators = i.(int)
 		}
-		if i, ok := item[deplConfigurationCoordinatorMemorySize]; ok {
+		if i, ok := item[deplConfigurationCoordinatorMemorySize]; ok && i.(int) != 0 {
 			conf.coordinators = i.(int)
 		}
-		if i, ok := item[deplConfigurationDbServerCount]; ok {
+		if i, ok := item[deplConfigurationDbServerCount]; ok && i.(int) != 0 {
 			conf.dbServerCount = i.(int)
 		}
-		if i, ok := item[deplConfigurationDbServerMemorySize]; ok {
+		if i, ok := item[deplConfigurationDbServerMemorySize]; ok && i.(int) != 0 {
 			conf.dbServerMemorySize = i.(int)
 		}
-		if i, ok := item[deplConfigurationDbServerDiskSize]; ok {
+		if i, ok := item[deplConfigurationDbServerDiskSize]; ok && i.(int) != 0 {
 			conf.dbServerDiskSize = i.(int)
 		}
 	}
@@ -362,21 +346,19 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
-	for k, v := range flattenDeployment(depl) {
-		if _, ok := d.GetOk(k); ok {
-			if err := d.Set(k, v); err != nil {
-				return err
-			}
+	for k, v := range flattenDeployment(depl, d) {
+		if err := d.Set(k, v); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
 // flattenDeployment creates a map from a deployment for easy storage on terraform.
-func flattenDeployment(depl *data.Deployment) map[string]interface{} {
+func flattenDeployment(depl *data.Deployment, d *schema.ResourceData) map[string]interface{} {
 	conf := flattenConfigurationData(depl)
 	loc := flattenLocationData(depl)
-	ver := flattenVersionData(depl)
+	ver := flattenVersionData(depl, d)
 
 	return map[string]interface{}{
 		deplNameFieldName:          depl.GetName(),
@@ -388,15 +370,29 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 }
 
 // flattenVersionData takes the version part of a deployment and creates a sub map for terraform schema.
-func flattenVersionData(depl *data.Deployment) *schema.Set {
+func flattenVersionData(depl *data.Deployment, d *schema.ResourceData) *schema.Set {
 	s := &schema.Set{
 		F: schema.HashResource(resourceDeployment().Schema[deplVersionFieldName].Elem.(*schema.Resource)),
 	}
+
 	versionMap := map[string]interface{}{
-		deplVersionDbVersionFieldName:     depl.GetVersion(),
-		deplVersionCaCertificateFieldName: depl.GetCertificates().GetCaCertificateId(),
-		deplVersionIpWhitelistFieldName:   depl.GetIpwhitelistId(),
+		deplVersionDbVersionFieldName:   depl.GetVersion(),
+		deplVersionIpWhitelistFieldName: depl.GetIpwhitelistId(),
 	}
+	// Make sure that certificate is only showing up in the change list and in show
+	// if it was explicitly set by the user.
+	if v, ok := d.GetOk(deplVersionFieldName); ok {
+		m := v.(*schema.Set)
+		for _, i := range m.List() {
+			inner := i.(map[string]interface{})
+			if innerV, ok := inner[deplVersionCaCertificateFieldName]; ok {
+				if innerV.(string) != "" {
+					versionMap[deplVersionCaCertificateFieldName] = innerV.(string)
+				}
+			}
+		}
+	}
+
 	s.Add(versionMap)
 	return s
 }
@@ -420,12 +416,14 @@ func flattenConfigurationData(depl *data.Deployment) *schema.Set {
 	}
 
 	configMap := map[string]interface{}{
-		deplConfigurationModelFieldName:        depl.GetModel().GetModel(),
-		deplConfigurationCoordinatorsFieldName: int(depl.GetServers().GetCoordinators()),
-		deplConfigurationCoordinatorMemorySize: int(depl.GetServers().GetCoordinatorMemorySize()),
-		deplConfigurationDbServerCount:         int(depl.GetServers().GetDbservers()),
-		deplConfigurationDbServerMemorySize:    int(depl.GetServers().GetDbserverMemorySize()),
-		deplConfigurationDbServerDiskSize:      int(depl.GetServers().GetDbserverDiskSize()),
+		deplConfigurationModelFieldName: depl.GetModel().GetModel(),
+	}
+	if depl.GetModel().GetModel() == data.ModelFlexible {
+		configMap[deplConfigurationCoordinatorsFieldName] = int(depl.GetServers().GetCoordinators())
+		configMap[deplConfigurationCoordinatorMemorySize] = int(depl.GetServers().GetCoordinatorMemorySize())
+		configMap[deplConfigurationDbServerCount] = int(depl.GetServers().GetDbservers())
+		configMap[deplConfigurationDbServerMemorySize] = int(depl.GetServers().GetDbserverMemorySize())
+		configMap[deplConfigurationDbServerDiskSize] = int(depl.GetServers().GetDbserverDiskSize())
 	}
 	if depl.GetModel().GetModel() != data.ModelFlexible {
 		configMap[deplConfigurationNodeSizeIdFieldName] = depl.GetModel().GetNodeSizeId()
@@ -459,33 +457,50 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		depl.Description = d.Get(deplDescriptionFieldName).(string)
 	}
 	if d.HasChange(deplVersionFieldName) {
-		// No need to check for individual field change via set.Difference since the values should
-		// be that of the deployments if there is no change.
 		ver := expandVersion(d.Get(deplVersionFieldName).(*schema.Set))
-		depl.Certificates.CaCertificateId = ver.caCertificate
-		depl.Version = ver.dbVersion
-		depl.IpwhitelistId = ver.ipWhitelist
+		if ver.caCertificate != "" {
+			depl.Certificates.CaCertificateId = ver.caCertificate
+		}
+		if ver.dbVersion != "" {
+			depl.Version = ver.dbVersion
+		}
+		if ver.ipWhitelist != "" {
+			depl.IpwhitelistId = ver.ipWhitelist
+		}
 	}
 	if d.HasChange(deplConfigurationFieldName) {
-		// No need to check for individual field change via set.Difference since the values should
-		// be that of the deployments if there is no change.
 		conf := expandConfiguration(d.Get(deplConfigurationFieldName).(*schema.Set))
-		depl.Model.Model = conf.model
-		depl.Model.NodeSizeId = conf.nodeSizeId
-		depl.Model.NodeDiskSize = int32(conf.nodeDiskSize)
-		depl.Model.NodeCount = int32(conf.nodeCount)
-		depl.Servers.DbserverMemorySize = int32(conf.dbServerMemorySize)
-		depl.Servers.DbserverDiskSize = int32(conf.dbServerDiskSize)
-		depl.Servers.Dbservers = int32(conf.dbServerCount)
+
+		if conf.model != "" {
+			depl.Model.Model = conf.model
+		}
+		if conf.nodeSizeId != "" {
+			depl.Model.NodeSizeId = conf.nodeSizeId
+		}
+		if conf.nodeDiskSize != 0 {
+			depl.Model.NodeDiskSize = int32(conf.nodeDiskSize)
+		}
+		if conf.nodeCount != 0 {
+			depl.Model.NodeCount = int32(conf.nodeCount)
+		}
+		if conf.dbServerMemorySize != 0 {
+			depl.Servers.DbserverMemorySize = int32(conf.dbServerMemorySize)
+		}
+		if conf.dbServerDiskSize != 0 {
+			depl.Servers.DbserverDiskSize = int32(conf.dbServerDiskSize)
+		}
+		if conf.dbServerCount != 0 {
+			depl.Servers.Dbservers = int32(conf.dbServerCount)
+		}
 	}
 
-	res, err := datac.UpdateDeployment(client.ctxWithToken, depl)
-	if err != nil {
+	if res, err := datac.UpdateDeployment(client.ctxWithToken, depl); err != nil {
 		client.log.Error().Err(err).Msg("Failed to update deployment")
 		return err
+	} else {
+		d.SetId(res.GetId())
 	}
 
-	d.SetId(res.GetId())
 	return resourceDeploymentRead(d, m)
 }
 
