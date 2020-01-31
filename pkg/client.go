@@ -23,13 +23,15 @@ import (
 
 // Client is responsible for connecting to the Oasis API
 type Client struct {
-	ApiKeyID      string
-	ApiKeySecret  string
-	ApiEndpoint   string
-	ApiPortSuffix string
-	ctxWithToken  context.Context
-	conn          *grpc.ClientConn
-	log           zerolog.Logger
+	ApiKeyID       string
+	ApiKeySecret   string
+	ApiEndpoint    string
+	ApiPortSuffix  string
+	ProjectID      string
+	OrganizationID string
+	ctxWithToken   context.Context
+	conn           *grpc.ClientConn
+	log            zerolog.Logger
 }
 
 // Connect connects to oasis api
