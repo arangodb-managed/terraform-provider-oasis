@@ -105,12 +105,16 @@ func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*securi
 	)
 	if v, ok := d.GetOk(ipNameFieldName); ok {
 		name = v.(string)
+	} else {
+		return nil, fmt.Errorf("failed to parse field %s", ipNameFieldName)
 	}
 	if v, ok := d.GetOk(ipCIDRRangeFieldName); ok {
 		cidrRange, err = expandStringList(v.([]interface{}))
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		return nil, fmt.Errorf("failed to parse field %s", ipNameFieldName)
 	}
 	project := defaultProject
 	if v, ok := d.GetOk(ipDescriptionFieldName); ok {

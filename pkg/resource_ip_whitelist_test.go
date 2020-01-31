@@ -93,6 +93,19 @@ func TestExpandingIPWhitelistResource(t *testing.T) {
 	assert.Equal(t, cidrRange, whitelist.GetCidrRanges())
 }
 
+func TestExpandingIPWhitelistResourceNameNotDefinedError(t *testing.T) {
+	raw := map[string]interface{}{
+		ipDescriptionFieldName: "test-description",
+		ipProjectFieldName:     "123456789",
+		ipCIDRRangeFieldName:   []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipIsDeletedFieldName:   false,
+	}
+	s := resourceIPWhitelist().Schema
+	data := schema.TestResourceDataRaw(t, s, raw)
+	_, err := expandToIPWhitelist(data, "123456789")
+	assert.EqualError(t, err, "failed to parse field "+ipNameFieldName)
+}
+
 func testAccCheckDestroyIPWhitelist(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 	if err := client.Connect(); err != nil {
