@@ -172,16 +172,23 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 			client.log.Error().Err(err).Msg("Failed to list CA certificates")
 			return err
 		}
-		if len(list.Items) < 1 {
+		if len(list.GetItems()) < 1 {
 			client.log.Error().Err(err).Msg("Failed to find any CA certificates")
 			return fmt.Errorf("failed to find any CA certificates for project %s", expandedDepl.GetProjectId())
 		}
+		// Select the default certificate
 		for _, c := range list.GetItems() {
 			if c.GetIsDefault() {
 				expandedDepl.Certificates.CaCertificateId = c.GetId()
 				break
 			}
 		}
+
+		// If the list is one item long, select it, regardless of it being the default or not.
+		if len(list.GetItems()) == 1 {
+			expandedDepl.Certificates.CaCertificateId = list.GetItems()[0].GetId()
+		}
+
 		if expandedDepl.Certificates.CaCertificateId == "" {
 			client.log.Error().Err(err).Str("project-id", expandedDepl.ProjectId).Msg("Unable to find default certificate for project. Please select one manually.")
 			return fmt.Errorf("Unable to find default certificate for project %s. Please select one manually.", expandedDepl.GetProjectId())
