@@ -242,6 +242,9 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 	if v, ok := d.GetOk(deplDescriptionFieldName); ok {
 		description = v.(string)
 	}
+	if v, ok := d.GetOk(deplProjectFieldName); ok {
+		project = v.(string)
+	}
 	if v, ok := d.GetOk(deplLocationFieldName); ok {
 		loc = expandLocation(v.([]interface{}))
 	}
