@@ -19,8 +19,6 @@ import (
 )
 
 var (
-	testAccProviders   map[string]terraform.ResourceProvider
-	testAccProvider    *schema.Provider
 	testOrganizationId string
 	testProject        *rm.Project
 )
