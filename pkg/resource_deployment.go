@@ -249,7 +249,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 		loc = expandLocation(v.([]interface{}))
 	}
 	if v, ok := d.GetOk(deplVersionAndSecurityFieldName); ok {
-		ver = expandVersion(v.([]interface{}))
+		ver = expandVersionAndSecurity(v.([]interface{}))
 	}
 	if v, ok := d.GetOk(deplConfigurationFieldName); ok {
 		conf = expandConfiguration(v.([]interface{}))
@@ -272,7 +272,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 	}
 }
 
-// expandLocation gathers location data from the location set in terraform schema
+// expandLocation gathers location data from the terraform store
 func expandLocation(s []interface{}) (loc location) {
 	for _, v := range s {
 		item := v.(map[string]interface{})
@@ -283,8 +283,8 @@ func expandLocation(s []interface{}) (loc location) {
 	return
 }
 
-// expandVersion gathers version data from the version set in terraform schema
-func expandVersion(s []interface{}) (ver version) {
+// expandVersionAndSecurity gathers version and security data from the terraform store
+func expandVersionAndSecurity(s []interface{}) (ver version) {
 	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplVersionAndSecurityDbVersionFieldName]; ok {
@@ -349,7 +349,7 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	conf := flattenConfigurationData(depl)
 	loc := flattenLocationData(depl)
-	ver := flattenVersionData(depl)
+	ver := flattenVersionAndSecurityData(depl)
 
 	return map[string]interface{}{
 		deplNameFieldName:               depl.GetName(),
@@ -361,8 +361,8 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	}
 }
 
-// flattenVersionData takes the version part of a deployment and creates a sub map for terraform schema.
-func flattenVersionData(depl *data.Deployment) []interface{} {
+// flattenVersionAndSecurityData takes the version and security part of a deployment and creates a sub map for terraform schema.
+func flattenVersionAndSecurityData(depl *data.Deployment) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
 			deplVersionAndSecurityDbVersionFieldName:     depl.GetVersion(),
@@ -415,7 +415,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		depl.Description = d.Get(deplDescriptionFieldName).(string)
 	}
 	if d.HasChange(deplVersionAndSecurityFieldName) {
-		ver := expandVersion(d.Get(deplVersionAndSecurityFieldName).([]interface{}))
+		ver := expandVersionAndSecurity(d.Get(deplVersionAndSecurityFieldName).([]interface{}))
 		if ver.caCertificate != "" {
 			depl.Certificates.CaCertificateId = ver.caCertificate
 		}

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
 	"github.com/stretchr/testify/assert"
 
 	data "github.com/arangodb-managed/apis/data/v1"
