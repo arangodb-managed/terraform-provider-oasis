@@ -58,6 +58,7 @@ func Provider() *schema.Provider {
 			"oasis_certificate": resourceCertificate(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
+			"oasis_project":      dataSourceOasisProject(),
 			"oasis_organization": dataSourceOasisOrganization(),
 		},
 		ConfigureFunc: providerConfigure,
@@ -71,6 +72,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ApiKeySecret:  d.Get("api_key_secret").(string),
 		ApiEndpoint:   d.Get("oasis_endpoint").(string),
 		ApiPortSuffix: d.Get("api_port_suffix").(string),
+	}
+	if v, ok := d.GetOk("project"); ok {
+		client.ProjectID = v.(string)
+	}
+	if v, ok := d.GetOk("organization"); ok {
+		client.OrganizationID = v.(string)
 	}
 	return &client, nil
 }
