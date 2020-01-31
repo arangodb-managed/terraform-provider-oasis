@@ -17,12 +17,12 @@ import (
 
 const (
 	// Organization data source fields
-	idFieldName                             = "id"
-	nameFieldName                           = "name"
-	descriptionFieldName                    = "description"
-	urlFieldName                            = "url"
-	createdAtFieldName                      = "created_at"
-	isDeletedFieldName                      = "is_deleted"
+	orgIdFieldName                          = "id"
+	orgNameFieldName                        = "name"
+	orgDescriptionFieldName                 = "description"
+	orgUrlFieldName                         = "url"
+	orgCreatedAtFieldName                   = "created_at"
+	orgIsDeletedFieldName                   = "is_deleted"
 	tierFieldName                           = "tier"
 	tierIdFieldName                         = "id"
 	tierNameFieldName                       = "name"
@@ -37,27 +37,27 @@ func dataSourceOasisOrganization() *schema.Resource {
 		Read: dataSourceOasisOrganizationRead,
 
 		Schema: map[string]*schema.Schema{
-			idFieldName: {
+			orgIdFieldName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			nameFieldName: {
+			orgNameFieldName: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			descriptionFieldName: {
+			orgDescriptionFieldName: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			urlFieldName: {
+			orgUrlFieldName: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			createdAtFieldName: {
+			orgCreatedAtFieldName: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			isDeletedFieldName: {
+			orgIsDeletedFieldName: {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -102,7 +102,7 @@ func dataSourceOasisOrganizationRead(data *schema.ResourceData, m interface{}) e
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	oid := data.Get(idFieldName).(string)
+	oid := data.Get(orgIdFieldName).(string)
 	org, err := rmc.GetOrganization(client.ctxWithToken, &common.IDOptions{Id: oid})
 	if err != nil {
 		return err
@@ -119,12 +119,12 @@ func dataSourceOasisOrganizationRead(data *schema.ResourceData, m interface{}) e
 // flattenOrganizationObject creates a map from an Oasis Organization structure for the terraform schema.
 func flattenOrganizationObject(org *rm.Organization) map[string]interface{} {
 	ret := map[string]interface{}{
-		idFieldName:          org.GetId(),
-		nameFieldName:        org.GetName(),
-		descriptionFieldName: org.GetDescription(),
-		urlFieldName:         org.GetUrl(),
-		createdAtFieldName:   org.GetCreatedAt().String(),
-		tierFieldName:        flattenTierObject(org.GetTier()),
+		orgIdFieldName:          org.GetId(),
+		orgNameFieldName:        org.GetName(),
+		orgDescriptionFieldName: org.GetDescription(),
+		orgUrlFieldName:         org.GetUrl(),
+		orgCreatedAtFieldName:   org.GetCreatedAt().String(),
+		tierFieldName:           flattenTierObject(org.GetTier()),
 	}
 
 	return ret
