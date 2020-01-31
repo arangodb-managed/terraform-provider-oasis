@@ -242,7 +242,7 @@ type version struct {
 }
 
 // security is a convenient wrapper around the security schema for easy parsing
-type security struct {
+type securityFields struct {
 	caCertificate string
 	ipWhitelist   string
 }
@@ -264,7 +264,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		ver         version
 		loc         location
 		conf        configuration
-		sec         security
+		sec         securityFields
 		err         error
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
@@ -347,7 +347,7 @@ func expandVersion(s []interface{}) (ver version, err error) {
 }
 
 // expandSecurity gathers security data from the terraform store
-func expandSecurity(s []interface{}) (sec security) {
+func expandSecurity(s []interface{}) (sec securityFields) {
 	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplSecurityCaCertificateFieldName]; ok {
