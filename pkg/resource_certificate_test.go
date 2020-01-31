@@ -52,12 +52,12 @@ func TestResourceCertificate(t *testing.T) {
 		}
 	}()
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccCertificatePreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCertificate,
 		Steps: []resource.TestStep{
 			{
-				Config: testBasicConfig(res, certName, id),
+				Config: testBasicCertificateConfig(res, certName, id),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("oasis_certificate."+res, descriptionFieldName),
 					resource.TestCheckResourceAttr("oasis_certificate."+res, nameFieldName, certName),
@@ -185,7 +185,7 @@ func testAccCheckDestroyCertificate(s *terraform.State) error {
 	return nil
 }
 
-func testBasicConfig(resource, name, project string) string {
+func testBasicCertificateConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
   name = "%s"
   description = "Terraform Updated Generated Certificate"
@@ -210,7 +210,7 @@ func testOptionalFieldsConfig(resource, name, project string) string {
 }`, resource, name, project)
 }
 
-func testAccPreCheck(t *testing.T) {
+func testAccCertificatePreCheck(t *testing.T) {
 	if v := os.Getenv("OASIS_API_KEY_ID"); v == "" {
 		t.Fatal("the test needs a test account key to run")
 	}
