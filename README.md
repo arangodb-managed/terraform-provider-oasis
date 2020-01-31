@@ -21,10 +21,23 @@ Requirements
 
 Usage
 ---------------------
-TODOs:
-Explain how to:
-* Create/Retrieve API Key
-* Retrieve relevant ids (org, project, provider, ca_certificate, ip_whitelist)
+
+Retrieving API Keys
+--------------------
+
+Api keys can be generated and viewed under the user's dashboard view on the API Keys tab.
+On a logged in view, navigate to [API Keys](https://cloud.arangodb.com/dashboard/user/api-keys) and hit the button
+labeled `New API key`. This will generate a set of keys which can be used with ArangoDB's public API.
+
+Retrieving relevant IDs
+-----------------------
+
+After a key has been obtained, the relevant api can be called to list organizations, projects etc. 
+
+Configuration
+-------------
+
+The following is an example of a terraform deployment configuration:
 
 ```
 provider "oasis" {
@@ -37,65 +50,89 @@ provider "oasis" {
 // Example of oneshard deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
   project = "190765139" // If set here, overrides project in provider
-  location = {
-    provider = "gcp" // Required
+  location {
     region = "gcp-europe-west4" // Required
   }
-  version = {
+  version {
     db_version = "3.6.0" // Required
+  }
+
+  security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
     ip_whitelist = "" // If not set, no whitelist is configured
   }
-  configuration = {
+
+  configuration {
     model = "oneshard"
     node_size_id = "a4"
     node_disk_size = 20
   }
 }
 
-// Example of a sharded deployment
-resource "oasis_deployment" "my_sharded_deployment" {
+// Example of oneshard deployment without node specification
+resource "oasis_deployment" "my_oneshard_deployment" {
   project = "190765139" // If set here, overrides project in provider
-  location = {
-    provider = "gcp" // Required
-    region = "gcp-eu-west4" // Required
+  location {
+    region = "gcp-europe-west4" // Required
   }
-  version = {
+
+  version {
     db_version = "3.6.0" // Required
+  }
+
+  security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
     ip_whitelist = "" // If not set, no whitelist is configured
   }
-  configuration = {
+
+  configuration {
+    model = "oneshard" // the smallest will be selected that's available in the given region
+  }
+}
+
+// Example of a sharded deployment
+resource "oasis_deployment" "my_sharded_deployment" {
+  project = "190765139" // If set here, overrides project in provider
+  location {
+    region = "gcp-eu-west4" // Required
+  }
+
+  version {
+    db_version = "3.6.0" // Required
+  }
+
+  security { // this section is optional
+    ca_certificate = "" // If not set, uses default certificate from project
+    ip_whitelist = "" // If not set, no whitelist is configured
+  }
+
+  configuration {
     model = "sharded"
     node_size_id = "a4"
     node_disk_size = 20
     num_nodes = 5
   }
 }
-resource "oasis_deployment" "my_flexible_deployment" {
-  project = "190765139" // If set here, overrides project in provider
-  location = {
-    provider = "gcp" // Required
-    region = "gcp-eu-west4" // Required
-  }
-  version = {
-    db_version = "3.6.0" // Required
-    ca_certificate = "" // If not set, uses default certificate from project
-    ip_whitelist = "" // If not set, no whitelist is configured
-  }
-  configuration = {
-    model = "flexible"
-    coordinator_memory_size = 3
-    dbserver_memory_size = 8
-    dbserver_disk_size = 64
-    num_coordinators = 3
-    num_dbservers = 5
-  }
-}
-
 ```
 
-## Organization Data Source
+## Data sources
+
+### Project Data Source
+
+To define and use a project as data source, consider the following terraform configuration:
+
+```
+data "oasis_project" "my_project" {
+  name = "MyProject"
+  id = "123456789"
+}
+
+resource "oasis_deployment" "my_flexible_deployment" {
+  project = data.oasis_project.my_project.id
+}
+```
+
+### Organization Data Source
 
 To define and use an organization as data source, consider the following terraform configuration:
 
@@ -104,8 +141,33 @@ data "oasis_organization" "my_organization" {
   name = "MyOrganization"
   id = "123456789"
 }
+
 resource "oasis_deployment" "my_flexible_deployment" {
   organization = data.oasis_organization.my_organization.id
   ...
 }
+```
+
+# Running Acceptance Tests
+
+In order to run acceptance tests, the following make target needs to be executed:
+
+```bash
+make test-acc
+```
+
+It is recommended that on a schema addition / deprecation and general larger refactorings the acceptance tests are
+executed. *NOTE* that these tests create real deployments, projects and organizations.
+
+Some of them may require additional environment properties to work. I.e.:
+
+```dotenv
+OASIS_TEST_ORGANIZATION_ID=123456789
+```
+
+All of them require the following two environment properties to be set:
+
+```dotenv
+OASIS_API_KEY_ID=<your_key_id>
+OASIS_API_KEY_SECRET=<your_key_secret>
 ```

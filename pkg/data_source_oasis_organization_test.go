@@ -30,23 +30,23 @@ func TestOasisOrganizationDataSource_Basic(t *testing.T) {
 		t.Fatal(err)
 	}
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccDataSourcePreCheck(t) },
+		PreCheck:  func() { testOrgAccDataSourcePreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testBasicOasisOrganizationDataSourceConfig(organizationID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.oasis_organization.test", idFieldName),
-					resource.TestCheckResourceAttrSet("data.oasis_organization.test", nameFieldName),
-					resource.TestCheckResourceAttrSet("data.oasis_organization.test", createdAtFieldName),
-					resource.TestCheckResourceAttrSet("data.oasis_organization.test", urlFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_organization.test", orgIdFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_organization.test", orgNameFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_organization.test", orgCreatedAtFieldName),
+					resource.TestCheckResourceAttrSet("data.oasis_organization.test", orgUrlFieldName),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourcePreCheck(t *testing.T) {
+func testOrgAccDataSourcePreCheck(t *testing.T) {
 	if v := os.Getenv("OASIS_API_KEY_ID"); v == "" {
 		t.Fatal("the test needs a test account key to run")
 	}
@@ -70,19 +70,19 @@ func TestFlattenOrganizationDataSource(t *testing.T) {
 	}
 	flattenedTier := flattenTierObject(org.Tier)
 	expected := map[string]interface{}{
-		idFieldName:          "test-id",
-		nameFieldName:        "test-name",
-		descriptionFieldName: "test-description",
-		urlFieldName:         "https://test.url",
-		createdAtFieldName:   "1980-01-01T01:01:01Z",
-		tierFieldName:        flattenedTier,
+		orgIdFieldName:          "test-id",
+		orgNameFieldName:        "test-name",
+		orgDescriptionFieldName: "test-description",
+		orgUrlFieldName:         "https://test.url",
+		orgCreatedAtFieldName:   "1980-01-01T01:01:01Z",
+		tierFieldName:           flattenedTier,
 	}
 	got := flattenOrganizationObject(&org)
-	assert.Equal(t, expected[idFieldName], got[idFieldName])
-	assert.Equal(t, expected[nameFieldName], got[nameFieldName])
-	assert.Equal(t, expected[descriptionFieldName], got[descriptionFieldName])
-	assert.Equal(t, expected[urlFieldName], got[urlFieldName])
-	assert.Equal(t, expected[createdAtFieldName], got[createdAtFieldName])
+	assert.Equal(t, expected[orgIdFieldName], got[orgIdFieldName])
+	assert.Equal(t, expected[orgNameFieldName], got[orgNameFieldName])
+	assert.Equal(t, expected[orgDescriptionFieldName], got[orgDescriptionFieldName])
+	assert.Equal(t, expected[orgUrlFieldName], got[orgUrlFieldName])
+	assert.Equal(t, expected[orgCreatedAtFieldName], got[orgCreatedAtFieldName])
 	assert.True(t, flattenedTier.Equal(got[tierFieldName]))
 
 }
