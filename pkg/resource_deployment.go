@@ -159,15 +159,13 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 			client.log.Error().Err(err).Msg("Failed to find any CA certificates")
 			return fmt.Errorf("failed to find any CA certificates for project %s", expandedDepl.GetProjectId())
 		}
-		certificateSelected := false
 		for _, c := range list.GetItems() {
 			if c.GetIsDefault() {
 				expandedDepl.Certificates.CaCertificateId = c.GetId()
-				certificateSelected = true
 				break
 			}
 		}
-		if !certificateSelected {
+		if expandedDepl.Certificates.CaCertificateId == "" {
 			client.log.Error().Err(err).Str("project-id", expandedDepl.ProjectId).Msg("Unable to find default certificate for project. Please select one manually.")
 			return fmt.Errorf("Unable to find default certificate for project %s. Please select one manually.", expandedDepl.GetProjectId())
 		}
@@ -214,8 +212,8 @@ type location struct {
 	region string
 }
 
-// version is a convenient wrapper around the version schema for easy parsing
-type version struct {
+// versionAndSecurity is a convenient wrapper around the version_and_security schema for easy parsing
+type versionAndSecurity struct {
 	dbVersion     string
 	caCertificate string
 	ipWhitelist   string
@@ -231,14 +229,17 @@ type configuration struct {
 
 // expandDeploymentResource creates an oasis deployment structure out of a terraform schema model.
 func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *data.Deployment {
-	name := d.Get("name").(string)
 	project := defaultProject
 	var (
+		name        string
 		description string
-		ver         version
+		ver         versionAndSecurity
 		loc         location
 		conf        configuration
 	)
+	if v, ok := d.GetOk(deplNameFieldName); ok {
+		name = v.(string)
+	}
 	if v, ok := d.GetOk(deplDescriptionFieldName); ok {
 		description = v.(string)
 	}
@@ -283,8 +284,8 @@ func expandLocation(s []interface{}) (loc location) {
 	return
 }
 
-// expandVersionAndSecurity gathers version and security data from the terraform store
-func expandVersionAndSecurity(s []interface{}) (ver version) {
+// expandVersionAndSecurity gathers versionAndSecurity and security data from the terraform store
+func expandVersionAndSecurity(s []interface{}) (ver versionAndSecurity) {
 	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplVersionAndSecurityDbVersionFieldName]; ok {
@@ -317,7 +318,6 @@ func expandConfiguration(s []interface{}) (conf configuration) {
 			conf.nodeDiskSize = i.(int)
 		}
 	}
-
 	return
 }
 
@@ -339,6 +339,7 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 
 	for k, v := range flattenDeployment(depl) {
 		if err := d.Set(k, v); err != nil {
+			d.SetId("")
 			return err
 		}
 	}
@@ -361,7 +362,7 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	}
 }
 
-// flattenVersionAndSecurityData takes the version and security part of a deployment and creates a sub map for terraform schema.
+// flattenVersionAndSecurityData takes the versionAndSecurity and security part of a deployment and creates a sub map for terraform schema.
 func flattenVersionAndSecurityData(depl *data.Deployment) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
@@ -449,7 +450,6 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		d.SetId(res.GetId())
 	}
-
 	return resourceDeploymentRead(d, m)
 }
 
