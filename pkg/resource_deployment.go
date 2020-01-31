@@ -351,6 +351,7 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	return map[string]interface{}{
 		deplNameFieldName:               depl.GetName(),
 		deplProjectFieldName:            depl.GetProjectId(),
+		deplDescriptionFieldName:        depl.GetDescription(),
 		deplConfigurationFieldName:      conf,
 		deplLocationFieldName:           loc,
 		deplVersionAndSecurityFieldName: ver,
