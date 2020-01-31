@@ -9,11 +9,8 @@
 package pkg
 
 import (
-	"bytes"
 	"fmt"
 	"sort"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
@@ -63,8 +60,9 @@ func resourceDeployment() *schema.Resource {
 			},
 
 			deplLocationFieldName: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplLocationRegionFieldName: {
@@ -76,8 +74,9 @@ func resourceDeployment() *schema.Resource {
 			},
 
 			deplVersionAndSecurityFieldName: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplVersionAndSecurityDbVersionFieldName: {
@@ -87,6 +86,9 @@ func resourceDeployment() *schema.Resource {
 						deplVersionAndSecurityCaCertificateFieldName: {
 							Type:     schema.TypeString,
 							Optional: true, // If not set, uses default certificate from project
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return new == ""
+							},
 						},
 						deplVersionAndSecurityIpWhitelistFieldName: {
 							Type:     schema.TypeString,
@@ -97,8 +99,9 @@ func resourceDeployment() *schema.Resource {
 			},
 
 			deplConfigurationFieldName: {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplConfigurationModelFieldName: {
@@ -108,14 +111,23 @@ func resourceDeployment() *schema.Resource {
 						deplConfigurationNodeSizeIdFieldName: {
 							Type:     schema.TypeString,
 							Optional: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return new == ""
+							},
 						},
 						deplConfigurationNodeCountFieldName: {
 							Type:     schema.TypeInt,
 							Optional: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return new == "0"
+							},
 						},
 						deplConfigurationNodeDiskSizeFieldName: {
 							Type:     schema.TypeInt,
 							Optional: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return new == "0"
+							},
 						},
 					},
 				},
@@ -125,6 +137,8 @@ func resourceDeployment() *schema.Resource {
 }
 
 // resourceDeploymentCreate creates an oasis deployment given a project id.
+// It will automatically select a certificate if none is provided and will
+// automatically select the smallest node size if none is provided.
 func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
@@ -229,13 +243,13 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 		description = v.(string)
 	}
 	if v, ok := d.GetOk(deplLocationFieldName); ok {
-		loc = expandLocation(v.(*schema.Set))
+		loc = expandLocation(v.([]interface{}))
 	}
 	if v, ok := d.GetOk(deplVersionAndSecurityFieldName); ok {
-		ver = expandVersion(v.(*schema.Set))
+		ver = expandVersion(v.([]interface{}))
 	}
 	if v, ok := d.GetOk(deplConfigurationFieldName); ok {
-		conf = expandConfiguration(v.(*schema.Set))
+		conf = expandConfiguration(v.([]interface{}))
 	}
 
 	return &data.Deployment{
@@ -256,8 +270,8 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 }
 
 // expandLocation gathers location data from the location set in terraform schema
-func expandLocation(s *schema.Set) (loc location) {
-	for _, v := range s.List() {
+func expandLocation(s []interface{}) (loc location) {
+	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplLocationRegionFieldName]; ok {
 			loc.region = i.(string)
@@ -267,8 +281,8 @@ func expandLocation(s *schema.Set) (loc location) {
 }
 
 // expandVersion gathers version data from the version set in terraform schema
-func expandVersion(s *schema.Set) (ver version) {
-	for _, v := range s.List() {
+func expandVersion(s []interface{}) (ver version) {
+	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplVersionAndSecurityDbVersionFieldName]; ok {
 			ver.dbVersion = i.(string)
@@ -284,8 +298,8 @@ func expandVersion(s *schema.Set) (ver version) {
 }
 
 // expandConfiguration gathers configuration data from the configuration set in terraform schema
-func expandConfiguration(s *schema.Set) (conf configuration) {
-	for _, v := range s.List() {
+func expandConfiguration(s []interface{}) (conf configuration) {
+	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplConfigurationModelFieldName]; ok {
 			conf.model = i.(string)
@@ -320,7 +334,7 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	for k, v := range flattenDeployment(depl, d) {
+	for k, v := range flattenDeployment(depl) {
 		if err := d.Set(k, v); err != nil {
 			return err
 		}
@@ -329,10 +343,10 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // flattenDeployment creates a map from a deployment for easy storage on terraform.
-func flattenDeployment(depl *data.Deployment, d *schema.ResourceData) map[string]interface{} {
-	conf := flattenConfigurationData(depl, d)
+func flattenDeployment(depl *data.Deployment) map[string]interface{} {
+	conf := flattenConfigurationData(depl)
 	loc := flattenLocationData(depl)
-	ver := flattenVersionData(depl, d)
+	ver := flattenVersionData(depl)
 
 	return map[string]interface{}{
 		deplNameFieldName:               depl.GetName(),
@@ -344,122 +358,35 @@ func flattenDeployment(depl *data.Deployment, d *schema.ResourceData) map[string
 }
 
 // flattenVersionData takes the version part of a deployment and creates a sub map for terraform schema.
-func flattenVersionData(depl *data.Deployment, d *schema.ResourceData) *schema.Set {
-	s := &schema.Set{
-		F: schema.HashResource(resourceDeployment().Schema[deplVersionAndSecurityFieldName].Elem.(*schema.Resource)),
+func flattenVersionData(depl *data.Deployment) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			deplVersionAndSecurityDbVersionFieldName:     depl.GetVersion(),
+			deplVersionAndSecurityIpWhitelistFieldName:   depl.GetIpwhitelistId(),
+			deplVersionAndSecurityCaCertificateFieldName: depl.GetCertificates().GetCaCertificateId(),
+		},
 	}
-
-	versionMap := map[string]interface{}{
-		deplVersionAndSecurityDbVersionFieldName:   depl.GetVersion(),
-		deplVersionAndSecurityIpWhitelistFieldName: depl.GetIpwhitelistId(),
-	}
-	// Make sure that certificate is only showing up in the change list and in show
-	// if it was explicitly set by the user.
-	if v, ok := d.GetOk(deplVersionAndSecurityFieldName); ok {
-		m := v.(*schema.Set)
-		for _, i := range m.List() {
-			inner := i.(map[string]interface{})
-			if innerV, ok := inner[deplVersionAndSecurityCaCertificateFieldName]; ok {
-				if innerV.(string) != "" {
-					if innerV.(string) != depl.GetCertificates().GetCaCertificateId() {
-						// Any incoming change will show up as a diff to the user.
-						// This is so that we don't miss upstream changes once this field is no longer
-						// automatically managed.
-						versionMap[deplVersionAndSecurityCaCertificateFieldName] = depl.GetCertificates().GetCaCertificateId()
-					} else {
-						versionMap[deplVersionAndSecurityCaCertificateFieldName] = innerV.(string)
-					}
-				}
-			}
-		}
-	}
-
-	s.Add(versionMap)
-	return s
 }
 
 // flattenLocationData takes the location part of a deployment and creates a sub map for terraform schema.
-func flattenLocationData(depl *data.Deployment) *schema.Set {
-	s := &schema.Set{
-		F: schema.HashResource(resourceDeployment().Schema[deplLocationFieldName].Elem.(*schema.Resource)),
+func flattenLocationData(depl *data.Deployment) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			deplLocationRegionFieldName: depl.GetRegionId(),
+		},
 	}
-	locationMap := map[string]interface{}{
-		deplLocationRegionFieldName: depl.GetRegionId(),
-	}
-	s.Add(locationMap)
-	return s
 }
 
 // flattenConfigurationData takes the configuration part of a deployment and creates a sub map for terraform schema.
-func flattenConfigurationData(depl *data.Deployment, d *schema.ResourceData) *schema.Set {
-	s := &schema.Set{
-		// Calculate a unique key based on the provided values. This should always calculate the same value
-		// for the same changes to avoid conflicting diffs.
-		F: func(v interface{}) int {
-			var buf bytes.Buffer
-			m := v.(map[string]interface{})
-			// All keys added in alphabetical order.
-			if v, ok := m[deplConfigurationModelFieldName]; ok {
-				buf.WriteString(fmt.Sprintf("%s-", v.(string)))
-			}
-			if v, ok := m[deplConfigurationNodeCountFieldName]; ok {
-				buf.WriteString(fmt.Sprintf("%d-", v.(int)))
-			}
-			if v, ok := m[deplConfigurationNodeDiskSizeFieldName]; ok {
-				buf.WriteString(fmt.Sprintf("%d-", v.(int)))
-			}
-			if v, ok := m[deplConfigurationNodeSizeIdFieldName]; ok {
-				buf.WriteString(fmt.Sprintf("%s-", v.(string)))
-			}
-			return hashcode.String(buf.String())
+func flattenConfigurationData(depl *data.Deployment) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			deplConfigurationModelFieldName:        depl.GetModel().GetModel(),
+			deplConfigurationNodeSizeIdFieldName:   depl.GetModel().GetNodeSizeId(),
+			deplConfigurationNodeDiskSizeFieldName: int(depl.GetModel().GetNodeDiskSize()),
+			deplConfigurationNodeCountFieldName:    int(depl.GetModel().GetNodeCount()),
 		},
 	}
-
-	configMap := map[string]interface{}{
-		deplConfigurationModelFieldName:        depl.GetModel().GetModel(),
-		deplConfigurationNodeSizeIdFieldName:   depl.GetModel().GetNodeSizeId(),
-		deplConfigurationNodeDiskSizeFieldName: int(depl.GetModel().GetNodeDiskSize()),
-		deplConfigurationNodeCountFieldName:    int(depl.GetModel().GetNodeCount()),
-	}
-
-	// Remove the keys that the user did not set up manually. But always check if there is
-	// a potential upstream change.
-	if v, ok := d.GetOk(deplConfigurationFieldName); ok {
-		m := v.(*schema.Set)
-		for _, v := range m.List() {
-			change := v.(map[string]interface{})
-			if v, ok := change[deplConfigurationNodeCountFieldName]; ok {
-				if v.(int) != 0 {
-					if v.(int) == int(depl.GetModel().GetNodeCount()) {
-						configMap[deplConfigurationNodeCountFieldName] = v.(int)
-					}
-				} else {
-					delete(configMap, deplConfigurationNodeCountFieldName)
-				}
-			}
-			if v, ok := change[deplConfigurationNodeSizeIdFieldName]; ok {
-				if v.(string) != "" {
-					if v.(string) == depl.GetModel().GetNodeSizeId() {
-						configMap[deplConfigurationNodeSizeIdFieldName] = v.(string)
-					}
-				} else {
-					delete(configMap, deplConfigurationNodeSizeIdFieldName)
-				}
-			}
-			if v, ok := change[deplConfigurationNodeDiskSizeFieldName]; ok {
-				if v.(int) != 0 {
-					if v.(int) == int(depl.GetModel().GetNodeDiskSize()) {
-						configMap[deplConfigurationNodeDiskSizeFieldName] = v.(int)
-					}
-				} else {
-					delete(configMap, deplConfigurationNodeDiskSizeFieldName)
-				}
-			}
-		}
-	}
-
-	s.Add(configMap)
-	return s
 }
 
 // resourceDeploymentUpdate checks fields for differences and updates a deployment if necessary.
@@ -484,7 +411,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		depl.Description = d.Get(deplDescriptionFieldName).(string)
 	}
 	if d.HasChange(deplVersionAndSecurityFieldName) {
-		ver := expandVersion(d.Get(deplVersionAndSecurityFieldName).(*schema.Set))
+		ver := expandVersion(d.Get(deplVersionAndSecurityFieldName).([]interface{}))
 		if ver.caCertificate != "" {
 			depl.Certificates.CaCertificateId = ver.caCertificate
 		}
@@ -496,7 +423,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	if d.HasChange(deplConfigurationFieldName) {
-		conf := expandConfiguration(d.Get(deplConfigurationFieldName).(*schema.Set))
+		conf := expandConfiguration(d.Get(deplConfigurationFieldName).([]interface{}))
 
 		if conf.model != "" {
 			depl.Model.Model = conf.model
