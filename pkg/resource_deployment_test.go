@@ -17,7 +17,7 @@ import (
 	data "github.com/arangodb-managed/apis/data/v1"
 )
 
-func TestExpandingDeploymentResource(t *testing.T) {
+func TestFlattenDeploymentResource(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
 		Description: "test-desc",
@@ -45,11 +45,15 @@ func TestExpandingDeploymentResource(t *testing.T) {
 				deplLocationRegionFieldName: "gcp-europe-west4",
 			},
 		},
-		deplVersionAndSecurityFieldName: []interface{}{
+		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionAndSecurityDbVersionFieldName:     "3.6.0",
-				deplVersionAndSecurityCaCertificateFieldName: "certificate-id",
-				deplVersionAndSecurityIpWhitelistFieldName:   "ip-whitelist",
+				deplVersionDbVersionFieldName: "3.6.0",
+			},
+		},
+		deplSecurityFieldName: []interface{}{
+			map[string]interface{}{
+				deplSecurityCaCertificateFieldName: "certificate-id",
+				deplSecurityIpWhitelistFieldName:   "ip-whitelist",
 			},
 		},
 		deplConfigurationFieldName: []interface{}{
@@ -64,7 +68,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 	assert.Equal(t, expected, flattened)
 }
 
-func TestExpandDeployment(t *testing.T) {
+func TestExpandingDeploymentResource(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
 		Description: "test-desc",
@@ -91,11 +95,15 @@ func TestExpandDeployment(t *testing.T) {
 				deplLocationRegionFieldName: "gcp-europe-west4",
 			},
 		},
-		deplVersionAndSecurityFieldName: []interface{}{
+		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionAndSecurityDbVersionFieldName:     "3.6.0",
-				deplVersionAndSecurityCaCertificateFieldName: "certificate-id",
-				deplVersionAndSecurityIpWhitelistFieldName:   "ip-whitelist",
+				deplVersionDbVersionFieldName: "3.6.0",
+			},
+		},
+		deplSecurityFieldName: []interface{}{
+			map[string]interface{}{
+				deplSecurityCaCertificateFieldName: "certificate-id",
+				deplSecurityIpWhitelistFieldName:   "ip-whitelist",
 			},
 		},
 		deplConfigurationFieldName: []interface{}{
@@ -109,7 +117,8 @@ func TestExpandDeployment(t *testing.T) {
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
-	expandedDepl := expandDeploymentResource(resourceData, "123456789")
+	expandedDepl, err := expandDeploymentResource(resourceData, "123456789")
+	assert.NoError(t, err)
 	assert.Equal(t, depl, expandedDepl)
 }
 
@@ -140,11 +149,15 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 				deplLocationRegionFieldName: "gcp-europe-west4",
 			},
 		},
-		deplVersionAndSecurityFieldName: []interface{}{
+		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionAndSecurityDbVersionFieldName:     "3.6.0",
-				deplVersionAndSecurityCaCertificateFieldName: "certificate-id",
-				deplVersionAndSecurityIpWhitelistFieldName:   "ip-whitelist",
+				deplVersionDbVersionFieldName: "3.6.0",
+			},
+		},
+		deplSecurityFieldName: []interface{}{
+			map[string]interface{}{
+				deplSecurityCaCertificateFieldName: "certificate-id",
+				deplSecurityIpWhitelistFieldName:   "ip-whitelist",
 			},
 		},
 		deplConfigurationFieldName: []interface{}{
@@ -158,6 +171,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
-	expandedDepl := expandDeploymentResource(resourceData, "thisshouldbeoverriden")
+	expandedDepl, err := expandDeploymentResource(resourceData, "thisshouldbeoverriden")
+	assert.NoError(t, err)
 	assert.Equal(t, depl, expandedDepl)
 }

@@ -40,11 +40,15 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   location {
     region = "gcp-europe-west4" // Required
   }
-  version_and_security {
+  version {
     db_version = "3.6.0" // Required
+  }
+
+  security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
     ip_whitelist = "" // If not set, no whitelist is configured
   }
+
   configuration {
     model = "oneshard"
     node_size_id = "a4"
@@ -58,11 +62,16 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   location {
     region = "gcp-europe-west4" // Required
   }
-  version_and_security {
+
+  version {
     db_version = "3.6.0" // Required
+  }
+
+  security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
     ip_whitelist = "" // If not set, no whitelist is configured
   }
+
   configuration {
     model = "oneshard" // the smallest will be selected that's available in the given region
   }
@@ -74,11 +83,16 @@ resource "oasis_deployment" "my_sharded_deployment" {
   location {
     region = "gcp-eu-west4" // Required
   }
-  version_and_security {
+
+  version {
     db_version = "3.6.0" // Required
+  }
+
+  security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
     ip_whitelist = "" // If not set, no whitelist is configured
   }
+
   configuration {
     model = "sharded"
     node_size_id = "a4"

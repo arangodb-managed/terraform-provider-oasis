@@ -20,20 +20,21 @@ import (
 )
 
 const (
-	deplProjectFieldName                         = "project"
-	deplNameFieldName                            = "name"
-	deplDescriptionFieldName                     = "description"
-	deplLocationFieldName                        = "location"
-	deplLocationRegionFieldName                  = "region"
-	deplVersionAndSecurityFieldName              = "version_and_security"
-	deplVersionAndSecurityDbVersionFieldName     = "db_version"
-	deplVersionAndSecurityCaCertificateFieldName = "ca_certificate"
-	deplVersionAndSecurityIpWhitelistFieldName   = "ip_whitelist"
-	deplConfigurationFieldName                   = "configuration"
-	deplConfigurationModelFieldName              = "model"
-	deplConfigurationNodeSizeIdFieldName         = "node_size_id"
-	deplConfigurationNodeCountFieldName          = "node_count"
-	deplConfigurationNodeDiskSizeFieldName       = "node_disk_size"
+	deplProjectFieldName                   = "project"
+	deplNameFieldName                      = "name"
+	deplDescriptionFieldName               = "description"
+	deplLocationFieldName                  = "location"
+	deplLocationRegionFieldName            = "region"
+	deplVersionFieldName                   = "version"
+	deplVersionDbVersionFieldName          = "db_version"
+	deplSecurityFieldName                  = "security"
+	deplSecurityCaCertificateFieldName     = "ca_certificate"
+	deplSecurityIpWhitelistFieldName       = "ip_whitelist"
+	deplConfigurationFieldName             = "configuration"
+	deplConfigurationModelFieldName        = "model"
+	deplConfigurationNodeSizeIdFieldName   = "node_size_id"
+	deplConfigurationNodeCountFieldName    = "node_count"
+	deplConfigurationNodeDiskSizeFieldName = "node_disk_size"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -73,24 +74,37 @@ func resourceDeployment() *schema.Resource {
 				},
 			},
 
-			deplVersionAndSecurityFieldName: {
+			deplVersionFieldName: {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						deplVersionAndSecurityDbVersionFieldName: {
+						deplVersionDbVersionFieldName: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						deplVersionAndSecurityCaCertificateFieldName: {
+					},
+				},
+			},
+
+			deplSecurityFieldName: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return old == "1" && new == "0"
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						deplSecurityCaCertificateFieldName: {
 							Type:     schema.TypeString,
 							Optional: true, // If not set, uses default certificate from project
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == ""
 							},
 						},
-						deplVersionAndSecurityIpWhitelistFieldName: {
+						deplSecurityIpWhitelistFieldName: {
 							Type:     schema.TypeString,
 							Optional: true, // If not set, no whitelist is configured
 						},
@@ -147,7 +161,10 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	datac := data.NewDataServiceClient(client.conn)
-	expandedDepl := expandDeploymentResource(d, client.ProjectID)
+	expandedDepl, err := expandDeploymentResource(d, client.ProjectID)
+	if err != nil {
+		return err
+	}
 	if expandedDepl.Certificates.CaCertificateId == "" {
 		cryptoc := crypto.NewCryptoServiceClient(client.conn)
 		list, err := cryptoc.ListCACertificates(client.ctxWithToken, &common.ListOptions{ContextId: expandedDepl.GetProjectId()})
@@ -212,9 +229,13 @@ type location struct {
 	region string
 }
 
-// versionAndSecurity is a convenient wrapper around the version_and_security schema for easy parsing
-type versionAndSecurity struct {
-	dbVersion     string
+// version is a convenient wrapper around the version schema for easy parsing
+type version struct {
+	dbVersion string
+}
+
+// security is a convenient wrapper around the security schema for easy parsing
+type security struct {
 	caCertificate string
 	ipWhitelist   string
 }
@@ -228,17 +249,21 @@ type configuration struct {
 }
 
 // expandDeploymentResource creates an oasis deployment structure out of a terraform schema model.
-func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *data.Deployment {
+func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*data.Deployment, error) {
 	project := defaultProject
 	var (
 		name        string
 		description string
-		ver         versionAndSecurity
+		ver         version
 		loc         location
 		conf        configuration
+		sec         security
+		err         error
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
+	} else {
+		return nil, fmt.Errorf("unable to find parse field %s", deplNameFieldName)
 	}
 	if v, ok := d.GetOk(deplDescriptionFieldName); ok {
 		description = v.(string)
@@ -247,13 +272,28 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 		project = v.(string)
 	}
 	if v, ok := d.GetOk(deplLocationFieldName); ok {
-		loc = expandLocation(v.([]interface{}))
+		if loc, err = expandLocation(v.([]interface{})); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("unable to find parse field %s", deplLocationFieldName)
 	}
-	if v, ok := d.GetOk(deplVersionAndSecurityFieldName); ok {
-		ver = expandVersionAndSecurity(v.([]interface{}))
+	if v, ok := d.GetOk(deplVersionFieldName); ok {
+		if ver, err = expandVersion(v.([]interface{})); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("unable to find parse field %s", deplVersionFieldName)
+	}
+	if v, ok := d.GetOk(deplSecurityFieldName); ok {
+		sec = expandSecurity(v.([]interface{}))
 	}
 	if v, ok := d.GetOk(deplConfigurationFieldName); ok {
-		conf = expandConfiguration(v.([]interface{}))
+		if conf, err = expandConfiguration(v.([]interface{})); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("unable to find parse field %s", deplConfigurationFieldName)
 	}
 
 	return &data.Deployment{
@@ -262,51 +302,65 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) *da
 		ProjectId:     project,
 		RegionId:      loc.region,
 		Version:       ver.dbVersion,
-		Certificates:  &data.Deployment_CertificateSpec{CaCertificateId: ver.caCertificate},
-		IpwhitelistId: ver.ipWhitelist,
+		Certificates:  &data.Deployment_CertificateSpec{CaCertificateId: sec.caCertificate},
+		IpwhitelistId: sec.ipWhitelist,
 		Model: &data.Deployment_ModelSpec{
 			Model:        conf.model,
 			NodeCount:    int32(conf.nodeCount),
 			NodeDiskSize: int32(conf.nodeDiskSize),
 			NodeSizeId:   conf.nodeSizeId,
 		},
-	}
+	}, nil
 }
 
 // expandLocation gathers location data from the terraform store
-func expandLocation(s []interface{}) (loc location) {
+func expandLocation(s []interface{}) (loc location, err error) {
 	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplLocationRegionFieldName]; ok {
 			loc.region = i.(string)
+		} else {
+			return loc, fmt.Errorf("failed to parse field %s", deplLocationFieldName)
 		}
 	}
 	return
 }
 
-// expandVersionAndSecurity gathers versionAndSecurity and security data from the terraform store
-func expandVersionAndSecurity(s []interface{}) (ver versionAndSecurity) {
+// expandVersion gathers version and security data from the terraform store
+func expandVersion(s []interface{}) (ver version, err error) {
 	for _, v := range s {
 		item := v.(map[string]interface{})
-		if i, ok := item[deplVersionAndSecurityDbVersionFieldName]; ok {
+		if i, ok := item[deplVersionDbVersionFieldName]; ok {
 			ver.dbVersion = i.(string)
+		} else {
+			return ver, fmt.Errorf("failed to parse field %s", deplVersionDbVersionFieldName)
 		}
-		if i, ok := item[deplVersionAndSecurityCaCertificateFieldName]; ok {
-			ver.caCertificate = i.(string)
+	}
+	return
+}
+
+// expandSecurity gathers security data from the terraform store
+func expandSecurity(s []interface{}) (sec security) {
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[deplSecurityCaCertificateFieldName]; ok {
+			sec.caCertificate = i.(string)
 		}
-		if i, ok := item[deplVersionAndSecurityIpWhitelistFieldName]; ok {
-			ver.ipWhitelist = i.(string)
+		if i, ok := item[deplSecurityIpWhitelistFieldName]; ok {
+			sec.ipWhitelist = i.(string)
 		}
 	}
 	return
 }
 
 // expandConfiguration gathers configuration data from the configuration set in terraform schema
-func expandConfiguration(s []interface{}) (conf configuration) {
+func expandConfiguration(s []interface{}) (conf configuration, err error) {
 	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplConfigurationModelFieldName]; ok {
 			conf.model = i.(string)
+		} else {
+			return conf, fmt.Errorf("failed to parse field %s", deplConfigurationModelFieldName)
 		}
 		if i, ok := item[deplConfigurationNodeSizeIdFieldName]; ok {
 			conf.nodeSizeId = i.(string)
@@ -350,25 +404,35 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	conf := flattenConfigurationData(depl)
 	loc := flattenLocationData(depl)
-	ver := flattenVersionAndSecurityData(depl)
+	ver := flattenVersion(depl)
+	sec := flattenSecurity(depl)
 
 	return map[string]interface{}{
-		deplNameFieldName:               depl.GetName(),
-		deplProjectFieldName:            depl.GetProjectId(),
-		deplDescriptionFieldName:        depl.GetDescription(),
-		deplConfigurationFieldName:      conf,
-		deplLocationFieldName:           loc,
-		deplVersionAndSecurityFieldName: ver,
+		deplNameFieldName:          depl.GetName(),
+		deplProjectFieldName:       depl.GetProjectId(),
+		deplDescriptionFieldName:   depl.GetDescription(),
+		deplConfigurationFieldName: conf,
+		deplLocationFieldName:      loc,
+		deplVersionFieldName:       ver,
+		deplSecurityFieldName:      sec,
 	}
 }
 
-// flattenVersionAndSecurityData takes the versionAndSecurity and security part of a deployment and creates a sub map for terraform schema.
-func flattenVersionAndSecurityData(depl *data.Deployment) []interface{} {
+// flattenVersion takes the version part of a deployment and creates a sub map for terraform schema.
+func flattenVersion(depl *data.Deployment) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
-			deplVersionAndSecurityDbVersionFieldName:     depl.GetVersion(),
-			deplVersionAndSecurityIpWhitelistFieldName:   depl.GetIpwhitelistId(),
-			deplVersionAndSecurityCaCertificateFieldName: depl.GetCertificates().GetCaCertificateId(),
+			deplVersionDbVersionFieldName: depl.GetVersion(),
+		},
+	}
+}
+
+// flattenSecurity takes the security part of a deployment and creates a sub map for terraform schema.
+func flattenSecurity(depl *data.Deployment) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			deplSecurityIpWhitelistFieldName:   depl.GetIpwhitelistId(),
+			deplSecurityCaCertificateFieldName: depl.GetCertificates().GetCaCertificateId(),
 		},
 	}
 }
@@ -415,20 +479,29 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange(deplDescriptionFieldName) {
 		depl.Description = d.Get(deplDescriptionFieldName).(string)
 	}
-	if d.HasChange(deplVersionAndSecurityFieldName) {
-		ver := expandVersionAndSecurity(d.Get(deplVersionAndSecurityFieldName).([]interface{}))
-		if ver.caCertificate != "" {
-			depl.Certificates.CaCertificateId = ver.caCertificate
+	if d.HasChange(deplVersionFieldName) {
+		ver, err := expandVersion(d.Get(deplVersionFieldName).([]interface{}))
+		if err != nil {
+			return err
 		}
 		if ver.dbVersion != "" {
 			depl.Version = ver.dbVersion
 		}
-		if ver.ipWhitelist != "" {
-			depl.IpwhitelistId = ver.ipWhitelist
+	}
+	if d.HasChange(deplSecurityFieldName) {
+		sec := expandSecurity(d.Get(deplSecurityFieldName).([]interface{}))
+		if sec.caCertificate != "" {
+			depl.Certificates.CaCertificateId = sec.caCertificate
+		}
+		if sec.ipWhitelist != "" {
+			depl.IpwhitelistId = sec.ipWhitelist
 		}
 	}
 	if d.HasChange(deplConfigurationFieldName) {
-		conf := expandConfiguration(d.Get(deplConfigurationFieldName).([]interface{}))
+		conf, err := expandConfiguration(d.Get(deplConfigurationFieldName).([]interface{}))
+		if err != nil {
+			return err
+		}
 
 		if conf.model != "" {
 			depl.Model.Model = conf.model
