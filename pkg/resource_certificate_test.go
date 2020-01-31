@@ -15,23 +15,7 @@ import (
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
-	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
-
-var (
-	testOrganizationId string
-	testProject        *rm.Project
-)
-
-func init() {
-	testAccProvider = Provider()
-	testAccProviders = map[string]terraform.ResourceProvider{
-		"oasis": testAccProvider,
-	}
-	testOrganizationId = os.Getenv("OASIS_TEST_ORGANIZATION_ID")
-	// Initialize Client with connection settings
-	testAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
-}
 
 func TestResourceCertificate(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
@@ -40,31 +24,29 @@ func TestResourceCertificate(t *testing.T) {
 	t.Parallel()
 	res := "test-cert-" + acctest.RandString(10)
 	certName := "terraform-cert-" + acctest.RandString(10)
-	id, err := getOrCreateProject()
+	orgID, err := FetchOrganizationID(testAccProvider)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
-		if err := deleteTestProject(); err != nil {
-			// Note: this is a t.Error because t.Fatal would mask any panics that the test
-			// could potentionally produce.
-			t.Error("Failed to defer delete project: ", err)
-		}
-	}()
+	pid, err := FetchProjectID(orgID, testAccProvider)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccCertificatePreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDestroyCertificate,
 		Steps: []resource.TestStep{
 			{
-				Config: testBasicCertificateConfig(res, certName, id),
+				Config: testBasicCertificateConfig(res, certName, pid),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("oasis_certificate."+res, descriptionFieldName),
 					resource.TestCheckResourceAttr("oasis_certificate."+res, nameFieldName, certName),
 				),
 			},
 			{
-				Config: testUseWellKnownConfig(res, certName, id),
+				Config: testUseWellKnownConfig(res, certName, pid),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("oasis_certificate."+res, descriptionFieldName),
 					resource.TestCheckResourceAttr("oasis_certificate."+res, nameFieldName, certName),
@@ -72,50 +54,13 @@ func TestResourceCertificate(t *testing.T) {
 				),
 			},
 			{
-				Config: testOptionalFieldsConfig(res, certName, id),
+				Config: testOptionalFieldsConfig(res, certName, pid),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_certificate."+res, nameFieldName, certName),
 				),
 			},
 		},
 	})
-}
-
-func getOrCreateProject() (string, error) {
-	if testProject != nil {
-		return testProject.GetId(), nil
-	}
-
-	client := testAccProvider.Meta().(*Client)
-	if err := client.Connect(); err != nil {
-		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return "", err
-	}
-	rmc := rm.NewResourceManagerServiceClient(client.conn)
-
-	proj, err := rmc.CreateProject(client.ctxWithToken, &rm.Project{
-		Name:           "terraform-test-project",
-		Description:    "This is a project used by terraform acceptance tests. PLEASE DO NOT DELETE!",
-		OrganizationId: testOrganizationId,
-	})
-	if err != nil {
-		client.log.Error().Err(err).Msg("Failed to create project")
-		return "", err
-	}
-	testProject = proj
-	return testProject.GetId(), nil
-}
-
-func deleteTestProject() error {
-	client := testAccProvider.Meta().(*Client)
-	if err := client.Connect(); err != nil {
-		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
-	}
-	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	_, err := rmc.DeleteProject(client.ctxWithToken, &common.IDOptions{Id: testProject.GetId()})
-	testProject = nil
-	return err
 }
 
 func TestFlattenCertificateResource(t *testing.T) {
@@ -213,8 +158,5 @@ func testOptionalFieldsConfig(resource, name, project string) string {
 func testAccCertificatePreCheck(t *testing.T) {
 	if v := os.Getenv("OASIS_API_KEY_ID"); v == "" {
 		t.Fatal("the test needs a test account key to run")
-	}
-	if v := os.Getenv("OASIS_TEST_ORGANIZATION_ID"); v == "" {
-		t.Fatal("the test needs an organization id to use for testing")
 	}
 }
