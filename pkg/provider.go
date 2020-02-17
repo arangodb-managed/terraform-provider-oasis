@@ -54,9 +54,10 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"oasis_deployment":  resourceDeployment(),
-			"oasis_ipwhitelist": resourceIPWhitelist(),
-			"oasis_certificate": resourceCertificate(),
+			"oasis_deployment":    resourceDeployment(),
+			"oasis_ipwhitelist":   resourceIPWhitelist(),
+			"oasis_certificate":   resourceCertificate(),
+			"oasis_backup_policy": resourceBackupPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"oasis_project":      dataSourceOasisProject(),
