@@ -9,6 +9,11 @@
 package pkg
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/gogo/protobuf/types"
+
 	backup "github.com/arangodb-managed/apis/backup/v1"
 	common "github.com/arangodb-managed/apis/common/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -348,7 +353,150 @@ func flattenTimeOfDay(day *backup.TimeOfDay) []interface{} {
 	}
 }
 
+func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, error) {
+	ret := &backup.BackupPolicy{}
+	if v, ok := d.GetOk(backupPolicyNameFieldName); ok {
+		ret.Name = v.(string)
+	} else {
+		return nil, fmt.Errorf("unable to find parse field %s", backupPolicyNameFieldName)
+	}
+	if v, ok := d.GetOk(backupPolicyDescriptionFieldName); ok {
+		ret.Description = v.(string)
+	}
+	if v, ok := d.GetOk(backupPolicyIsPausedFieldName); ok {
+		ret.IsPaused = v.(bool)
+	}
+	if v, ok := d.GetOk(backupPolicyUploadFieldName); ok {
+		ret.Upload = v.(bool)
+	}
+	if v, ok := d.GetOk(backupPolicyDeploymentIDFieldName); ok {
+		ret.DeploymentId = v.(string)
+	}
+	if v, ok := d.GetOk(backupPolicyRetentionPeriodFieldName); ok {
+		ret.RetentionPeriod = types.DurationProto(time.Duration(v.(int)))
+	}
+	if v, ok := d.GetOk(backupPolictEmailNotificationFeidlName); ok {
+		ret.EmailNotification = v.(string)
+	}
+	if v, ok := d.GetOk(backupPolicyScheduleFieldName); ok {
+		expandBackupPolicySchedule(v.([]interface{}))
+	}
+	return ret, nil
+}
+
+func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
+	ret := &backup.BackupPolicy_Schedule{}
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[backupPolicyScheduleTypeFieldName]; ok {
+			ret.ScheduleType = i.(string)
+		}
+		if i, ok := item[backupPolicyScheudleHourlyScheduleFieldName]; ok {
+			ret.HourlySchedule = expandHourlySchedule(i.([]interface{}))
+		}
+		if i, ok := item[backupPolicyScheudleDailyScheduleFieldName]; ok {
+			ret.DailySchedule = expandDailySchedule(i.([]interface{}))
+		}
+		if i, ok := item[backupPolicyScheudleMonthlyScheduleFieldName]; ok {
+			ret.MonthlySchedule = expandMonthlySchedule(i.([]interface{}))
+		}
+	}
+	return ret
+}
+
+func expandMonthlySchedule(s []interface{}) *backup.BackupPolicy_MonthlySchedule {
+	ret := &backup.BackupPolicy_MonthlySchedule{}
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName]; ok {
+			ret.DayOfMonth = int32(i.(int))
+		}
+		if i, ok := item[backupPolicyTimeOfDayScheduleAtFieldName]; ok {
+			ret.ScheduleAt = expandTimeOfDay(i.([]interface{}))
+		}
+	}
+	return ret
+}
+
+func expandTimeOfDay(s []interface{}) *backup.TimeOfDay {
+	ret := &backup.TimeOfDay{}
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[backupPolicyTimeOfDayHoursFieldName]; ok {
+			ret.Hours = int32(i.(int))
+		}
+		if i, ok := item[backupPolicyTimeOfDayMinutesFieldName]; ok {
+			ret.Minutes = int32(i.(int))
+		}
+		if i, ok := item[backupPolicyTimeOfDayTimeZoneFieldName]; ok {
+			ret.TimeZone = i.(string)
+		}
+	}
+	return ret
+}
+
+func expandDailySchedule(s []interface{}) *backup.BackupPolicy_DailySchedule {
+	ret := &backup.BackupPolicy_DailySchedule{}
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[backupPolicyScheudleDailyScheduleMondayFieldName]; ok {
+			ret.Monday = i.(bool)
+		}
+		if i, ok := item[backupPolicyScheudleDailyScheduleTuesdayFieldName]; ok {
+			ret.Tuesday = i.(bool)
+		}
+		if i, ok := item[backupPolicyScheudleDailyScheduleWednesdayFieldName]; ok {
+			ret.Wednesday = i.(bool)
+		}
+		if i, ok := item[backupPolicyScheudleDailyScheduleThursdayFieldName]; ok {
+			ret.Thursday = i.(bool)
+		}
+		if i, ok := item[backupPolicyScheudleDailyScheduleFridayFieldName]; ok {
+			ret.Friday = i.(bool)
+		}
+		if i, ok := item[backupPolicyScheudleDailyScheduleSaturdayFieldName]; ok {
+			ret.Saturday = i.(bool)
+		}
+		if i, ok := item[backupPolicyScheudleDailyScheduleSundayFieldName]; ok {
+			ret.Sunday = i.(bool)
+		}
+		if i, ok := item[backupPolicyTimeOfDayScheduleAtFieldName]; ok {
+			ret.ScheduleAt = expandTimeOfDay(i.([]interface{}))
+		}
+	}
+	return ret
+}
+
+func expandHourlySchedule(s []interface{}) *backup.BackupPolicy_HourlySchedule {
+	ret := &backup.BackupPolicy_HourlySchedule{}
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[backupPolicyScheudleHourlyScheduleIntervalFieldName]; ok {
+			ret.ScheduleEveryIntervalHours = int32(i.(int))
+		}
+	}
+	return ret
+}
+
 func resourceBackupPolicyCreate(d *schema.ResourceData, m interface{}) error {
+	client := m.(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+
+	backupc := backup.NewBackupServiceClient(client.conn)
+	expandedPolicy, err := expandBackupPolicyResource(d)
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to expand on policy")
+		return err
+	}
+	if b, err := backupc.CreateBackupPolicy(client.ctxWithToken, expandedPolicy); err != nil {
+		client.log.Error().Err(err).Msg("Failed to create backup policy")
+		return err
+	} else {
+		d.SetId(b.GetId())
+	}
 	return resourceBackupPolicyRead(d, m)
 }
 
