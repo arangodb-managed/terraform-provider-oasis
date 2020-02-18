@@ -54,6 +54,11 @@ const (
 	backupPolicyTimeOfDayHoursFieldName      = "hours"
 	backupPolicyTimeOfDayMinutesFieldName    = "minutes"
 	backupPolicyTimeOfDayTimeZoneFieldName   = "timezone"
+
+	// Schedule Types
+	hourlySchedule  = "Hourly"
+	dailySchedule   = "Daily"
+	monthlySchedule = "Monthly"
 )
 
 // resourceBackupPolicy defines a BackupPolicy oasis resource.
@@ -285,6 +290,21 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange(backupPolicyScheduleFieldName) {
 		policy.Schedule = expandBackupPolicySchedule(d.Get(backupPolicyScheduleFieldName).([]interface{}))
 	}
+	// Make sure we are sending the right schedule. The coming back schedule can contain invalid
+	// field items for different schedule. We make sure here that the right one is sent after an
+	// update. This check can be removed once terraform allows conflict checks for list items.
+	switch policy.GetSchedule().GetScheduleType() {
+	case hourlySchedule:
+		policy.Schedule.DailySchedule = nil
+		policy.Schedule.MonthlySchedule = nil
+	case dailySchedule:
+		policy.Schedule.HourlySchedule = nil
+		policy.Schedule.MonthlySchedule = nil
+	case monthlySchedule:
+		policy.Schedule.HourlySchedule = nil
+		policy.Schedule.DailySchedule = nil
+	}
+
 	res, err := backupc.UpdateBackupPolicy(client.ctxWithToken, policy)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to update backup policy")
@@ -367,16 +387,15 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 // flattenBackupPolicyResource will take a Schedule portion of a BackupPolicy object and turn it into a flat map for terraform digestion.
 func flattenSchedule(policy *backup.BackupPolicy_Schedule) []interface{} {
 	schedule := make(map[string]interface{})
-	if policy.GetHourlySchedule() != nil {
+	schedule[backupPolicyScheduleTypeFieldName] = policy.GetScheduleType()
+	switch policy.GetScheduleType() {
+	case hourlySchedule:
 		schedule[backupPolicyScheudleHourlyScheduleFieldName] = flattenScheduleHourly(policy.GetHourlySchedule())
-	}
-	if policy.GetDailySchedule() != nil {
+	case dailySchedule:
 		schedule[backupPolicyScheudleDailyScheduleFieldName] = flattenScheduleDaily(policy.GetDailySchedule())
-	}
-	if policy.GetMonthlySchedule() != nil {
+	case monthlySchedule:
 		schedule[backupPolicyScheudleMonthlyScheduleFieldName] = flattenScheduleMonthly(policy.GetMonthlySchedule())
 	}
-	schedule[backupPolicyScheduleTypeFieldName] = policy.GetScheduleType()
 	return []interface{}{
 		schedule,
 	}
@@ -463,28 +482,40 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 // expandBackupPolicySchedule will take a terraform flat map schema data and turn it into an Oasis BackupPolicy Schedule.
 func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
 	ret := &backup.BackupPolicy_Schedule{}
+	// First, find the schedule type.
 	for _, v := range s {
 		item := v.(map[string]interface{})
 		if i, ok := item[backupPolicyScheduleTypeFieldName]; ok {
 			ret.ScheduleType = i.(string)
 		}
-		if i, ok := item[backupPolicyScheudleHourlyScheduleFieldName]; ok {
+	}
+	// Any other schedules need to be cleared out. This is necessary until
+	// terraform allows conflict checks for list items.
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[backupPolicyScheudleHourlyScheduleFieldName]; ok && ret.ScheduleType == hourlySchedule {
 			hourlySchedule := i.([]interface{})
 			if len(hourlySchedule) > 0 {
 				ret.HourlySchedule = expandHourlySchedule(hourlySchedule)
 			}
+			ret.DailySchedule = nil
+			ret.MonthlySchedule = nil
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleFieldName]; ok {
+		if i, ok := item[backupPolicyScheudleDailyScheduleFieldName]; ok && ret.ScheduleType == dailySchedule {
 			dailySchedule := i.([]interface{})
 			if len(dailySchedule) > 0 {
 				ret.DailySchedule = expandDailySchedule(dailySchedule)
 			}
+			ret.HourlySchedule = nil
+			ret.MonthlySchedule = nil
 		}
-		if i, ok := item[backupPolicyScheudleMonthlyScheduleFieldName]; ok {
+		if i, ok := item[backupPolicyScheudleMonthlyScheduleFieldName]; ok && ret.ScheduleType == monthlySchedule {
 			monthlySchedule := i.([]interface{})
 			if len(monthlySchedule) > 0 {
 				ret.MonthlySchedule = expandMonthlySchedule(monthlySchedule)
 			}
+			ret.DailySchedule = nil
+			ret.HourlySchedule = nil
 		}
 	}
 	return ret

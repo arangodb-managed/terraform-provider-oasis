@@ -44,7 +44,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 
 	t.Run("with hourly schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "Hourly",
+			ScheduleType: hourlySchedule,
 			HourlySchedule: &backup.BackupPolicy_HourlySchedule{
 				ScheduleEveryIntervalHours: 10,
 			},
@@ -52,7 +52,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		policy.Schedule = schedule
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "Hourly",
+				backupPolicyScheduleTypeFieldName: hourlySchedule,
 				backupPolicyScheudleHourlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleHourlyScheduleIntervalFieldName: 10,
@@ -66,7 +66,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 	})
 	t.Run("with daily schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "Daily",
+			ScheduleType: dailySchedule,
 			DailySchedule: &backup.BackupPolicy_DailySchedule{
 				Monday:    true,
 				Tuesday:   false,
@@ -85,7 +85,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		policy.Schedule = schedule
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "Daily",
+				backupPolicyScheduleTypeFieldName: dailySchedule,
 				backupPolicyScheudleDailyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleDailyScheduleMondayFieldName:    true,
@@ -112,7 +112,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 	})
 	t.Run("with monthly schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "Monthly",
+			ScheduleType: monthlySchedule,
 			MonthlySchedule: &backup.BackupPolicy_MonthlySchedule{
 				DayOfMonth: 30,
 				ScheduleAt: &backup.TimeOfDay{
@@ -125,7 +125,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		policy.Schedule = schedule
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "Monthly",
+				backupPolicyScheduleTypeFieldName: monthlySchedule,
 				backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
@@ -168,7 +168,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 	t.Run("test hourly schedule", func(tt *testing.T) {
 		rawSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "Hourly",
+				backupPolicyScheduleTypeFieldName: hourlySchedule,
 				backupPolicyScheudleHourlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleHourlyScheduleIntervalFieldName: 6,
@@ -182,7 +182,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 		policy, err := expandBackupPolicyResource(resourceData)
 		assert.NoError(t, err)
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "Hourly",
+			ScheduleType: hourlySchedule,
 			HourlySchedule: &backup.BackupPolicy_HourlySchedule{
 				ScheduleEveryIntervalHours: 6,
 			},
@@ -193,7 +193,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 	t.Run("test daily schedule", func(tt *testing.T) {
 		rawSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "Daily",
+				backupPolicyScheduleTypeFieldName: dailySchedule,
 				backupPolicyScheudleDailyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleDailyScheduleMondayFieldName:    true,
@@ -220,7 +220,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 		policy, err := expandBackupPolicyResource(resourceData)
 		assert.NoError(t, err)
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "Daily",
+			ScheduleType: dailySchedule,
 			DailySchedule: &backup.BackupPolicy_DailySchedule{
 				Monday:    true,
 				Tuesday:   true,
@@ -242,7 +242,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 	t.Run("test monthly schedule", func(tt *testing.T) {
 		rawSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "Monthly",
+				backupPolicyScheduleTypeFieldName: monthlySchedule,
 				backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
@@ -263,7 +263,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 		policy, err := expandBackupPolicyResource(resourceData)
 		assert.NoError(t, err)
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "Monthly",
+			ScheduleType: monthlySchedule,
 			MonthlySchedule: &backup.BackupPolicy_MonthlySchedule{
 				ScheduleAt: &backup.TimeOfDay{
 					Hours:    10,
