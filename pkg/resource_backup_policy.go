@@ -10,6 +10,7 @@ package pkg
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/gogo/protobuf/types"
@@ -56,12 +57,21 @@ const (
 	backupPolicyTimeOfDayTimeZoneFieldName   = "timezone"
 )
 
+// resourceBackupPolicy defines a BackupPolicy oasis resource.
 func resourceBackupPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBackupPolicyCreate,
 		Read:   resourceBackupPolicyRead,
 		Update: resourceBackupPolicyUpdate,
 		Delete: resourceBackupPolicyDelete,
+
+		CustomizeDiff: func(diff *schema.ResourceDiff, meta interface{}) error {
+			o, n := diff.GetChange(backupPolicyDeploymentIDFieldName)
+			if o != "" && o != n {
+				return fmt.Errorf("Cannot change deployment ID once it has been set.")
+			}
+			return nil
+		},
 
 		Schema: map[string]*schema.Schema{
 			backupPolicyNameFieldName: {
@@ -239,10 +249,68 @@ func resourceBackupPolicy() *schema.Resource {
 	}
 }
 
+// resourceBackupPolicyUpdate will take a resource diff and apply changes accordingly if there are any.
 func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
+	log.Println("Entered the update hook.")
+	client := m.(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+	backupc := backup.NewBackupServiceClient(client.conn)
+	policy, err := backupc.GetBackupPolicy(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to find backup policy")
+		d.SetId("")
+		return err
+	}
+	// Main fields
+	if d.HasChange(backupPolicyNameFieldName) {
+		policy.Name = d.Get(backupPolicyNameFieldName).(string)
+	}
+	if d.HasChange(backupPolicyDescriptionFieldName) {
+		policy.Description = d.Get(backupPolicyDescriptionFieldName).(string)
+	}
+	if d.HasChange(backupPolicyIsPausedFieldName) {
+		policy.IsPaused = d.Get(backupPolicyIsPausedFieldName).(bool)
+	}
+	if d.HasChange(backupPolicyUploadFieldName) {
+		policy.Upload = d.Get(backupPolicyUploadFieldName).(bool)
+	}
+	if d.HasChange(backupPolicyRetentionPeriodFieldName) {
+		v := d.Get(backupPolicyRetentionPeriodFieldName)
+		policy.RetentionPeriod = getRetentionPeriodBasedOnUpload(policy.Upload, v)
+	}
+	if d.HasChange(backupPolictEmailNotificationFeidlName) {
+		policy.EmailNotification = d.Get(backupPolictEmailNotificationFeidlName).(string)
+	}
+	log.Print("Checking of schedule field name has new values...")
+	if d.HasChange(backupPolicyScheduleFieldName) {
+		policy.Schedule = expandBackupPolicySchedule(d.Get(backupPolicyScheduleFieldName).([]interface{}))
+	}
+	res, err := backupc.UpdateBackupPolicy(client.ctxWithToken, policy)
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to update backup policy")
+		return err
+	} else {
+		d.SetId(res.GetId())
+	}
 	return resourceBackupPolicyRead(d, m)
 }
 
+// getRetentionPeriodBasedOnUpload calculates the retention period based on the predicate if Upload is enabled.
+// If it is, days are used, hours otherwise.
+func getRetentionPeriodBasedOnUpload(upload bool, v interface{}) *types.Duration {
+	if upload {
+		// retention period is given in days
+		return types.DurationProto((time.Duration(v.(int)) * 24 * 60 * 60) * time.Second)
+	} else {
+		// retention period is given in hours
+		return types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
+	}
+}
+
+// resourceBackupPolicyRead will gather information from the terraform store and display it accordingly.
 func resourceBackupPolicyRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
@@ -264,15 +332,14 @@ func resourceBackupPolicyRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	for k, v := range flattenBackupPolicyResource(policy) {
-		if _, ok := d.GetOk(k); ok {
-			if err := d.Set(k, v); err != nil {
-				return err
-			}
+		if err := d.Set(k, v); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
+// flattenBackupPolicyResource will take a BackupPolicy object and turn it into a flat map for terraform digestion.
 func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interface{} {
 	schedule := flattenSchedule(policy.GetSchedule())
 	ret := map[string]interface{}{
@@ -300,6 +367,7 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 	return ret
 }
 
+// flattenBackupPolicyResource will take a Schedule portion of a BackupPolicy object and turn it into a flat map for terraform digestion.
 func flattenSchedule(policy *backup.BackupPolicy_Schedule) []interface{} {
 	schedule := make(map[string]interface{})
 	if policy.GetHourlySchedule() != nil {
@@ -317,6 +385,7 @@ func flattenSchedule(policy *backup.BackupPolicy_Schedule) []interface{} {
 	}
 }
 
+// flattenScheduleHourly will take the Hourly portion of a schedule an turn it into a flat map.
 func flattenScheduleHourly(policy *backup.BackupPolicy_HourlySchedule) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
@@ -325,6 +394,7 @@ func flattenScheduleHourly(policy *backup.BackupPolicy_HourlySchedule) []interfa
 	}
 }
 
+// flattenScheduleDaily will take the Daily portion of a schedule an turn it into a flat map.
 func flattenScheduleDaily(policy *backup.BackupPolicy_DailySchedule) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
@@ -340,6 +410,7 @@ func flattenScheduleDaily(policy *backup.BackupPolicy_DailySchedule) []interface
 	}
 }
 
+// flattenScheduleMonthly will take the Monthly portion of a schedule an turn it into a flat map.
 func flattenScheduleMonthly(policy *backup.BackupPolicy_MonthlySchedule) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
@@ -349,6 +420,7 @@ func flattenScheduleMonthly(policy *backup.BackupPolicy_MonthlySchedule) []inter
 	}
 }
 
+// flattenTimeOfDay will take the TimeOfDay portion of a schedule an turn it into a flat map.
 func flattenTimeOfDay(day *backup.TimeOfDay) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
@@ -359,6 +431,7 @@ func flattenTimeOfDay(day *backup.TimeOfDay) []interface{} {
 	}
 }
 
+// expandBackupPolicyResource will take a terraform flat map schema data and turn it into an Oasis BackupPolicy.
 func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, error) {
 	ret := &backup.BackupPolicy{}
 	if v, ok := d.GetOk(backupPolicyNameFieldName); ok {
@@ -379,13 +452,7 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 		ret.DeploymentId = v.(string)
 	}
 	if v, ok := d.GetOk(backupPolicyRetentionPeriodFieldName); ok {
-		if ret.Upload {
-			// retention period is given in days
-			ret.RetentionPeriod = types.DurationProto((time.Duration(v.(int)) * 24 * 60 * 60) * time.Second)
-		} else {
-			// retention period is given in hours
-			ret.RetentionPeriod = types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
-		}
+		ret.RetentionPeriod = getRetentionPeriodBasedOnUpload(ret.Upload, v)
 	}
 	if v, ok := d.GetOk(backupPolictEmailNotificationFeidlName); ok {
 		ret.EmailNotification = v.(string)
@@ -396,6 +463,7 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 	return ret, nil
 }
 
+// expandBackupPolicySchedule will take a terraform flat map schema data and turn it into an Oasis BackupPolicy Schedule.
 func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
 	ret := &backup.BackupPolicy_Schedule{}
 	for _, v := range s {
@@ -425,6 +493,7 @@ func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
 	return ret
 }
 
+// expandMonthlySchedule will take a terraform flat map schema data and decipher the monthly schedule from it.
 func expandMonthlySchedule(s []interface{}) *backup.BackupPolicy_MonthlySchedule {
 	ret := &backup.BackupPolicy_MonthlySchedule{}
 	for _, v := range s {
@@ -439,6 +508,7 @@ func expandMonthlySchedule(s []interface{}) *backup.BackupPolicy_MonthlySchedule
 	return ret
 }
 
+// expandTimeOfDay will take a terraform flat map schema data and decipher the time of day schedule from it.
 func expandTimeOfDay(s []interface{}) *backup.TimeOfDay {
 	ret := &backup.TimeOfDay{}
 	for _, v := range s {
@@ -456,6 +526,7 @@ func expandTimeOfDay(s []interface{}) *backup.TimeOfDay {
 	return ret
 }
 
+// expandDailySchedule will take a terraform flat map schema data and decipher the daily schedule from it.
 func expandDailySchedule(s []interface{}) *backup.BackupPolicy_DailySchedule {
 	ret := &backup.BackupPolicy_DailySchedule{}
 	for _, v := range s {
@@ -488,6 +559,7 @@ func expandDailySchedule(s []interface{}) *backup.BackupPolicy_DailySchedule {
 	return ret
 }
 
+// expandHourlySchedule will take a terraform flat map schema data and decipher the hourly schedule from it.
 func expandHourlySchedule(s []interface{}) *backup.BackupPolicy_HourlySchedule {
 	ret := &backup.BackupPolicy_HourlySchedule{}
 	for _, v := range s {
@@ -499,6 +571,9 @@ func expandHourlySchedule(s []interface{}) *backup.BackupPolicy_HourlySchedule {
 	return ret
 }
 
+// resourceBackupPolicyCreate will take the schema data from the terraform config file and call the oasis client
+// to initiate a create procedure for a BackupPolicy. It will call helper methods to construct the necessary data
+// in order to create this object.
 func resourceBackupPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
@@ -527,6 +602,7 @@ func resourceBackupPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	return resourceBackupPolicyRead(d, m)
 }
 
+// resourceBackupPolicyDelete will delete a given resource based on the calculated ID.
 func resourceBackupPolicyDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
