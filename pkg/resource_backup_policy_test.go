@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/gogo/protobuf/types"
@@ -20,7 +22,6 @@ import (
 )
 
 func TestFlattenBackupPolicy(t *testing.T) {
-
 	policy := &backup.BackupPolicy{
 		Name:              "test-policy",
 		Description:       "test-description",
@@ -61,7 +62,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		}
 		expected[backupPolicyScheduleFieldName] = expectedSchedule
 		flattened := flattenBackupPolicyResource(policy)
-		assert.Equal(t, expected, flattened)
+		assert.Equal(tt, expected, flattened)
 	})
 	t.Run("with daily schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
@@ -107,7 +108,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		}
 		expected[backupPolicyScheduleFieldName] = expectedSchedule
 		flattened := flattenBackupPolicyResource(policy)
-		assert.Equal(t, expected, flattened)
+		assert.Equal(tt, expected, flattened)
 	})
 	t.Run("with monthly schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
@@ -141,6 +142,63 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		}
 		expected[backupPolicyScheduleFieldName] = expectedSchedule
 		flattened := flattenBackupPolicyResource(policy)
-		assert.Equal(t, expected, flattened)
+		assert.Equal(tt, expected, flattened)
 	})
+}
+
+func TestExpandBackupPolicy(t *testing.T) {
+	raw := map[string]interface{}{
+		backupPolicyNameFieldName:              "test-policy",
+		backupPolicyDescriptionFieldName:       "test-description",
+		backupPolicyDeploymentIDFieldName:      "123456",
+		backupPolicyIsPausedFieldName:          true,
+		backupPolicyUploadFieldName:            true,
+		backupPolicyRetentionPeriodFieldName:   200,
+		backupPolictEmailNotificationFeidlName: "None",
+	}
+	rawSchedule := []interface{}{
+		map[string]interface{}{
+			backupPolicyScheduleTypeFieldName: "monthly",
+			backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
+				map[string]interface{}{
+					backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
+					backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
+						map[string]interface{}{
+							backupPolicyTimeOfDayHoursFieldName:    10,
+							backupPolicyTimeOfDayMinutesFieldName:  10,
+							backupPolicyTimeOfDayTimeZoneFieldName: "UTC",
+						},
+					},
+				},
+			},
+		},
+	}
+	raw[backupPolicyScheduleFieldName] = rawSchedule
+	s := resourceBackupPolicy().Schema
+	resourceData := schema.TestResourceDataRaw(t, s, raw)
+	policy, err := expandBackupPolicyResource(resourceData)
+	assert.NoError(t, err)
+	expected := &backup.BackupPolicy{
+		Name:         "test-policy",
+		Description:  "test-description",
+		DeploymentId: "123456",
+		IsPaused:     true,
+		Schedule: &backup.BackupPolicy_Schedule{
+			ScheduleType:   "monthly",
+			HourlySchedule: nil,
+			DailySchedule:  nil,
+			MonthlySchedule: &backup.BackupPolicy_MonthlySchedule{
+				ScheduleAt: &backup.TimeOfDay{
+					Hours:    10,
+					Minutes:  10,
+					TimeZone: "UTC",
+				},
+				DayOfMonth: 30,
+			},
+		},
+		Upload:            true,
+		RetentionPeriod:   types.DurationProto(200 * 24 * time.Hour),
+		EmailNotification: "None",
+	}
+	assert.Equal(t, expected, policy)
 }

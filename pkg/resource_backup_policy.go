@@ -82,10 +82,6 @@ func resourceBackupPolicy() *schema.Resource {
 			backupPolicyDeploymentIDFieldName: {
 				Type:     schema.TypeString,
 				Required: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// This is a read-only field.
-					return true
-				},
 			},
 			backupPolicyRetentionPeriodFieldName: {
 				Type: schema.TypeInt,
@@ -373,13 +369,14 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 		ret.DeploymentId = v.(string)
 	}
 	if v, ok := d.GetOk(backupPolicyRetentionPeriodFieldName); ok {
-		ret.RetentionPeriod = types.DurationProto(time.Duration(v.(int)))
+		// retention period is given in days
+		ret.RetentionPeriod = types.DurationProto((time.Duration(v.(int)) * 24 * 60 * 60) * time.Second)
 	}
 	if v, ok := d.GetOk(backupPolictEmailNotificationFeidlName); ok {
 		ret.EmailNotification = v.(string)
 	}
 	if v, ok := d.GetOk(backupPolicyScheduleFieldName); ok {
-		expandBackupPolicySchedule(v.([]interface{}))
+		ret.Schedule = expandBackupPolicySchedule(v.([]interface{}))
 	}
 	return ret, nil
 }
@@ -392,13 +389,22 @@ func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
 			ret.ScheduleType = i.(string)
 		}
 		if i, ok := item[backupPolicyScheudleHourlyScheduleFieldName]; ok {
-			ret.HourlySchedule = expandHourlySchedule(i.([]interface{}))
+			hourlySchedule := i.([]interface{})
+			if len(hourlySchedule) > 0 {
+				ret.HourlySchedule = expandHourlySchedule(hourlySchedule)
+			}
 		}
 		if i, ok := item[backupPolicyScheudleDailyScheduleFieldName]; ok {
-			ret.DailySchedule = expandDailySchedule(i.([]interface{}))
+			dailySchedule := i.([]interface{})
+			if len(dailySchedule) > 0 {
+				ret.DailySchedule = expandDailySchedule(dailySchedule)
+			}
 		}
 		if i, ok := item[backupPolicyScheudleMonthlyScheduleFieldName]; ok {
-			ret.MonthlySchedule = expandMonthlySchedule(i.([]interface{}))
+			monthlySchedule := i.([]interface{})
+			if len(monthlySchedule) > 0 {
+				ret.MonthlySchedule = expandMonthlySchedule(monthlySchedule)
+			}
 		}
 	}
 	return ret
