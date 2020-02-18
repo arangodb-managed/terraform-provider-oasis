@@ -44,7 +44,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 
 	t.Run("with hourly schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "hourly",
+			ScheduleType: "Hourly",
 			HourlySchedule: &backup.BackupPolicy_HourlySchedule{
 				ScheduleEveryIntervalHours: 10,
 			},
@@ -66,7 +66,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 	})
 	t.Run("with daily schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "daily",
+			ScheduleType: "Daily",
 			DailySchedule: &backup.BackupPolicy_DailySchedule{
 				Monday:    true,
 				Tuesday:   false,
@@ -156,37 +156,114 @@ func TestExpandBackupPolicy(t *testing.T) {
 		backupPolicyRetentionPeriodFieldName:   200,
 		backupPolictEmailNotificationFeidlName: "None",
 	}
-	rawSchedule := []interface{}{
-		map[string]interface{}{
-			backupPolicyScheduleTypeFieldName: "Monthly",
-			backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
-				map[string]interface{}{
-					backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
-					backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
-						map[string]interface{}{
-							backupPolicyTimeOfDayHoursFieldName:    10,
-							backupPolicyTimeOfDayMinutesFieldName:  10,
-							backupPolicyTimeOfDayTimeZoneFieldName: "UTC",
+	expected := &backup.BackupPolicy{
+		Name:              "test-policy",
+		Description:       "test-description",
+		DeploymentId:      "123456",
+		IsPaused:          true,
+		Upload:            true,
+		RetentionPeriod:   types.DurationProto(200 * 24 * time.Hour),
+		EmailNotification: "None",
+	}
+	t.Run("test hourly schedule", func(tt *testing.T) {
+		rawSchedule := []interface{}{
+			map[string]interface{}{
+				backupPolicyScheduleTypeFieldName: "Hourly",
+				backupPolicyScheudleHourlyScheduleFieldName: []interface{}{
+					map[string]interface{}{
+						backupPolicyScheudleHourlyScheduleIntervalFieldName: 6,
+					},
+				},
+			},
+		}
+		raw[backupPolicyScheduleFieldName] = rawSchedule
+		s := resourceBackupPolicy().Schema
+		resourceData := schema.TestResourceDataRaw(t, s, raw)
+		policy, err := expandBackupPolicyResource(resourceData)
+		assert.NoError(t, err)
+		schedule := &backup.BackupPolicy_Schedule{
+			ScheduleType: "Hourly",
+			HourlySchedule: &backup.BackupPolicy_HourlySchedule{
+				ScheduleEveryIntervalHours: 6,
+			},
+		}
+		expected.Schedule = schedule
+		assert.Equal(t, expected, policy)
+	})
+	t.Run("test daily schedule", func(tt *testing.T) {
+		rawSchedule := []interface{}{
+			map[string]interface{}{
+				backupPolicyScheduleTypeFieldName: "Daily",
+				backupPolicyScheudleDailyScheduleFieldName: []interface{}{
+					map[string]interface{}{
+						backupPolicyScheudleDailyScheduleMondayFieldName:    true,
+						backupPolicyScheudleDailyScheduleTuesdayFieldName:   true,
+						backupPolicyScheudleDailyScheduleWednesdayFieldName: true,
+						backupPolicyScheudleDailyScheduleThursdayFieldName:  true,
+						backupPolicyScheudleDailyScheduleFridayFieldName:    true,
+						backupPolicyScheudleDailyScheduleSaturdayFieldName:  true,
+						backupPolicyScheudleDailyScheduleSundayFieldName:    true,
+						backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
+							map[string]interface{}{
+								backupPolicyTimeOfDayHoursFieldName:    10,
+								backupPolicyTimeOfDayMinutesFieldName:  10,
+								backupPolicyTimeOfDayTimeZoneFieldName: "UTC",
+							},
 						},
 					},
 				},
 			},
-		},
-	}
-	raw[backupPolicyScheduleFieldName] = rawSchedule
-	s := resourceBackupPolicy().Schema
-	resourceData := schema.TestResourceDataRaw(t, s, raw)
-	policy, err := expandBackupPolicyResource(resourceData)
-	assert.NoError(t, err)
-	expected := &backup.BackupPolicy{
-		Name:         "test-policy",
-		Description:  "test-description",
-		DeploymentId: "123456",
-		IsPaused:     true,
-		Schedule: &backup.BackupPolicy_Schedule{
-			ScheduleType:   "Monthly",
-			HourlySchedule: nil,
-			DailySchedule:  nil,
+		}
+		raw[backupPolicyScheduleFieldName] = rawSchedule
+		s := resourceBackupPolicy().Schema
+		resourceData := schema.TestResourceDataRaw(t, s, raw)
+		policy, err := expandBackupPolicyResource(resourceData)
+		assert.NoError(t, err)
+		schedule := &backup.BackupPolicy_Schedule{
+			ScheduleType: "Daily",
+			DailySchedule: &backup.BackupPolicy_DailySchedule{
+				Monday:    true,
+				Tuesday:   true,
+				Wednesday: true,
+				Thursday:  true,
+				Friday:    true,
+				Saturday:  true,
+				Sunday:    true,
+				ScheduleAt: &backup.TimeOfDay{
+					Hours:    10,
+					Minutes:  10,
+					TimeZone: "UTC",
+				},
+			},
+		}
+		expected.Schedule = schedule
+		assert.Equal(t, expected, policy)
+	})
+	t.Run("test monthly schedule", func(tt *testing.T) {
+		rawSchedule := []interface{}{
+			map[string]interface{}{
+				backupPolicyScheduleTypeFieldName: "Monthly",
+				backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
+					map[string]interface{}{
+						backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
+						backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
+							map[string]interface{}{
+								backupPolicyTimeOfDayHoursFieldName:    10,
+								backupPolicyTimeOfDayMinutesFieldName:  10,
+								backupPolicyTimeOfDayTimeZoneFieldName: "UTC",
+							},
+						},
+					},
+				},
+			},
+		}
+		raw[backupPolicyScheduleFieldName] = rawSchedule
+		s := resourceBackupPolicy().Schema
+		resourceData := schema.TestResourceDataRaw(t, s, raw)
+		policy, err := expandBackupPolicyResource(resourceData)
+		assert.NoError(t, err)
+		schedule := &backup.BackupPolicy_Schedule{
+			ScheduleType: "Monthly",
 			MonthlySchedule: &backup.BackupPolicy_MonthlySchedule{
 				ScheduleAt: &backup.TimeOfDay{
 					Hours:    10,
@@ -195,10 +272,8 @@ func TestExpandBackupPolicy(t *testing.T) {
 				},
 				DayOfMonth: 30,
 			},
-		},
-		Upload:            true,
-		RetentionPeriod:   types.DurationProto(200 * 24 * time.Hour),
-		EmailNotification: "None",
-	}
-	assert.Equal(t, expected, policy)
+		}
+		expected.Schedule = schedule
+		assert.Equal(t, expected, policy)
+	})
 }
