@@ -17,10 +17,11 @@ import (
 const (
 	// Backup field names
 	// Main
-	backupPolicyNameFieldName        = "name"
-	backupPolicyDescriptionFieldName = "description"
-	backupPolicyIsPausedFieldName    = "is_paused"
-	backupPolicyScheduleFieldName    = "schedule"
+	backupPolicyNameFieldName         = "name"
+	backupPolicyDescriptionFieldName  = "description"
+	backupPolicyIsPausedFieldName     = "is_paused"
+	backupPolicyScheduleFieldName     = "schedule"
+	backupPolicyDeploymentIDFieldName = "deployment_id"
 	// Schedule
 	backupPolicyScheduleTypeFieldName = "type"
 	// Hourly
@@ -72,6 +73,14 @@ func resourceBackupPolicy() *schema.Resource {
 			backupPolicyUploadFieldName: {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			backupPolicyDeploymentIDFieldName: {
+				Type:     schema.TypeString,
+				Required: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// This is a read-only field.
+					return true
+				},
 			},
 			backupPolicyRetentionPeriodFieldName: {
 				Type: schema.TypeInt,
@@ -266,6 +275,7 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 	ret := map[string]interface{}{
 		backupPolicyNameFieldName:              policy.GetName(),
 		backupPolicyDescriptionFieldName:       policy.GetDescription(),
+		backupPolicyDeploymentIDFieldName:      policy.GetDeploymentId(),
 		backupPolicyIsPausedFieldName:          policy.GetIsPaused(),
 		backupPolicyUploadFieldName:            policy.GetUpload(),
 		backupPolictEmailNotificationFeidlName: policy.GetEmailNotification(),
@@ -274,7 +284,7 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 	if policy.GetRetentionPeriod() != nil {
 		seconds := policy.GetRetentionPeriod().GetSeconds()
 		days := seconds / (24 * 60 * 60)
-		ret[backupPolicyRetentionPeriodFieldName] = days
+		ret[backupPolicyRetentionPeriodFieldName] = int(days)
 	}
 	return ret
 }
