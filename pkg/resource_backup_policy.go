@@ -10,7 +10,6 @@ package pkg
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/gogo/protobuf/types"
@@ -251,7 +250,6 @@ func resourceBackupPolicy() *schema.Resource {
 
 // resourceBackupPolicyUpdate will take a resource diff and apply changes accordingly if there are any.
 func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
-	log.Println("Entered the update hook.")
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
@@ -284,7 +282,6 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange(backupPolictEmailNotificationFeidlName) {
 		policy.EmailNotification = d.Get(backupPolictEmailNotificationFeidlName).(string)
 	}
-	log.Print("Checking of schedule field name has new values...")
 	if d.HasChange(backupPolicyScheduleFieldName) {
 		policy.Schedule = expandBackupPolicySchedule(d.Get(backupPolicyScheduleFieldName).([]interface{}))
 	}
