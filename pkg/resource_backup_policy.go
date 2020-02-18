@@ -13,10 +13,11 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/types"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 	common "github.com/arangodb-managed/apis/common/v1"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	data "github.com/arangodb-managed/apis/data/v1"
 )
 
 const (
@@ -101,8 +102,9 @@ func resourceBackupPolicy() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						backupPolicyScheduleTypeFieldName: {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Schedule type should be one of the following string: \"Hourly|Daily|Monthly\"",
 						},
 						// Hourly
 						backupPolicyScheudleHourlyScheduleFieldName: {
@@ -283,9 +285,17 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 		backupPolicyScheduleFieldName:          schedule,
 	}
 	if policy.GetRetentionPeriod() != nil {
-		seconds := policy.GetRetentionPeriod().GetSeconds()
-		days := seconds / (24 * 60 * 60)
-		ret[backupPolicyRetentionPeriodFieldName] = int(days)
+		// if not uploaded, period is in hours
+		if policy.GetUpload() {
+			// if uploaded, period is in days
+			seconds := policy.GetRetentionPeriod().GetSeconds()
+			days := seconds / (24 * 60 * 60)
+			ret[backupPolicyRetentionPeriodFieldName] = int(days)
+		} else {
+			seconds := policy.GetRetentionPeriod().GetSeconds()
+			hours := seconds / (60 * 60)
+			ret[backupPolicyRetentionPeriodFieldName] = int(hours)
+		}
 	}
 	return ret
 }
@@ -369,8 +379,13 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 		ret.DeploymentId = v.(string)
 	}
 	if v, ok := d.GetOk(backupPolicyRetentionPeriodFieldName); ok {
-		// retention period is given in days
-		ret.RetentionPeriod = types.DurationProto((time.Duration(v.(int)) * 24 * 60 * 60) * time.Second)
+		if ret.Upload {
+			// retention period is given in days
+			ret.RetentionPeriod = types.DurationProto((time.Duration(v.(int)) * 24 * 60 * 60) * time.Second)
+		} else {
+			// retention period is given in hours
+			ret.RetentionPeriod = types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
+		}
 	}
 	if v, ok := d.GetOk(backupPolictEmailNotificationFeidlName); ok {
 		ret.EmailNotification = v.(string)
@@ -495,6 +510,12 @@ func resourceBackupPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	expandedPolicy, err := expandBackupPolicyResource(d)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to expand on policy")
+		return err
+	}
+	// Pre-check for the given deployment
+	datac := data.NewDataServiceClient(client.conn)
+	if _, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: expandedPolicy.DeploymentId}); err != nil {
+		client.log.Error().Err(err).Str("deployment-id", expandedPolicy.DeploymentId).Msg("Deployment with ID not found.")
 		return err
 	}
 	if b, err := backupc.CreateBackupPolicy(client.ctxWithToken, expandedPolicy); err != nil {

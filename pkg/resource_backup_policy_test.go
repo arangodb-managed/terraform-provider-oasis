@@ -52,7 +52,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		policy.Schedule = schedule
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "hourly",
+				backupPolicyScheduleTypeFieldName: "Hourly",
 				backupPolicyScheudleHourlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleHourlyScheduleIntervalFieldName: 10,
@@ -85,7 +85,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		policy.Schedule = schedule
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "daily",
+				backupPolicyScheduleTypeFieldName: "Daily",
 				backupPolicyScheudleDailyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleDailyScheduleMondayFieldName:    true,
@@ -112,7 +112,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 	})
 	t.Run("with monthly schedule", func(tt *testing.T) {
 		schedule := &backup.BackupPolicy_Schedule{
-			ScheduleType: "monthly",
+			ScheduleType: "Monthly",
 			MonthlySchedule: &backup.BackupPolicy_MonthlySchedule{
 				DayOfMonth: 30,
 				ScheduleAt: &backup.TimeOfDay{
@@ -125,7 +125,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		policy.Schedule = schedule
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
-				backupPolicyScheduleTypeFieldName: "monthly",
+				backupPolicyScheduleTypeFieldName: "Monthly",
 				backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
 						backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
@@ -158,7 +158,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 	}
 	rawSchedule := []interface{}{
 		map[string]interface{}{
-			backupPolicyScheduleTypeFieldName: "monthly",
+			backupPolicyScheduleTypeFieldName: "Monthly",
 			backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
 				map[string]interface{}{
 					backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
@@ -184,7 +184,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 		DeploymentId: "123456",
 		IsPaused:     true,
 		Schedule: &backup.BackupPolicy_Schedule{
-			ScheduleType:   "monthly",
+			ScheduleType:   "Monthly",
 			HourlySchedule: nil,
 			DailySchedule:  nil,
 			MonthlySchedule: &backup.BackupPolicy_MonthlySchedule{
