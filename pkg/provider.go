@@ -59,8 +59,9 @@ func Provider() *schema.Provider {
 			"oasis_certificate": resourceCertificate(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"oasis_project":      dataSourceOasisProject(),
-			"oasis_organization": dataSourceOasisOrganization(),
+			"oasis_project":              dataSourceOasisProject(),
+			"oasis_organization":         dataSourceOasisOrganization(),
+			"oasis_terms_and_conditions": dataSourceTermsAndConditions(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
