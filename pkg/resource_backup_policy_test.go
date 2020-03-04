@@ -53,9 +53,9 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
 				backupPolicyScheduleTypeFieldName: hourlySchedule,
-				backupPolicyScheudleHourlyScheduleFieldName: []interface{}{
+				backupPolicyScheduleHourlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
-						backupPolicyScheudleHourlyScheduleIntervalFieldName: 10,
+						backupPolicyScheduleHourlyScheduleIntervalFieldName: 10,
 					},
 				},
 			},
@@ -86,15 +86,15 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
 				backupPolicyScheduleTypeFieldName: dailySchedule,
-				backupPolicyScheudleDailyScheduleFieldName: []interface{}{
+				backupPolicyScheduleDailyScheduleFieldName: []interface{}{
 					map[string]interface{}{
-						backupPolicyScheudleDailyScheduleMondayFieldName:    true,
-						backupPolicyScheudleDailyScheduleTuesdayFieldName:   false,
-						backupPolicyScheudleDailyScheduleWednesdayFieldName: false,
-						backupPolicyScheudleDailyScheduleThursdayFieldName:  true,
-						backupPolicyScheudleDailyScheduleFridayFieldName:    false,
-						backupPolicyScheudleDailyScheduleSaturdayFieldName:  false,
-						backupPolicyScheudleDailyScheduleSundayFieldName:    false,
+						backupPolicyScheduleDailyScheduleMondayFieldName:    true,
+						backupPolicyScheduleDailyScheduleTuesdayFieldName:   false,
+						backupPolicyScheduleDailyScheduleWednesdayFieldName: false,
+						backupPolicyScheduleDailyScheduleThursdayFieldName:  true,
+						backupPolicyScheduleDailyScheduleFridayFieldName:    false,
+						backupPolicyScheduleDailyScheduleSaturdayFieldName:  false,
+						backupPolicyScheduleDailyScheduleSundayFieldName:    false,
 						backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
 							map[string]interface{}{
 								backupPolicyTimeOfDayHoursFieldName:    10,
@@ -126,9 +126,9 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		expectedSchedule := []interface{}{
 			map[string]interface{}{
 				backupPolicyScheduleTypeFieldName: monthlySchedule,
-				backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
+				backupPolicyScheduleMonthlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
-						backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
+						backupPolicyScheduleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
 						backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
 							map[string]interface{}{
 								backupPolicyTimeOfDayHoursFieldName:    10,
@@ -169,9 +169,9 @@ func TestExpandBackupPolicy(t *testing.T) {
 		rawSchedule := []interface{}{
 			map[string]interface{}{
 				backupPolicyScheduleTypeFieldName: hourlySchedule,
-				backupPolicyScheudleHourlyScheduleFieldName: []interface{}{
+				backupPolicyScheduleHourlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
-						backupPolicyScheudleHourlyScheduleIntervalFieldName: 6,
+						backupPolicyScheduleHourlyScheduleIntervalFieldName: 6,
 					},
 				},
 			},
@@ -194,15 +194,15 @@ func TestExpandBackupPolicy(t *testing.T) {
 		rawSchedule := []interface{}{
 			map[string]interface{}{
 				backupPolicyScheduleTypeFieldName: dailySchedule,
-				backupPolicyScheudleDailyScheduleFieldName: []interface{}{
+				backupPolicyScheduleDailyScheduleFieldName: []interface{}{
 					map[string]interface{}{
-						backupPolicyScheudleDailyScheduleMondayFieldName:    true,
-						backupPolicyScheudleDailyScheduleTuesdayFieldName:   true,
-						backupPolicyScheudleDailyScheduleWednesdayFieldName: true,
-						backupPolicyScheudleDailyScheduleThursdayFieldName:  true,
-						backupPolicyScheudleDailyScheduleFridayFieldName:    true,
-						backupPolicyScheudleDailyScheduleSaturdayFieldName:  true,
-						backupPolicyScheudleDailyScheduleSundayFieldName:    true,
+						backupPolicyScheduleDailyScheduleMondayFieldName:    true,
+						backupPolicyScheduleDailyScheduleTuesdayFieldName:   true,
+						backupPolicyScheduleDailyScheduleWednesdayFieldName: true,
+						backupPolicyScheduleDailyScheduleThursdayFieldName:  true,
+						backupPolicyScheduleDailyScheduleFridayFieldName:    true,
+						backupPolicyScheduleDailyScheduleSaturdayFieldName:  true,
+						backupPolicyScheduleDailyScheduleSundayFieldName:    true,
 						backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
 							map[string]interface{}{
 								backupPolicyTimeOfDayHoursFieldName:    10,
@@ -243,9 +243,9 @@ func TestExpandBackupPolicy(t *testing.T) {
 		rawSchedule := []interface{}{
 			map[string]interface{}{
 				backupPolicyScheduleTypeFieldName: monthlySchedule,
-				backupPolicyScheudleMonthlyScheduleFieldName: []interface{}{
+				backupPolicyScheduleMonthlyScheduleFieldName: []interface{}{
 					map[string]interface{}{
-						backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
+						backupPolicyScheduleMonthlyScheduleDayOfMonthScheduleFieldName: 30,
 						backupPolicyTimeOfDayScheduleAtFieldName: []interface{}{
 							map[string]interface{}{
 								backupPolicyTimeOfDayHoursFieldName:    10,

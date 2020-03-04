@@ -31,20 +31,20 @@ const (
 	// Schedule
 	backupPolicyScheduleTypeFieldName = "type"
 	// Hourly
-	backupPolicyScheudleHourlyScheduleFieldName         = "hourly"
-	backupPolicyScheudleHourlyScheduleIntervalFieldName = "interval"
+	backupPolicyScheduleHourlyScheduleFieldName         = "hourly"
+	backupPolicyScheduleHourlyScheduleIntervalFieldName = "interval"
 	// Daily
-	backupPolicyScheudleDailyScheduleFieldName          = "daily"
-	backupPolicyScheudleDailyScheduleMondayFieldName    = "monday"
-	backupPolicyScheudleDailyScheduleTuesdayFieldName   = "tuesday"
-	backupPolicyScheudleDailyScheduleWednesdayFieldName = "wednesday"
-	backupPolicyScheudleDailyScheduleThursdayFieldName  = "thursday"
-	backupPolicyScheudleDailyScheduleFridayFieldName    = "friday"
-	backupPolicyScheudleDailyScheduleSaturdayFieldName  = "saturday"
-	backupPolicyScheudleDailyScheduleSundayFieldName    = "sunday"
+	backupPolicyScheduleDailyScheduleFieldName          = "daily"
+	backupPolicyScheduleDailyScheduleMondayFieldName    = "monday"
+	backupPolicyScheduleDailyScheduleTuesdayFieldName   = "tuesday"
+	backupPolicyScheduleDailyScheduleWednesdayFieldName = "wednesday"
+	backupPolicyScheduleDailyScheduleThursdayFieldName  = "thursday"
+	backupPolicyScheduleDailyScheduleFridayFieldName    = "friday"
+	backupPolicyScheduleDailyScheduleSaturdayFieldName  = "saturday"
+	backupPolicyScheduleDailyScheduleSundayFieldName    = "sunday"
 	// Monthly
-	backupPolicyScheudleMonthlyScheduleFieldName                   = "monthly"
-	backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName = "day_of_month"
+	backupPolicyScheduleMonthlyScheduleFieldName                   = "monthly"
+	backupPolicyScheduleMonthlyScheduleDayOfMonthScheduleFieldName = "day_of_month"
 	// Details
 	backupPolicyUploadFieldName            = "upload"
 	backupPolicyRetentionPeriodFieldName   = "retention_period"
@@ -121,19 +121,19 @@ func resourceBackupPolicy() *schema.Resource {
 							Description: "Schedule type should be one of the following string: \"Hourly|Daily|Monthly\"",
 						},
 						// Hourly
-						backupPolicyScheudleHourlyScheduleFieldName: {
+						backupPolicyScheduleHourlyScheduleFieldName: {
 							Type: schema.TypeList,
 							// Not supported as of now. Enable this check once this issue is fixed:
 							// https://github.com/hashicorp/terraform-plugin-sdk/issues/71
 							//ConflictsWith: []string{
-							//	backupPolicyScheudleDailyScheduleFieldName,
-							//	backupPolicyScheudleMonthlyScheduleFieldName,
+							//	backupPolicyScheduleDailyScheduleFieldName,
+							//	backupPolicyScheduleMonthlyScheduleFieldName,
 							//},
 							Optional: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									backupPolicyScheudleHourlyScheduleIntervalFieldName: {
+									backupPolicyScheduleHourlyScheduleIntervalFieldName: {
 										Type:     schema.TypeInt,
 										Required: true,
 									},
@@ -141,43 +141,43 @@ func resourceBackupPolicy() *schema.Resource {
 							},
 						},
 						// Daily
-						backupPolicyScheudleDailyScheduleFieldName: {
+						backupPolicyScheduleDailyScheduleFieldName: {
 							Type: schema.TypeList,
 							// Not supported as of now. Enable this check once this issue is fixed:
 							// https://github.com/hashicorp/terraform-plugin-sdk/issues/71
 							//ConflictsWith: []string{
-							//	backupPolicyScheudleHourlyScheduleFieldName,
-							//	backupPolicyScheudleMonthlyScheduleFieldName,
+							//	backupPolicyScheduleHourlyScheduleFieldName,
+							//	backupPolicyScheduleMonthlyScheduleFieldName,
 							//},
 							Optional: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									backupPolicyScheudleDailyScheduleMondayFieldName: {
+									backupPolicyScheduleDailyScheduleMondayFieldName: {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
-									backupPolicyScheudleDailyScheduleTuesdayFieldName: {
+									backupPolicyScheduleDailyScheduleTuesdayFieldName: {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
-									backupPolicyScheudleDailyScheduleWednesdayFieldName: {
+									backupPolicyScheduleDailyScheduleWednesdayFieldName: {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
-									backupPolicyScheudleDailyScheduleThursdayFieldName: {
+									backupPolicyScheduleDailyScheduleThursdayFieldName: {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
-									backupPolicyScheudleDailyScheduleFridayFieldName: {
+									backupPolicyScheduleDailyScheduleFridayFieldName: {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
-									backupPolicyScheudleDailyScheduleSaturdayFieldName: {
+									backupPolicyScheduleDailyScheduleSaturdayFieldName: {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
-									backupPolicyScheudleDailyScheduleSundayFieldName: {
+									backupPolicyScheduleDailyScheduleSundayFieldName: {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
@@ -206,19 +206,19 @@ func resourceBackupPolicy() *schema.Resource {
 							},
 						},
 						// Monthly
-						backupPolicyScheudleMonthlyScheduleFieldName: {
+						backupPolicyScheduleMonthlyScheduleFieldName: {
 							Type: schema.TypeList,
 							// Not supported as of now. Enable this check once this issue is fixed:
 							// https://github.com/hashicorp/terraform-plugin-sdk/issues/71
 							//ConflictsWith: []string{
-							//	backupPolicyScheudleDailyScheduleFieldName,
-							//	backupPolicyScheudleHourlyScheduleFieldName,
+							//	backupPolicyScheduleDailyScheduleFieldName,
+							//	backupPolicyScheduleHourlyScheduleFieldName,
 							//},
 							Optional: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: {
+									backupPolicyScheduleMonthlyScheduleDayOfMonthScheduleFieldName: {
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
@@ -316,11 +316,10 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 // getRetentionPeriodBasedOnUpload calculates the retention period based on the predicate if Upload is enabled.
-// If it is, days are used, hours otherwise.
 func getRetentionPeriodBasedOnUpload(upload bool, v interface{}) *types.Duration {
 	if upload {
 		// retention period is given in days
-		return types.DurationProto((time.Duration(v.(int)) * 24 * 60 * 60) * time.Second)
+		return types.DurationProto((time.Duration(v.(int)) * 24) * time.Hour)
 	} else {
 		// retention period is given in hours
 		return types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
@@ -390,11 +389,11 @@ func flattenSchedule(policy *backup.BackupPolicy_Schedule) []interface{} {
 	schedule[backupPolicyScheduleTypeFieldName] = policy.GetScheduleType()
 	switch policy.GetScheduleType() {
 	case hourlySchedule:
-		schedule[backupPolicyScheudleHourlyScheduleFieldName] = flattenScheduleHourly(policy.GetHourlySchedule())
+		schedule[backupPolicyScheduleHourlyScheduleFieldName] = flattenScheduleHourly(policy.GetHourlySchedule())
 	case dailySchedule:
-		schedule[backupPolicyScheudleDailyScheduleFieldName] = flattenScheduleDaily(policy.GetDailySchedule())
+		schedule[backupPolicyScheduleDailyScheduleFieldName] = flattenScheduleDaily(policy.GetDailySchedule())
 	case monthlySchedule:
-		schedule[backupPolicyScheudleMonthlyScheduleFieldName] = flattenScheduleMonthly(policy.GetMonthlySchedule())
+		schedule[backupPolicyScheduleMonthlyScheduleFieldName] = flattenScheduleMonthly(policy.GetMonthlySchedule())
 	}
 	return []interface{}{
 		schedule,
@@ -405,7 +404,7 @@ func flattenSchedule(policy *backup.BackupPolicy_Schedule) []interface{} {
 func flattenScheduleHourly(policy *backup.BackupPolicy_HourlySchedule) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
-			backupPolicyScheudleHourlyScheduleIntervalFieldName: int(policy.GetScheduleEveryIntervalHours()),
+			backupPolicyScheduleHourlyScheduleIntervalFieldName: int(policy.GetScheduleEveryIntervalHours()),
 		},
 	}
 }
@@ -414,13 +413,13 @@ func flattenScheduleHourly(policy *backup.BackupPolicy_HourlySchedule) []interfa
 func flattenScheduleDaily(policy *backup.BackupPolicy_DailySchedule) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
-			backupPolicyScheudleDailyScheduleMondayFieldName:    policy.GetMonday(),
-			backupPolicyScheudleDailyScheduleTuesdayFieldName:   policy.GetTuesday(),
-			backupPolicyScheudleDailyScheduleWednesdayFieldName: policy.GetWednesday(),
-			backupPolicyScheudleDailyScheduleThursdayFieldName:  policy.GetThursday(),
-			backupPolicyScheudleDailyScheduleFridayFieldName:    policy.GetFriday(),
-			backupPolicyScheudleDailyScheduleSaturdayFieldName:  policy.GetSaturday(),
-			backupPolicyScheudleDailyScheduleSundayFieldName:    policy.GetSunday(),
+			backupPolicyScheduleDailyScheduleMondayFieldName:    policy.GetMonday(),
+			backupPolicyScheduleDailyScheduleTuesdayFieldName:   policy.GetTuesday(),
+			backupPolicyScheduleDailyScheduleWednesdayFieldName: policy.GetWednesday(),
+			backupPolicyScheduleDailyScheduleThursdayFieldName:  policy.GetThursday(),
+			backupPolicyScheduleDailyScheduleFridayFieldName:    policy.GetFriday(),
+			backupPolicyScheduleDailyScheduleSaturdayFieldName:  policy.GetSaturday(),
+			backupPolicyScheduleDailyScheduleSundayFieldName:    policy.GetSunday(),
 			backupPolicyTimeOfDayScheduleAtFieldName:            flattenTimeOfDay(policy.GetScheduleAt()),
 		},
 	}
@@ -430,7 +429,7 @@ func flattenScheduleDaily(policy *backup.BackupPolicy_DailySchedule) []interface
 func flattenScheduleMonthly(policy *backup.BackupPolicy_MonthlySchedule) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
-			backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName: int(policy.GetDayOfMonth()),
+			backupPolicyScheduleMonthlyScheduleDayOfMonthScheduleFieldName: int(policy.GetDayOfMonth()),
 			backupPolicyTimeOfDayScheduleAtFieldName:                       flattenTimeOfDay(policy.GetScheduleAt()),
 		},
 	}
@@ -493,7 +492,7 @@ func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
 	// terraform allows conflict checks for list items.
 	for _, v := range s {
 		item := v.(map[string]interface{})
-		if i, ok := item[backupPolicyScheudleHourlyScheduleFieldName]; ok && ret.ScheduleType == hourlySchedule {
+		if i, ok := item[backupPolicyScheduleHourlyScheduleFieldName]; ok && ret.ScheduleType == hourlySchedule {
 			hourlySchedule := i.([]interface{})
 			if len(hourlySchedule) > 0 {
 				ret.HourlySchedule = expandHourlySchedule(hourlySchedule)
@@ -501,7 +500,7 @@ func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
 			ret.DailySchedule = nil
 			ret.MonthlySchedule = nil
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleFieldName]; ok && ret.ScheduleType == dailySchedule {
+		if i, ok := item[backupPolicyScheduleDailyScheduleFieldName]; ok && ret.ScheduleType == dailySchedule {
 			dailySchedule := i.([]interface{})
 			if len(dailySchedule) > 0 {
 				ret.DailySchedule = expandDailySchedule(dailySchedule)
@@ -509,7 +508,7 @@ func expandBackupPolicySchedule(s []interface{}) *backup.BackupPolicy_Schedule {
 			ret.HourlySchedule = nil
 			ret.MonthlySchedule = nil
 		}
-		if i, ok := item[backupPolicyScheudleMonthlyScheduleFieldName]; ok && ret.ScheduleType == monthlySchedule {
+		if i, ok := item[backupPolicyScheduleMonthlyScheduleFieldName]; ok && ret.ScheduleType == monthlySchedule {
 			monthlySchedule := i.([]interface{})
 			if len(monthlySchedule) > 0 {
 				ret.MonthlySchedule = expandMonthlySchedule(monthlySchedule)
@@ -526,7 +525,7 @@ func expandMonthlySchedule(s []interface{}) *backup.BackupPolicy_MonthlySchedule
 	ret := &backup.BackupPolicy_MonthlySchedule{}
 	for _, v := range s {
 		item := v.(map[string]interface{})
-		if i, ok := item[backupPolicyScheudleMonthlyScheduleDayOfMonthScheduleFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleMonthlyScheduleDayOfMonthScheduleFieldName]; ok {
 			ret.DayOfMonth = int32(i.(int))
 		}
 		if i, ok := item[backupPolicyTimeOfDayScheduleAtFieldName]; ok {
@@ -559,25 +558,25 @@ func expandDailySchedule(s []interface{}) *backup.BackupPolicy_DailySchedule {
 	ret := &backup.BackupPolicy_DailySchedule{}
 	for _, v := range s {
 		item := v.(map[string]interface{})
-		if i, ok := item[backupPolicyScheudleDailyScheduleMondayFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleDailyScheduleMondayFieldName]; ok {
 			ret.Monday = i.(bool)
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleTuesdayFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleDailyScheduleTuesdayFieldName]; ok {
 			ret.Tuesday = i.(bool)
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleWednesdayFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleDailyScheduleWednesdayFieldName]; ok {
 			ret.Wednesday = i.(bool)
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleThursdayFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleDailyScheduleThursdayFieldName]; ok {
 			ret.Thursday = i.(bool)
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleFridayFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleDailyScheduleFridayFieldName]; ok {
 			ret.Friday = i.(bool)
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleSaturdayFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleDailyScheduleSaturdayFieldName]; ok {
 			ret.Saturday = i.(bool)
 		}
-		if i, ok := item[backupPolicyScheudleDailyScheduleSundayFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleDailyScheduleSundayFieldName]; ok {
 			ret.Sunday = i.(bool)
 		}
 		if i, ok := item[backupPolicyTimeOfDayScheduleAtFieldName]; ok {
@@ -592,7 +591,7 @@ func expandHourlySchedule(s []interface{}) *backup.BackupPolicy_HourlySchedule {
 	ret := &backup.BackupPolicy_HourlySchedule{}
 	for _, v := range s {
 		item := v.(map[string]interface{})
-		if i, ok := item[backupPolicyScheudleHourlyScheduleIntervalFieldName]; ok {
+		if i, ok := item[backupPolicyScheduleHourlyScheduleIntervalFieldName]; ok {
 			ret.ScheduleEveryIntervalHours = int32(i.(int))
 		}
 	}
