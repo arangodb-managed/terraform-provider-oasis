@@ -33,8 +33,8 @@ func TestResourceCreateProject(t *testing.T) {
 
 	res := "terraform-project-" + acctest.RandString(10)
 	name := "terraform-project-name" + acctest.RandString(10)
-	//orgID, err := FetchOrganizationID(testAccProvider)
-	//assert.NoError(t, err)
+	orgID, err := FetchOrganizationID(testAccProvider)
+	assert.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -42,7 +42,7 @@ func TestResourceCreateProject(t *testing.T) {
 		CheckDestroy: testAccCheckDestroyProject,
 		Steps: []resource.TestStep{
 			{
-				Config: testBasicProjectConfig(res, name, "_support"),
+				Config: testBasicProjectConfig(res, name, orgID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_project."+res, projectNameFieldName, name),
 				),
