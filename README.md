@@ -175,3 +175,15 @@ OASIS_API_KEY_SECRET=<your_key_secret>
 # Examples
 
 For further examples, please take a look under [Examples](./examples) folder.
+
+# Schema
+
+In order to see every configuration option for this plugin, either browse the code for the data source
+you are interested in, or, once an oasis terraform configuration file is provided, take a look at the schema
+with the following command:
+
+```bash
+terraform providers schema -json ./my_oasis_deployment | jq
+```
+
+Where `./my_oasis_deployment` is a folder which contains terraform configuration files.

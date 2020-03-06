@@ -1,34 +1,38 @@
+/*
+ * This example demonstrates what fields are the bare minimum in order to get
+ * started creating a deployment with Oasis.
+ * The api_key_id and api_key_secret could be replaced with the environment
+ * properties OASIS_API_KEY_ID and OASIS_API_KEY_SECRET respectively.
+ */
 provider "oasis" {
   api_key_id     = ""
   api_key_secret = ""
-  organization   = "organization id"
-  # project = "1234567" -- this is optional
 }
 
+// A project is created here, but we could also use the default project
+// which is created with a first organization.
 resource "oasis_project" "my_project" {
-  name = "Test Terraform Project 2"
-  description = "This should also be filled 1"
-  # organization = "This is optional"
+  name = "Test Terraform Project"
 }
 
+/* A deployment has a bare minimum requirement of name, project, region,
+ * version and model. Anything else is either left empty, or deciphered
+ * for you. After a resource is created, `terraform show` can be used to
+ * investiage calculated fields.
+ * For example:
+ * Calculated fields include, a certificate, node size, node disk size,
+ * node memory and node count.
+ */
 resource "oasis_deployment" "my_oneshard_deployment" {
-  name = "terraform-deployment"
-  project      = oasis_project.my_project.id
+  name    = "Test Terraform Deployment"
+  project = oasis_project.my_project.id
   location {
-    region   = "gcp-europe-west4"
+    region = "gcp-europe-west4"
   }
   version {
-    db_version     = "3.6.0"
+    db_version = "3.6.0"
   }
   configuration {
-    model = "oneshard" # this is a required field
-    # this is an optional field and automatically set.
-    # further more, the smallest node size available in the given region will be used.
-    #node_count = 3
+    model = "oneshard"
   }
-  # Security configuration is optional.
-  # If no certificate is provided, one will be generated or the default will be used.
-  #security {
-  #  ca_certificate = oasis_certificate.my_oasis_cert.id
-  #}
 }
