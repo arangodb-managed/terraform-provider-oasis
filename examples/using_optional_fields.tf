@@ -20,12 +20,15 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   version {
     db_version     = "3.6.0"
   }
-  # Model is oneshard and the count is 3 by default.
   configuration {
     model = "oneshard" # this is a required field
-  #     node_count = 3
-  #   }
-  #   security {
-  #     ca_certificate = oasis_certificate.my_oasis_cert.id # if non is provided, one will be created and automatically used.
+    # this is an optional field and automatically set.
+    # further more, the smallest node size available in the given region will be used.
+    #node_count = 3
   }
+  # Security configuration is optional.
+  # If no certificate is provided, one will be generated or the default will be used.
+  #security {
+  #  ca_certificate = oasis_certificate.my_oasis_cert.id
+  #}
 }
