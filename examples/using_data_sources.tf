@@ -16,12 +16,12 @@ provider "oasis" {
 
 // Define existing organizations with oasis_organization.
 data "oasis_organization" "support" {
-  id = "organization id"
+  id = ""
 }
 
 // Define existing projects with oasis_project.
 data "oasis_project" "my_project" {
-  id = "project id"
+  id = ""
 }
 
 // Backup policy definition. This requires a deployment_id which is provided by the created deployment.

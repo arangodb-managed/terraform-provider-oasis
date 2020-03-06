@@ -6,7 +6,7 @@
 provider "oasis" {
   api_key_id     = ""
   api_key_secret = ""
-  organization   = "_support"
+  organization   = ""
 }
 
 // Terraform created project.
