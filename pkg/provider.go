@@ -58,6 +58,7 @@ func Provider() *schema.Provider {
 			"oasis_ipwhitelist":   resourceIPWhitelist(),
 			"oasis_certificate":   resourceCertificate(),
 			"oasis_backup_policy": resourceBackupPolicy(),
+			"oasis_project":       resourceProject(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"oasis_project":      dataSourceOasisProject(),
