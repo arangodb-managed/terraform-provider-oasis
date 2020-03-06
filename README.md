@@ -171,3 +171,7 @@ All of them require the following two environment properties to be set:
 OASIS_API_KEY_ID=<your_key_id>
 OASIS_API_KEY_SECRET=<your_key_secret>
 ```
+
+# Examples
+
+For further examples, please take a look under [Examples](./examples) folder.
