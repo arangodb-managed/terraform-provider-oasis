@@ -17,7 +17,7 @@ import (
 
 const (
 	// t&c data source fields
-	tcIdFieldName           = "id"
+	tcIDFieldName           = "id"
 	tcCreatedAtFieldName    = "created_at"
 	tcContentFieldName      = "content"
 	tcOrganizationFieldName = "organization"
@@ -29,7 +29,7 @@ func dataSourceTermsAndConditions() *schema.Resource {
 		Read: dataSourceTermsAndConditionsRead,
 
 		Schema: map[string]*schema.Schema{
-			tcIdFieldName: {
+			tcIDFieldName: {
 				Type:     schema.TypeString,
 				Optional: true, // if left out, the current is fetched
 			},
@@ -62,7 +62,7 @@ func dataSourceTermsAndConditionsRead(data *schema.ResourceData, m interface{}) 
 		tc  *rm.TermsAndConditions
 		err error
 	)
-	if v, ok := data.GetOk(tcIdFieldName); ok {
+	if v, ok := data.GetOk(tcIDFieldName); ok {
 		tc, err = rmc.GetTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: v.(string)})
 		if err != nil {
 			return err
@@ -90,7 +90,7 @@ func dataSourceTermsAndConditionsRead(data *schema.ResourceData, m interface{}) 
 // flattenTCObject creates a map from an Oasis Terms and Condition object for easy digestion by the terraform.
 func flattenTCObject(tc *rm.TermsAndConditions) map[string]interface{} {
 	return map[string]interface{}{
-		tcIdFieldName:        tc.GetId(),
+		tcIDFieldName:        tc.GetId(),
 		tcCreatedAtFieldName: tc.GetCreatedAt().String(),
 		tcContentFieldName:   tc.GetContent(),
 	}
