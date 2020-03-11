@@ -30,8 +30,9 @@ func dataSourceTermsAndConditions() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			tcIDFieldName: {
-				Type:     schema.TypeString,
-				Optional: true, // if left out, the current is fetched
+				Type:        schema.TypeString,
+				Description: "If this field is omitted the current terms and conditions is fetched.",
+				Optional:    true,
 			},
 			tcContentFieldName: {
 				Type:     schema.TypeString,
