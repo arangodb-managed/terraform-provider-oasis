@@ -104,6 +104,8 @@ func resourceBackupPolicy() *schema.Resource {
 					return new == "0"
 				},
 				Optional: true,
+				Description: `Retention period depends on upload. If upload flag is set, retention period should be provided in days.
+If upload is disabled, retention period should be provided in hours. Any invalid range will be rejected.`,
 			},
 			backupPolictEmailNotificationFeidlName: {
 				Type:     schema.TypeString,
