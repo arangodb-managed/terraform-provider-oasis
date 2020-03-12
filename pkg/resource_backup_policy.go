@@ -47,8 +47,8 @@ const (
 	backupPolicyScheduleMonthlyScheduleDayOfMonthScheduleFieldName = "day_of_month"
 	// Details
 	backupPolicyUploadFieldName            = "upload"
-	backupPolicyRetentionPeriodFieldName   = "retention_period"
-	backupPolictEmailNotificationFeidlName = "email_notification"
+	backupPolicyRetentionPeriodFieldName   = "retention_period_hour"
+	backupPolictEmailNotificationFieldName = "email_notification"
 	// TimeOfDay
 	backupPolicyTimeOfDayScheduleAtFieldName = "schedule_at"
 	backupPolicyTimeOfDayHoursFieldName      = "hours"
@@ -104,10 +104,8 @@ func resourceBackupPolicy() *schema.Resource {
 					return new == "0"
 				},
 				Optional: true,
-				Description: `Retention period depends on upload. If upload flag is set, retention period should be provided in days.
-If upload is disabled, retention period should be provided in hours. Any invalid range will be rejected.`,
 			},
-			backupPolictEmailNotificationFeidlName: {
+			backupPolictEmailNotificationFieldName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -284,10 +282,10 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	if d.HasChange(backupPolicyRetentionPeriodFieldName) {
 		v := d.Get(backupPolicyRetentionPeriodFieldName)
-		policy.RetentionPeriod = getRetentionPeriodBasedOnUpload(policy.Upload, v)
+		policy.RetentionPeriod = getRetentionPeriod(policy.Upload, v)
 	}
-	if d.HasChange(backupPolictEmailNotificationFeidlName) {
-		policy.EmailNotification = d.Get(backupPolictEmailNotificationFeidlName).(string)
+	if d.HasChange(backupPolictEmailNotificationFieldName) {
+		policy.EmailNotification = d.Get(backupPolictEmailNotificationFieldName).(string)
 	}
 	if d.HasChange(backupPolicyScheduleFieldName) {
 		policy.Schedule = expandBackupPolicySchedule(d.Get(backupPolicyScheduleFieldName).([]interface{}))
@@ -317,15 +315,10 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceBackupPolicyRead(d, m)
 }
 
-// getRetentionPeriodBasedOnUpload calculates the retention period based on the predicate if Upload is enabled.
-func getRetentionPeriodBasedOnUpload(upload bool, v interface{}) *types.Duration {
-	if upload {
-		// retention period is given in days
-		return types.DurationProto((time.Duration(v.(int)) * 24) * time.Hour)
-	} else {
-		// retention period is given in hours
-		return types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
-	}
+// getRetentionPeriod calculates the retention period.
+func getRetentionPeriod(upload bool, v interface{}) *types.Duration {
+	// retention period is given in hours
+	return types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
 }
 
 // resourceBackupPolicyRead will gather information from the terraform store and display it accordingly.
@@ -366,21 +359,13 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 		backupPolicyDeploymentIDFieldName:      policy.GetDeploymentId(),
 		backupPolicyIsPausedFieldName:          policy.GetIsPaused(),
 		backupPolicyUploadFieldName:            policy.GetUpload(),
-		backupPolictEmailNotificationFeidlName: policy.GetEmailNotification(),
+		backupPolictEmailNotificationFieldName: policy.GetEmailNotification(),
 		backupPolicyScheduleFieldName:          schedule,
 	}
 	if policy.GetRetentionPeriod() != nil {
-		// if not uploaded, period is in hours
-		if policy.GetUpload() {
-			// if uploaded, period is in days
-			seconds := policy.GetRetentionPeriod().GetSeconds()
-			days := seconds / (24 * 60 * 60)
-			ret[backupPolicyRetentionPeriodFieldName] = int(days)
-		} else {
-			seconds := policy.GetRetentionPeriod().GetSeconds()
-			hours := seconds / (60 * 60)
-			ret[backupPolicyRetentionPeriodFieldName] = int(hours)
-		}
+		seconds := policy.GetRetentionPeriod().GetSeconds()
+		hours := seconds / (60 * 60)
+		ret[backupPolicyRetentionPeriodFieldName] = int(hours)
 	}
 	return ret
 }
@@ -469,9 +454,9 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 		ret.DeploymentId = v.(string)
 	}
 	if v, ok := d.GetOk(backupPolicyRetentionPeriodFieldName); ok {
-		ret.RetentionPeriod = getRetentionPeriodBasedOnUpload(ret.Upload, v)
+		ret.RetentionPeriod = getRetentionPeriod(ret.Upload, v)
 	}
-	if v, ok := d.GetOk(backupPolictEmailNotificationFeidlName); ok {
+	if v, ok := d.GetOk(backupPolictEmailNotificationFieldName); ok {
 		ret.EmailNotification = v.(string)
 	}
 	if v, ok := d.GetOk(backupPolicyScheduleFieldName); ok {
