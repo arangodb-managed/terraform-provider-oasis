@@ -56,7 +56,7 @@ resource "oasis_backup_policy" "my_backup_policy" {
   description        = "Description of the year"
   email_notification = "None"
   deployment_id      = oasis_deployment.my_oneshard_deployment.id
-  retention_period   = 120
+  retention_period_hour   = 120
   upload             = true
   schedule {
     type = "Monthly"

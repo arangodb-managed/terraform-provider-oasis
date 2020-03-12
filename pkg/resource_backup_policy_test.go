@@ -28,7 +28,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		DeploymentId:      "123456",
 		IsPaused:          true,
 		Upload:            true,
-		RetentionPeriod:   types.DurationProto(200 * 24 * time.Hour),
+		RetentionPeriod:   types.DurationProto(200 * time.Hour),
 		EmailNotification: "None",
 	}
 
@@ -39,7 +39,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		backupPolicyIsPausedFieldName:          true,
 		backupPolicyUploadFieldName:            true,
 		backupPolicyRetentionPeriodFieldName:   200,
-		backupPolictEmailNotificationFeidlName: "None",
+		backupPolictEmailNotificationFieldName: "None",
 	}
 
 	t.Run("with hourly schedule", func(tt *testing.T) {
@@ -154,7 +154,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 		backupPolicyIsPausedFieldName:          true,
 		backupPolicyUploadFieldName:            true,
 		backupPolicyRetentionPeriodFieldName:   200,
-		backupPolictEmailNotificationFeidlName: "None",
+		backupPolictEmailNotificationFieldName: "None",
 	}
 	expected := &backup.BackupPolicy{
 		Name:              "test-policy",
@@ -162,7 +162,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 		DeploymentId:      "123456",
 		IsPaused:          true,
 		Upload:            true,
-		RetentionPeriod:   types.DurationProto(200 * 24 * time.Hour),
+		RetentionPeriod:   types.DurationProto(200 * time.Hour),
 		EmailNotification: "None",
 	}
 	t.Run("test hourly schedule", func(tt *testing.T) {
