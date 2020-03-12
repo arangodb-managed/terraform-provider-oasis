@@ -282,7 +282,7 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	if d.HasChange(backupPolicyRetentionPeriodFieldName) {
 		v := d.Get(backupPolicyRetentionPeriodFieldName)
-		policy.RetentionPeriod = getRetentionPeriod(policy.Upload, v)
+		policy.RetentionPeriod = getRetentionPeriod(v)
 	}
 	if d.HasChange(backupPolictEmailNotificationFieldName) {
 		policy.EmailNotification = d.Get(backupPolictEmailNotificationFieldName).(string)
@@ -316,7 +316,7 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 // getRetentionPeriod calculates the retention period.
-func getRetentionPeriod(upload bool, v interface{}) *types.Duration {
+func getRetentionPeriod(v interface{}) *types.Duration {
 	// retention period is given in hours
 	return types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
 }
@@ -454,7 +454,7 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 		ret.DeploymentId = v.(string)
 	}
 	if v, ok := d.GetOk(backupPolicyRetentionPeriodFieldName); ok {
-		ret.RetentionPeriod = getRetentionPeriod(ret.Upload, v)
+		ret.RetentionPeriod = getRetentionPeriod(v)
 	}
 	if v, ok := d.GetOk(backupPolictEmailNotificationFieldName); ok {
 		ret.EmailNotification = v.(string)
