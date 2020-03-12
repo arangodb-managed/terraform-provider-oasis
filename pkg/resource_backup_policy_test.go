@@ -28,7 +28,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		DeploymentId:      "123456",
 		IsPaused:          true,
 		Upload:            true,
-		RetentionPeriod:   types.DurationProto(200 * 24 * time.Hour),
+		RetentionPeriod:   types.DurationProto(200 * time.Hour),
 		EmailNotification: "None",
 	}
 
