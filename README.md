@@ -39,7 +39,7 @@ Configuration
 
 The following is an example of a terraform deployment configuration:
 
-```
+```hcl
 provider "oasis" {
   api_key_id = "xx"
   api_key_secret  = "xxx"
@@ -121,7 +121,7 @@ resource "oasis_deployment" "my_sharded_deployment" {
 
 To define and use a project as data source, consider the following terraform configuration:
 
-```
+```hcl
 data "oasis_project" "my_project" {
   name = "MyProject"
   id = "123456789"
@@ -136,7 +136,7 @@ resource "oasis_deployment" "my_flexible_deployment" {
 
 To define and use an organization as data source, consider the following terraform configuration:
 
-```
+```hcl
 data "oasis_organization" "my_organization" {
   name = "MyOrganization"
   id = "123456789"
