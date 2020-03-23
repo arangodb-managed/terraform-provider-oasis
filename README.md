@@ -1,41 +1,29 @@
-ArangoDB Oasis Terraform Provider
-==================
+# ArangoDB Oasis Terraform Provider
 
-<img src="https://cloud.arangodb.com/static/media/cloud.5973146f.svg" width="300px">
+![ArangoDB Oasis](https://cloud.arangodb.com/assets/logos/arangodb-oasis-logo-whitebg-right.png)
 
-- Website: https://cloud.arangodb.com/
-- Slack: https://slack.arangodb.com/
-
-
-Maintainers
------------
+## Maintainers
 
 This provider plugin is maintained by the team at [ArangoDB](https://www.arangodb.com/).
 
+## Requirements
 
-Requirements
-------------
+- [Terraform](https://www.terraform.io/downloads.html) 0.10.x
+- [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
--	[Go](https://golang.org/doc/install) 1.11 (to build the provider plugin)
+## Usage
 
-Usage
----------------------
-
-Retrieving API Keys
---------------------
+### Retrieving API Keys
 
 Api keys can be generated and viewed under the user's dashboard view on the API Keys tab.
 On a logged in view, navigate to [API Keys](https://cloud.arangodb.com/dashboard/user/api-keys) and hit the button
 labeled `New API key`. This will generate a set of keys which can be used with ArangoDB's public API.
 
-Retrieving relevant IDs
------------------------
+### Retrieving relevant IDs
 
-After a key has been obtained, the relevant api can be called to list organizations, projects etc. 
+After a key has been obtained, the relevant API can be called to list organizations, projects etc.
 
-Configuration
--------------
+## Configuration
 
 The following is an example of a terraform deployment configuration:
 
@@ -148,7 +136,7 @@ resource "oasis_deployment" "my_flexible_deployment" {
 }
 ```
 
-# Running Acceptance Tests
+## Running Acceptance Tests
 
 In order to run acceptance tests, the following make target needs to be executed:
 
@@ -172,11 +160,11 @@ OASIS_API_KEY_ID=<your_key_id>
 OASIS_API_KEY_SECRET=<your_key_secret>
 ```
 
-# Examples
+## Examples
 
 For further examples, please take a look under [Examples](./examples) folder.
 
-# Schema
+## Schema
 
 In order to see every configuration option for this plugin, either browse the code for the data source
 you are interested in, or, once an oasis terraform configuration file is provided, take a look at the schema
@@ -187,3 +175,9 @@ terraform providers schema -json ./my_oasis_deployment | jq
 ```
 
 Where `./my_oasis_deployment` is a folder which contains terraform configuration files.
+
+## Links
+
+- Website: https://cloud.arangodb.com/
+- Slack: https://slack.arangodb.com/
+
