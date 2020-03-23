@@ -2,6 +2,12 @@
 
 ![ArangoDB Oasis](https://cloud.arangodb.com/assets/logos/arangodb-oasis-logo-whitebg-right.png)
 
+**Note that this provider is currently in preview**.
+
+That means that its API may still change.
+
+We welcome your feedback!
+
 ## Maintainers
 
 This provider plugin is maintained by the team at [ArangoDB](https://www.arangodb.com/).
