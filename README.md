@@ -2,9 +2,11 @@
 
 ![ArangoDB Oasis](https://cloud.arangodb.com/assets/logos/arangodb-oasis-logo-whitebg-right.png)
 
-**Note that this provider is currently in preview**.
+## Project status: Preview
 
-That means that its API may still change.
+Note that this provider is currently in preview.
+
+**That means that its API may still change.**
 
 We welcome your feedback!
 
