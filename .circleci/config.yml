@@ -39,11 +39,41 @@ jobs:
           paths:
             - "/go/pkg/mod"
 
+  deploy-release:
+    executor: go-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: cp go.sum go.sum.orig
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum.orig" }}
+      - run: |
+          go get
+          make bootstrap
+          make all
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            github-release release --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG}
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis.zip --file ./assets/terraform-provider-oasis.zip
+
 workflows:
   version: 2
   build_test_store_artifacts:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy-release:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
   nightly:
     triggers:
       - schedule:
