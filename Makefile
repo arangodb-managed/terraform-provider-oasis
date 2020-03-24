@@ -17,6 +17,8 @@ binaries:
 		-output="bin/{{.OS}}/{{.Arch}}/$(PROJECT)" \
 		-tags="netgo" \
 		./...
+	mkdir -p assets
+	zip -r assets/$(PROJECT).zip bin/*
 
 check:
 	zutano go check ./...
