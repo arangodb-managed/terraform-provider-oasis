@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk v1.4.1
 	github.com/rs/zerolog v1.17.2
 	github.com/stretchr/testify v1.4.0
-	google.golang.org/grpc v1.23.0
+	google.golang.org/grpc v1.27.1
 )
 
 go 1.13
@@ -70,3 +70,5 @@ replace k8s.io/metrics => k8s.io/metrics v0.0.0-20190409022812-850dadb8b49c
 replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.2.0-beta.2
 
 replace sourcegraph.com/sourcegraph/go-diff => github.com/sourcegraph/go-diff v0.5.0
+
+replace github.com/hashicorp/terraform-plugin-sdk => github.com/hashicorp/terraform-plugin-sdk v1.4.1
