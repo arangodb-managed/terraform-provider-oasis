@@ -26,11 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
-	"github.com/stretchr/testify/assert"
-
 	"github.com/gogo/protobuf/types"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/stretchr/testify/assert"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 )
