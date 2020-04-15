@@ -123,7 +123,7 @@ func dataSourceOasisExampleDatasetInstallationRead(data *schema.ResourceData, m 
 	return nil
 }
 
-// flattenExampleDatasetInstallations takes a list of installations and converts them into a terraform consumable format.
+// flattenExampleDatasetInstallations takes result of installations and converts them into a terraform consumable format.
 func flattenExampleDatasetInstallations(id string, items []*example.ExampleDatasetInstallation) map[string]interface{} {
 	return map[string]interface{}{
 		installationDeploymentIdFieldName: id,
@@ -131,7 +131,7 @@ func flattenExampleDatasetInstallations(id string, items []*example.ExampleDatas
 	}
 }
 
-// flattenExampleDatasetInstallation takes a single installation and converts it into a terraform consumable format.
+// flattenExampleDatasetInstallation converts the list of installations it into a terraform consumable format.
 func flattenExampleDatasetInstallation(items []*example.ExampleDatasetInstallation) []interface{} {
 	ret := make([]interface{}, 0)
 	for _, v := range items {
