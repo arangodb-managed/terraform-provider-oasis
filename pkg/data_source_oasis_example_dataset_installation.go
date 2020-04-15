@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	resourceName                            = "dataset-installation"
+	installationResourceName                = "dataset-installation"
 	installationDeploymentIdFieldName       = "deployment_id"
 	installationItemsFieldName              = "items"
 	installationExampleDatasetIdFieldName   = "example_dataset_id"
@@ -119,7 +119,7 @@ func dataSourceOasisExampleDatasetInstallationRead(data *schema.ResourceData, m 
 			return err
 		}
 	}
-	data.SetId(uniqueResourceID(resourceName))
+	data.SetId(uniqueResourceID(installationResourceName))
 	return nil
 }
 
