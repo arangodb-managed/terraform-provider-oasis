@@ -78,6 +78,7 @@ func Provider() *schema.Provider {
 			"oasis_project":              dataSourceOasisProject(),
 			"oasis_organization":         dataSourceOasisOrganization(),
 			"oasis_terms_and_conditions": dataSourceTermsAndConditions(),
+			"oasis_example_datasets":     dataSourceOasisExampleDataset(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
