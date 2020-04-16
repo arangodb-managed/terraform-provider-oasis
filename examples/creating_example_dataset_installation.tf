@@ -11,7 +11,7 @@ provider "oasis" {
 
 // Use an existing project
 data "oasis_project" "my_project" {
-  id = ""
+  id = "" // enter existing project ID here
 }
 
 /*
@@ -24,7 +24,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.6.0"
+    db_version = "3.6.2.2"
   }
   configuration {
     model = "oneshard"
