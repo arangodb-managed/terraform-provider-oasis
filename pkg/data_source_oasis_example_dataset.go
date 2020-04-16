@@ -31,7 +31,7 @@ import (
 var (
 	exampleResourceName                        = "example-dataset"
 	exampleOrganizationIDFieldName             = "organization"
-	exampleExampleDatasetsFieldName            = "example_datasets"
+	exampleExampleDatasetsFieldName            = "items"
 	exampleExampleDatasetsIDFieldName          = "id"
 	exampleExampleDatasetsNameFieldName        = "name"
 	exampleExampleDatasetsDescriptionFieldName = "description"
