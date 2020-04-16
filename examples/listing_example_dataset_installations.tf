@@ -16,7 +16,7 @@ data "oasis_example_dataset_installation" "my-installations" {
 
 // We output the list of installations for this deployment
 output "deployment-installations" {
-  value = data.oasis_example_dataset_installation.my-installations.items
+  value = data.oasis_example_dataset_installation.my-installations
 }
 
 // Setup an oasis project
