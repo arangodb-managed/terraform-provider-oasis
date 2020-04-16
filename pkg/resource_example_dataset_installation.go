@@ -40,12 +40,12 @@ var (
 	datasetStatusIsFailedFieldName     = "is_failed"
 )
 
-// resourceExampleDataset defines an Example Dataset resource.
-func resourceExampleDataset() *schema.Resource {
+// resourceExampleDatasetInstallation defines an Example Dataset Installation resource.
+func resourceExampleDatasetInstallation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceExampleDatasetCreate,
-		Read:   resourceExampleDatasetRead,
-		Delete: resourceExampleDatasetDelete,
+		Create: resourceExampleDatasetInstallationCreate,
+		Read:   resourceExampleDatasetInstallationRead,
+		Delete: resourceExampleDatasetInstallationDelete,
 
 		Schema: map[string]*schema.Schema{
 			datasetDeploymentIdFieldName: {
@@ -91,7 +91,7 @@ func resourceExampleDataset() *schema.Resource {
 	}
 }
 
-func resourceExampleDatasetCreate(data *schema.ResourceData, m interface{}) error {
+func resourceExampleDatasetInstallationCreate(data *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
@@ -107,7 +107,7 @@ func resourceExampleDatasetCreate(data *schema.ResourceData, m interface{}) erro
 	}
 
 	data.SetId(resp.GetId())
-	return resourceExampleDatasetRead(data, m)
+	return resourceExampleDatasetInstallationRead(data, m)
 }
 
 func expandExampleDatasetInstallation(data *schema.ResourceData) *example.ExampleDatasetInstallation {
@@ -121,7 +121,7 @@ func expandExampleDatasetInstallation(data *schema.ResourceData) *example.Exampl
 	return ret
 }
 
-func resourceExampleDatasetRead(data *schema.ResourceData, m interface{}) error {
+func resourceExampleDatasetInstallationRead(data *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
@@ -170,7 +170,7 @@ func flattenStatus(status *example.ExampleDatasetInstallation_Status) []interfac
 	}
 }
 
-func resourceExampleDatasetDelete(data *schema.ResourceData, m interface{}) error {
+func resourceExampleDatasetInstallationDelete(data *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")

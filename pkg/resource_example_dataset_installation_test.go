@@ -70,7 +70,7 @@ func TestExpandExampleDatasetInstallation(t *testing.T) {
 		datasetDeploymentIdFieldName:     "test-depl-id",
 		datasetExampleDatasetIdFieldName: "test-example-id",
 	}
-	s := resourceExampleDataset().Schema
+	s := resourceExampleDatasetInstallation().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
 	expanded := expandExampleDatasetInstallation(data)
 	assert.Equal(t, raw[datasetDeploymentIdFieldName], expanded.DeploymentId)
