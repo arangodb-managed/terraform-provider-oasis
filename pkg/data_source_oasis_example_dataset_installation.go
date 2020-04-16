@@ -127,25 +127,25 @@ func dataSourceOasisExampleDatasetInstallationRead(data *schema.ResourceData, m 
 func flattenExampleDatasetInstallations(id string, items []*example.ExampleDatasetInstallation) map[string]interface{} {
 	return map[string]interface{}{
 		installationDeploymentIdFieldName: id,
-		installationItemsFieldName:        flattenExampleDatasetInstallation(items),
+		installationItemsFieldName:        flattenInstallation(items),
 	}
 }
 
 // flattenExampleDatasetInstallation converts the list of installations it into a terraform consumable format.
-func flattenExampleDatasetInstallation(items []*example.ExampleDatasetInstallation) []interface{} {
+func flattenInstallation(items []*example.ExampleDatasetInstallation) []interface{} {
 	ret := make([]interface{}, 0)
 	for _, v := range items {
 		ret = append(ret, map[string]interface{}{
 			installationExampleDatasetIdFieldName: v.GetExampledatasetId(),
 			installationCreatedAtFieldName:        v.GetCreatedAt().String(),
-			installationStatusFieldName:           flattenStatus(v.GetStatus()),
+			installationStatusFieldName:           flattenInstallationStatus(v.GetStatus()),
 		})
 	}
 	return ret
 }
 
 // flattenStatus takes the status portion of the installation and converts it into a terraform consumable format.
-func flattenStatus(status *example.ExampleDatasetInstallation_Status) []interface{} {
+func flattenInstallationStatus(status *example.ExampleDatasetInstallation_Status) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
 			installationStatusDatabaseNameFieldName: status.GetDatabaseName(),
