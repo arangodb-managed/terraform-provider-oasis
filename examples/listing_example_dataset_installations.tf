@@ -10,8 +10,13 @@ provider "oasis" {
 }
 
 // List all installations for a created deployment
-data "oasis_example_dataset_installation" {
+data "oasis_example_dataset_installation" "my-installations" {
   deployment_id = oasis_deployment.my_oneshard_deployment.id
+}
+
+// We output the list of installations for this deployment
+output "deployment-installations" {
+  value = data.oasis_example_dataset_installation.my-installations.items
 }
 
 // Setup an oasis project
