@@ -35,7 +35,7 @@ test-acc:
 	TF_ACC=1 go test -v ./...
 
 bootstrap:
-	go get github.com/arangodb-managed/zutano
+	GOSUMDB=off GOPROXY=direct GO111MODULE=on go get github.com/arangodb-managed/zutano
 	go get github.com/mitchellh/gox
 	go get github.com/jstemmer/go-junit-report
 	go get github.com/hashicorp/terraform-plugin-sdk/plugin
