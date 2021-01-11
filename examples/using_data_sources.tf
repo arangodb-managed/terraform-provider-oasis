@@ -46,8 +46,8 @@ resource "oasis_backup_policy" "my_backup_policy" {
   }
 }
 
-// IP whitelist. This needs a project field.
-resource "oasis_ipwhitelist" "my_iplist" {
+// IP allowlist. This needs a project field.
+resource "oasis_ipallowlist" "my_iplist" {
   name        = "terraform-ip-list"
   description = "Important ip list."
   cidr_ranges = ["1.2.3.4/32", "111.11.0.0/16", "0.0.0.0/0"]
@@ -72,7 +72,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     node_count = 3
   }
   security {
-    ip_whitelist   = oasis_ipwhitelist.my_iplist.id
+    ip_allowlist   = oasis_ipallowlist.my_iplist.id
     ca_certificate = oasis_certificate.my_oasis_cert.id
   }
 }

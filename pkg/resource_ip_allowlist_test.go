@@ -39,14 +39,14 @@ import (
 	security "github.com/arangodb-managed/apis/security/v1"
 )
 
-func TestResourceIPWhitelist(t *testing.T) {
+func TestResourceIPAllowlist(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
 	}
 	t.Parallel()
 
-	res := "terraform-ipwhitelist-" + acctest.RandString(10)
-	name := "ipwhitelist-" + acctest.RandString(10)
+	res := "terraform-ipallowlist-" + acctest.RandString(10)
+	name := "ipallowlist-" + acctest.RandString(10)
 	orgID, err := FetchOrganizationID(testAccProvider)
 	assert.NoError(t, err)
 	pid, err := FetchProjectID(orgID, testAccProvider)
@@ -55,23 +55,23 @@ func TestResourceIPWhitelist(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDestroyIPWhitelist,
+		CheckDestroy: testAccCheckDestroyIPAllowlist,
 		Steps: []resource.TestStep{
 			{
 				Config: testBasicConfig(res, name, pid),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("oasis_ipwhitelist."+res, ipCIDRRangeFieldName+".#", "3"),
-					resource.TestCheckResourceAttr("oasis_ipwhitelist."+res, ipCIDRRangeFieldName+".0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr("oasis_ipwhitelist."+res, ipCIDRRangeFieldName+".1", "88.11.0.0/16"),
-					resource.TestCheckResourceAttr("oasis_ipwhitelist."+res, ipCIDRRangeFieldName+".2", "0.0.0.0/0"),
-					resource.TestCheckResourceAttr("oasis_ipwhitelist."+res, ipNameFieldName, name),
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".#", "3"),
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".0", "1.2.3.4/32"),
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".1", "88.11.0.0/16"),
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".2", "0.0.0.0/0"),
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipNameFieldName, name),
 				),
 			},
 		},
 	})
 }
 
-func TestFlattenIPWhitelistResource(t *testing.T) {
+func TestFlattenIPAllowlistResource(t *testing.T) {
 	expected := map[string]interface{}{
 		ipNameFieldName:        "test-name",
 		ipDescriptionFieldName: "test-description",
@@ -82,7 +82,7 @@ func TestFlattenIPWhitelistResource(t *testing.T) {
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
-	cert := security.IPWhitelist{
+	cert := security.IPAllowlist{
 		Name:        "test-name",
 		Description: "test-description",
 		ProjectId:   "123456789",
@@ -90,11 +90,11 @@ func TestFlattenIPWhitelistResource(t *testing.T) {
 		CreatedAt:   created,
 		IsDeleted:   false,
 	}
-	got := flattenIPWhitelistResource(&cert)
+	got := flattenIPAllowlistResource(&cert)
 	assert.Equal(t, expected, got)
 }
 
-func TestExpandingIPWhitelistResource(t *testing.T) {
+func TestExpandingIPAllowlistResource(t *testing.T) {
 	raw := map[string]interface{}{
 		ipNameFieldName:        "test-name",
 		ipDescriptionFieldName: "test-description",
@@ -104,31 +104,31 @@ func TestExpandingIPWhitelistResource(t *testing.T) {
 	}
 	cidrRange, err := expandStringList(raw[ipCIDRRangeFieldName].([]interface{}))
 	assert.NoError(t, err)
-	s := resourceIPWhitelist().Schema
+	s := resourceIPAllowlist().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
-	whitelist, err := expandToIPWhitelist(data, "123456789")
+	allowlist, err := expandToIPAllowlist(data, "123456789")
 	assert.NoError(t, err)
-	assert.Equal(t, raw[ipNameFieldName], whitelist.GetName())
-	assert.Equal(t, raw[ipDescriptionFieldName], whitelist.GetDescription())
-	assert.Equal(t, raw[ipIsDeletedFieldName], whitelist.GetIsDeleted())
-	assert.Equal(t, raw[ipProjectFieldName], whitelist.GetProjectId())
-	assert.Equal(t, cidrRange, whitelist.GetCidrRanges())
+	assert.Equal(t, raw[ipNameFieldName], allowlist.GetName())
+	assert.Equal(t, raw[ipDescriptionFieldName], allowlist.GetDescription())
+	assert.Equal(t, raw[ipIsDeletedFieldName], allowlist.GetIsDeleted())
+	assert.Equal(t, raw[ipProjectFieldName], allowlist.GetProjectId())
+	assert.Equal(t, cidrRange, allowlist.GetCidrRanges())
 }
 
-func TestExpandingIPWhitelistResourceNameNotDefinedError(t *testing.T) {
+func TestExpandingIPAllowlistResourceNameNotDefinedError(t *testing.T) {
 	raw := map[string]interface{}{
 		ipDescriptionFieldName: "test-description",
 		ipProjectFieldName:     "123456789",
 		ipCIDRRangeFieldName:   []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
 		ipIsDeletedFieldName:   false,
 	}
-	s := resourceIPWhitelist().Schema
+	s := resourceIPAllowlist().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
-	_, err := expandToIPWhitelist(data, "123456789")
+	_, err := expandToIPAllowlist(data, "123456789")
 	assert.EqualError(t, err, "failed to parse field "+ipNameFieldName)
 }
 
-func testAccCheckDestroyIPWhitelist(s *terraform.State) error {
+func testAccCheckDestroyIPAllowlist(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
@@ -137,12 +137,12 @@ func testAccCheckDestroyIPWhitelist(s *terraform.State) error {
 	securityc := security.NewSecurityServiceClient(client.conn)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "oasis_ipwhitelist" {
+		if rs.Type != "oasis_ipallowlist" {
 			continue
 		}
 
-		if _, err := securityc.DeleteIPWhitelist(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); err == nil {
-			return fmt.Errorf("IPWhitelist still present")
+		if _, err := securityc.DeleteIPAllowlist(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); err == nil {
+			return fmt.Errorf("IPAllowlist still present")
 		}
 	}
 
@@ -150,9 +150,9 @@ func testAccCheckDestroyIPWhitelist(s *terraform.State) error {
 }
 
 func testBasicConfig(resource, name, project string) string {
-	return fmt.Sprintf(`resource "oasis_ipwhitelist" "%s" {
+	return fmt.Sprintf(`resource "oasis_ipallowlist" "%s" {
   name = "%s"
-  description = "Terraform Generated IPWhitelist"
+  description = "Terraform Generated IPAllowlist"
   project      = "%s"
   cidr_ranges = ["1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"]
 }`, resource, name, project)

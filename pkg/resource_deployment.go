@@ -43,7 +43,7 @@ const (
 	deplVersionDbVersionFieldName          = "db_version"
 	deplSecurityFieldName                  = "security"
 	deplSecurityCaCertificateFieldName     = "ca_certificate"
-	deplSecurityIpWhitelistFieldName       = "ip_whitelist"
+	deplSecurityIpAllowlistFieldName       = "ip_allowlist"
 	deplConfigurationFieldName             = "configuration"
 	deplConfigurationModelFieldName        = "model"
 	deplConfigurationNodeSizeIdFieldName   = "node_size_id"
@@ -118,9 +118,9 @@ func resourceDeployment() *schema.Resource {
 								return new == ""
 							},
 						},
-						deplSecurityIpWhitelistFieldName: {
+						deplSecurityIpAllowlistFieldName: {
 							Type:     schema.TypeString,
-							Optional: true, // If not set, no whitelist is configured
+							Optional: true, // If not set, no allowlist is configured
 						},
 					},
 				},
@@ -258,7 +258,7 @@ type version struct {
 // security is a convenient wrapper around the security schema for easy parsing
 type securityFields struct {
 	caCertificate string
-	ipWhitelist   string
+	ipAllowlist   string
 }
 
 // configuration is a convenient wrapper around the configuration schema for easy parsing
@@ -324,7 +324,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		RegionId:      loc.region,
 		Version:       ver.dbVersion,
 		Certificates:  &data.Deployment_CertificateSpec{CaCertificateId: sec.caCertificate},
-		IpwhitelistId: sec.ipWhitelist,
+		IpallowlistId: sec.ipAllowlist,
 		Model: &data.Deployment_ModelSpec{
 			Model:        conf.model,
 			NodeCount:    int32(conf.nodeCount),
@@ -367,8 +367,8 @@ func expandSecurity(s []interface{}) (sec securityFields) {
 		if i, ok := item[deplSecurityCaCertificateFieldName]; ok {
 			sec.caCertificate = i.(string)
 		}
-		if i, ok := item[deplSecurityIpWhitelistFieldName]; ok {
-			sec.ipWhitelist = i.(string)
+		if i, ok := item[deplSecurityIpAllowlistFieldName]; ok {
+			sec.ipAllowlist = i.(string)
 		}
 	}
 	return
@@ -452,7 +452,7 @@ func flattenVersion(depl *data.Deployment) []interface{} {
 func flattenSecurity(depl *data.Deployment) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
-			deplSecurityIpWhitelistFieldName:   depl.GetIpwhitelistId(),
+			deplSecurityIpAllowlistFieldName:   depl.GetIpallowlistId(),
 			deplSecurityCaCertificateFieldName: depl.GetCertificates().GetCaCertificateId(),
 		},
 	}
@@ -514,8 +514,8 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		if sec.caCertificate != "" {
 			depl.Certificates.CaCertificateId = sec.caCertificate
 		}
-		if sec.ipWhitelist != "" {
-			depl.IpwhitelistId = sec.ipWhitelist
+		if sec.ipAllowlist != "" {
+			depl.IpallowlistId = sec.ipAllowlist
 		}
 	}
 	if d.HasChange(deplConfigurationFieldName) {

@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	// IP Whiltelist fields
+	// IP Allowlist fields
 	ipNameFieldName        = "name"
 	ipProjectFieldName     = "project"
 	ipDescriptionFieldName = "description"
@@ -41,13 +41,13 @@ const (
 	ipCreatedAtFieldName   = "created_at"
 )
 
-// resourceIPWhitelist defines the IPWhitelist terraform resource Schema.
-func resourceIPWhitelist() *schema.Resource {
+// resourceIPAllowlist defines the IPAllowlist terraform resource Schema.
+func resourceIPAllowlist() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIPWhitelistCreate,
-		Read:   resourceIPWhitelistRead,
-		Update: resourceIPWhitelistUpdate,
-		Delete: resourceIPWhitelistDelete,
+		Create: resourceIPAllowlistCreate,
+		Read:   resourceIPAllowlistRead,
+		Update: resourceIPAllowlistUpdate,
+		Delete: resourceIPAllowlistDelete,
 
 		Schema: map[string]*schema.Schema{
 			ipNameFieldName: {
@@ -85,32 +85,32 @@ func resourceIPWhitelist() *schema.Resource {
 	}
 }
 
-// resourceIPWhitelistCreate handles the creation lifecycle of the IPWhitelist resource
-// sets the ID of a given IPWhitelist once the creation is successful. This will be stored in local terraform store.
-func resourceIPWhitelistCreate(d *schema.ResourceData, m interface{}) error {
+// resourceIPAllowlistCreate handles the creation lifecycle of the IPAllowlist resource
+// sets the ID of a given IPAllowlist once the creation is successful. This will be stored in local terraform store.
+func resourceIPAllowlistCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return err
 	}
 	securityc := security.NewSecurityServiceClient(client.conn)
-	expanded, err := expandToIPWhitelist(d, client.ProjectID)
+	expanded, err := expandToIPAllowlist(d, client.ProjectID)
 	if err != nil {
 		return err
 	}
-	result, err := securityc.CreateIPWhitelist(client.ctxWithToken, expanded)
+	result, err := securityc.CreateIPAllowlist(client.ctxWithToken, expanded)
 	if err != nil {
-		client.log.Error().Err(err).Msg("Failed to create ip whitelist")
+		client.log.Error().Err(err).Msg("Failed to create ip allowlist")
 		return err
 	}
 	if result != nil {
 		d.SetId(result.Id)
 	}
-	return resourceIPWhitelistRead(d, m)
+	return resourceIPAllowlistRead(d, m)
 }
 
-// expandToIPWhitelist creates an ip whitelist oasis structure out of a terraform schema.
-func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*security.IPWhitelist, error) {
+// expandToIPAllowlist creates an ip allowlist oasis structure out of a terraform schema.
+func expandToIPAllowlist(d *schema.ResourceData, defaultProject string) (*security.IPAllowlist, error) {
 	var (
 		name        string
 		description string
@@ -139,7 +139,7 @@ func expandToIPWhitelist(d *schema.ResourceData, defaultProject string) (*securi
 		project = v.(string)
 	}
 
-	return &security.IPWhitelist{
+	return &security.IPAllowlist{
 		Name:        name,
 		Description: description,
 		ProjectId:   project,
@@ -162,8 +162,8 @@ func expandStringList(list []interface{}) ([]string, error) {
 	return cidr, nil
 }
 
-// flattenIPWhitelistResource flattens the ip whitelist data into a map interface for easy storage.
-func flattenIPWhitelistResource(ip *security.IPWhitelist) map[string]interface{} {
+// flattenIPAllowlistResource flattens the ip allowlist data into a map interface for easy storage.
+func flattenIPAllowlistResource(ip *security.IPAllowlist) map[string]interface{} {
 	return map[string]interface{}{
 		ipNameFieldName:        ip.GetName(),
 		ipProjectFieldName:     ip.GetProjectId(),
@@ -174,8 +174,8 @@ func flattenIPWhitelistResource(ip *security.IPWhitelist) map[string]interface{}
 	}
 }
 
-// resourceIPWhitelistRead handles the read lifecycle of the IPWhitelist resource.
-func resourceIPWhitelistRead(d *schema.ResourceData, m interface{}) error {
+// resourceIPAllowlistRead handles the read lifecycle of the IPAllowlist resource.
+func resourceIPAllowlistRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
@@ -183,18 +183,18 @@ func resourceIPWhitelistRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	securityc := security.NewSecurityServiceClient(client.conn)
-	ipWhitelist, err := securityc.GetIPWhitelist(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	ipAllowlist, err := securityc.GetIPAllowlist(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
-		client.log.Error().Err(err).Str("ipwhitelist-id", d.Id()).Msg("Failed to find ip whitelist")
+		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed to find ip allowlist")
 		return err
 	}
-	if ipWhitelist == nil {
-		client.log.Error().Str("ipwhitelist-id", d.Id()).Msg("Failed to find ip whitelist")
+	if ipAllowlist == nil {
+		client.log.Error().Str("ipallowlist-id", d.Id()).Msg("Failed to find ip allowlist")
 		d.SetId("")
 		return nil
 	}
 
-	for k, v := range flattenIPWhitelistResource(ipWhitelist) {
+	for k, v := range flattenIPAllowlistResource(ipAllowlist) {
 		if _, ok := d.GetOk(k); ok {
 			if err := d.Set(k, v); err != nil {
 				return err
@@ -204,8 +204,8 @@ func resourceIPWhitelistRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-// resourceIPWhitelistDelete will be called once the resource is destroyed.
-func resourceIPWhitelistDelete(d *schema.ResourceData, m interface{}) error {
+// resourceIPAllowlistDelete will be called once the resource is destroyed.
+func resourceIPAllowlistDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
@@ -213,16 +213,16 @@ func resourceIPWhitelistDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	securityc := security.NewSecurityServiceClient(client.conn)
-	if _, err := securityc.DeleteIPWhitelist(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
-		client.log.Error().Err(err).Str("ipwhitelist-id", d.Id()).Msg("Failed to delete ip whitelist")
+	if _, err := securityc.DeleteIPAllowlist(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
+		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed to delete ip allowlist")
 		return err
 	}
 	d.SetId("") // called automatically, but added to be explicit
 	return nil
 }
 
-// resourceIPWhitelistUpdate handles the update lifecycle of the IPWhitelist resource.
-func resourceIPWhitelistUpdate(d *schema.ResourceData, m interface{}) error {
+// resourceIPAllowlistUpdate handles the update lifecycle of the IPAllowlist resource.
+func resourceIPAllowlistUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
@@ -230,35 +230,35 @@ func resourceIPWhitelistUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	securityc := security.NewSecurityServiceClient(client.conn)
-	ipWhitelist, err := securityc.GetIPWhitelist(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	ipAllowlist, err := securityc.GetIPAllowlist(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
-		client.log.Error().Err(err).Str("ipwhitelist-id", d.Id()).Msg("Failed get ip whitelist")
+		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed get ip allowlist")
 		return err
 	}
-	if ipWhitelist == nil {
-		client.log.Error().Str("ipwhitelist-id", d.Id()).Msg("Failed to find certificate")
+	if ipAllowlist == nil {
+		client.log.Error().Str("ipallowlist-id", d.Id()).Msg("Failed to find certificate")
 		d.SetId("")
 		return nil
 	}
 
 	if d.HasChange(ipNameFieldName) {
-		ipWhitelist.Name = d.Get(ipNameFieldName).(string)
+		ipAllowlist.Name = d.Get(ipNameFieldName).(string)
 	}
 	if d.HasChange(ipDescriptionFieldName) {
-		ipWhitelist.Description = d.Get(ipDescriptionFieldName).(string)
+		ipAllowlist.Description = d.Get(ipDescriptionFieldName).(string)
 	}
 	if d.HasChange(ipCIDRRangeFieldName) {
 		cidrRange, err := expandStringList(d.Get(ipCIDRRangeFieldName).([]interface{}))
 		if err != nil {
 			return err
 		}
-		ipWhitelist.CidrRanges = cidrRange
+		ipAllowlist.CidrRanges = cidrRange
 	}
-	res, err := securityc.UpdateIPWhitelist(client.ctxWithToken, ipWhitelist)
+	res, err := securityc.UpdateIPAllowlist(client.ctxWithToken, ipAllowlist)
 	if err != nil {
-		client.log.Error().Err(err).Str("ipwhitelist-id", d.Id()).Msg("Failed to update ip whitelist")
+		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed to update ip allowlist")
 		return err
 	}
 	d.SetId(res.Id)
-	return resourceIPWhitelistRead(d, m)
+	return resourceIPAllowlistRead(d, m)
 }
