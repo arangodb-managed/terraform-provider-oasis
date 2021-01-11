@@ -15,11 +15,11 @@ resource "oasis_project" "my_project" {
   description = "Project description"
 }
 
-// Terraform created ip whitelist. This resource uses the computed ID value of the
+// Terraform created ip allowlist. This resource uses the computed ID value of the
 // previously defined project resource.
-resource "oasis_ipwhitelist" "my_iplist" {
-  name        = "Terraform IP Whitelist"
-  description = "IP Whitelist description"
+resource "oasis_ipallowlist" "my_iplist" {
+  name        = "Terraform IP Allowlist"
+  description = "IP Allowlist description"
   cidr_ranges = ["1.2.3.4/32", "111.11.0.0/16", "0.0.0.0/0"]
   project     = oasis_project.my_project.id
 }
@@ -27,7 +27,7 @@ resource "oasis_ipwhitelist" "my_iplist" {
 // Terraform created deployment. For all fields, please consult `terraform providers schema`
 // or the code.
 // This resource uses the computed project ID of the previously defined project resource,
-// and two other resources, ip whitelist and the certificate.
+// and two other resources, ip allowlist and the certificate.
 resource "oasis_deployment" "my_oneshard_deployment" {
   name        = "Terraform Deployment"
   description = "Deployment description"
@@ -43,7 +43,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     node_count = 3
   }
   security {
-    ip_whitelist   = oasis_ipwhitelist.my_iplist.id
+    ip_allowlist   = oasis_ipallowlist.my_iplist.id
     ca_certificate = oasis_certificate.my_oasis_cert.id
   }
 }

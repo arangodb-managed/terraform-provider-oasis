@@ -41,7 +41,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
-		IpwhitelistId: "ip-whitelist",
+		IpallowlistId: "ip-allowlist",
 		Model: &data.Deployment_ModelSpec{
 			Model:        "oneshard",
 			NodeSizeId:   "a8",
@@ -67,7 +67,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		deplSecurityFieldName: []interface{}{
 			map[string]interface{}{
 				deplSecurityCaCertificateFieldName: "certificate-id",
-				deplSecurityIpWhitelistFieldName:   "ip-whitelist",
+				deplSecurityIpAllowlistFieldName:   "ip-allowlist",
 			},
 		},
 		deplConfigurationFieldName: []interface{}{
@@ -92,7 +92,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
-		IpwhitelistId: "ip-whitelist",
+		IpallowlistId: "ip-allowlist",
 		Model: &data.Deployment_ModelSpec{
 			Model:        "oneshard",
 			NodeSizeId:   "a8",
@@ -117,7 +117,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		deplSecurityFieldName: []interface{}{
 			map[string]interface{}{
 				deplSecurityCaCertificateFieldName: "certificate-id",
-				deplSecurityIpWhitelistFieldName:   "ip-whitelist",
+				deplSecurityIpAllowlistFieldName:   "ip-allowlist",
 			},
 		},
 		deplConfigurationFieldName: []interface{}{
@@ -146,7 +146,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
-		IpwhitelistId: "ip-whitelist",
+		IpallowlistId: "ip-allowlist",
 		Model: &data.Deployment_ModelSpec{
 			Model:        "oneshard",
 			NodeSizeId:   "a8",
@@ -171,7 +171,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 		deplSecurityFieldName: []interface{}{
 			map[string]interface{}{
 				deplSecurityCaCertificateFieldName: "certificate-id",
-				deplSecurityIpWhitelistFieldName:   "ip-whitelist",
+				deplSecurityIpAllowlistFieldName:   "ip-allowlist",
 			},
 		},
 		deplConfigurationFieldName: []interface{}{

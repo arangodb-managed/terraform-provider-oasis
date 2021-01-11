@@ -67,7 +67,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
 
   security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
-    ip_whitelist = "" // If not set, no whitelist is configured
+    ip_allowlist = "" // If not set, no allowlist is configured
   }
 
   configuration {
@@ -90,7 +90,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
 
   security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
-    ip_whitelist = "" // If not set, no whitelist is configured
+    ip_allowlist = "" // If not set, no allowlist is configured
   }
 
   configuration {
@@ -111,7 +111,7 @@ resource "oasis_deployment" "my_sharded_deployment" {
 
   security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
-    ip_whitelist = "" // If not set, no whitelist is configured
+    ip_allowlist = "" // If not set, no allowlist is configured
   }
 
   configuration {
