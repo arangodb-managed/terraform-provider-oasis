@@ -235,9 +235,6 @@ func testDeploymentConfig(resource, name, project string) string {
 	location {
 	  region = "gcp-europe-west4"
 	}
-	version {
-	  db_version = "3.6.0"
-	}
 	configuration {
 	  model      = "oneshard"
 	  node_count = 3

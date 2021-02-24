@@ -25,7 +25,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.6.2.2"
+    // db_version = "3.6.2.2" // This is an optional field, if not set the default version will be used
   }
   configuration {
     model = "oneshard"

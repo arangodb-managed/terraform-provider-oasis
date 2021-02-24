@@ -97,13 +97,19 @@ func resourceDeployment() *schema.Resource {
 
 			deplVersionFieldName: {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return old == "1" && new == "0"
+				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplVersionDbVersionFieldName: {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return new == ""
+							},
 						},
 					},
 				},
@@ -196,6 +202,14 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	expandedDepl, err := expandDeploymentResource(d, client.ProjectID)
 	if err != nil {
 		return err
+	}
+	if expandedDepl.Version == "" {
+		defaultVersion, err := datac.GetDefaultVersion(client.ctxWithToken, &common.Empty{})
+		if err != nil {
+			client.log.Error().Err(err).Msg("Failed to get default version")
+			return err
+		}
+		expandedDepl.Version = defaultVersion.Version
 	}
 	if expandedDepl.Certificates.CaCertificateId == "" {
 		cryptoc := crypto.NewCryptoServiceClient(client.conn)
@@ -335,8 +349,6 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		if ver, err = expandVersion(v.([]interface{})); err != nil {
 			return nil, err
 		}
-	} else {
-		return nil, fmt.Errorf("unable to find parse field %s", deplVersionFieldName)
 	}
 	if v, ok := d.GetOk(deplSecurityFieldName); ok {
 		sec = expandSecurity(v.([]interface{}))
@@ -385,8 +397,6 @@ func expandVersion(s []interface{}) (ver version, err error) {
 		item := v.(map[string]interface{})
 		if i, ok := item[deplVersionDbVersionFieldName]; ok {
 			ver.dbVersion = i.(string)
-		} else {
-			return ver, fmt.Errorf("failed to parse field %s", deplVersionDbVersionFieldName)
 		}
 	}
 	return
