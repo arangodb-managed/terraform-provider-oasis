@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
 // Author Gergely Brautigam
+// Author Robert Stam
 //
 
 package pkg
@@ -31,9 +32,11 @@ import (
 	common "github.com/arangodb-managed/apis/common/v1"
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
 	data "github.com/arangodb-managed/apis/data/v1"
+	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
 const (
+	deplTAndCAcceptedFieldName             = "terms_and_conditions_accepted"
 	deplProjectFieldName                   = "project"
 	deplNameFieldName                      = "name"
 	deplDescriptionFieldName               = "description"
@@ -59,6 +62,10 @@ func resourceDeployment() *schema.Resource {
 		Delete: resourceDeploymentDelete,
 
 		Schema: map[string]*schema.Schema{
+			deplTAndCAcceptedFieldName: {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
 			deplProjectFieldName: { // If set here, overrides project in provider
 				Type:     schema.TypeString,
 				Optional: true,
@@ -174,6 +181,17 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	// Check if the T&C has been accepted
+	if v, ok := d.GetOk(deplTAndCAcceptedFieldName); ok {
+		if !v.(bool) {
+			client.log.Error().Str("name", deplTAndCAcceptedFieldName).Msg("Field should be set to accept Terms and Conditions")
+			return fmt.Errorf("Field '%s' should be set to accept Terms and Conditions", deplTAndCAcceptedFieldName)
+		}
+	} else {
+		client.log.Error().Str("name", deplTAndCAcceptedFieldName).Msg("Unable to find field, which is required to accept Terms and Conditions")
+		return fmt.Errorf("Unable to find field %s", deplTAndCAcceptedFieldName)
+	}
+
 	datac := data.NewDataServiceClient(client.conn)
 	expandedDepl, err := expandDeploymentResource(d, client.ProjectID)
 	if err != nil {
@@ -236,8 +254,22 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 		expandedDepl.Model.NodeCount = 3
 	}
 
+	rmc := rm.NewResourceManagerServiceClient(client.conn)
+	proj, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: expandedDepl.GetProjectId()})
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to get project")
+		return err
+	}
+	tAndC, err := rmc.GetCurrentTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: proj.GetOrganizationId()})
+	if err != nil {
+		client.log.Error().Err(err).Msg("Failed to get Terms and Conditions")
+		return err
+	}
+	client.log.Info().Str("id", tAndC.GetId()).Msg("Terms and Conditions are accepted")
+	expandedDepl.AcceptedTermsAndConditionsId = tAndC.GetId()
+
 	if depl, err := datac.CreateDeployment(client.ctxWithToken, expandedDepl); err != nil {
-		client.log.Error().Err(err).Msg("Failed to create deplyoment.")
+		client.log.Error().Err(err).Msg("Failed to create deployment.")
 		return err
 	} else {
 		d.SetId(depl.GetId())

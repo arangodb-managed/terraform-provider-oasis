@@ -18,6 +18,7 @@ data "oasis_project" "my_project" {
  * Create a deployment.
  */
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   name    = "Test Terraform Deployment"
   project = data.oasis_project.my_project.id
   location {

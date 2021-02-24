@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,18 +18,53 @@
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
 // Author Gergely Brautigam
+// Author Robert Stam
 //
 
 package pkg
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/stretchr/testify/assert"
 
+	common "github.com/arangodb-managed/apis/common/v1"
 	data "github.com/arangodb-managed/apis/data/v1"
 )
+
+func TestResourceDeployment(t *testing.T) {
+	if _, ok := os.LookupEnv("TF_ACC"); !ok {
+		t.Skip()
+	}
+	t.Parallel()
+
+	res := "terraform-deployment-" + acctest.RandString(10)
+	name := "deployment-" + acctest.RandString(10)
+	orgID, err := FetchOrganizationID(testAccProvider)
+	assert.NoError(t, err)
+	pid, err := FetchProjectID(orgID, testAccProvider)
+	assert.NoError(t, err)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDestroyDeployment,
+		Steps: []resource.TestStep{
+			{
+				Config: testDeploymentConfig(res, name, pid),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("oasis_deployment."+res, deplNameFieldName, name),
+				),
+			},
+		},
+	})
+}
 
 func TestFlattenDeploymentResource(t *testing.T) {
 	depl := &data.Deployment{
@@ -188,4 +223,44 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 	expandedDepl, err := expandDeploymentResource(resourceData, "thisshouldbeoverriden")
 	assert.NoError(t, err)
 	assert.Equal(t, depl, expandedDepl)
+}
+
+func testDeploymentConfig(resource, name, project string) string {
+	return fmt.Sprintf(`resource "oasis_deployment" "%s" {
+	terms_and_conditions_accepted = "true"
+	name        = "%s"
+	description = "Terraform Generated Deployment"
+	project     = "%s"
+	location {
+	  region = "gcp-europe-west4"
+	}
+	version {
+	  db_version = "3.6.0"
+	}
+	configuration {
+	  model      = "oneshard"
+	  node_count = 3
+	}
+  }`, resource, name, project)
+}
+
+func testAccCheckDestroyDeployment(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+	datac := data.NewDataServiceClient(client.conn)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "oasis_ipallowlist" {
+			continue
+		}
+
+		if _, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
+			return fmt.Errorf("Deployment still present")
+		}
+	}
+
+	return nil
 }

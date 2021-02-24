@@ -26,6 +26,7 @@ resource "oasis_project" "my_project" {
 
 // Create / Read an oasis deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   name    = "Test Terraform Deployment"
   project = oasis_project.my_project.id
   location {

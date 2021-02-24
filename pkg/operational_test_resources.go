@@ -24,6 +24,7 @@ package pkg
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -34,25 +35,11 @@ import (
 
 // FetchOrganizationID finds and retrieves the first Organization ID it finds for a user.
 func FetchOrganizationID(testAccProvider *schema.Provider) (string, error) {
-	// Initialize Client with connection settings
-	if err := testAccProvider.Configure(terraform.NewResourceConfigRaw(nil)); err != nil {
-		return "", err
+	if _, ok := os.LookupEnv("OASIS_TEST_ORGANIZATION_ID"); !ok {
+		return "" , fmt.Errorf("This test requires an organization id to be set.")
 	}
-	client := testAccProvider.Meta().(*Client)
-	if err := client.Connect(); err != nil {
-		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return "", err
-	}
-	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	if organizations, err := rmc.ListOrganizations(client.ctxWithToken, &common.ListOptions{}); err != nil {
-		client.log.Error().Err(err).Msg("Failed to list organizations")
-		return "", err
-	} else if len(organizations.GetItems()) < 1 {
-		client.log.Error().Err(err).Msg("No organizations found")
-		return "", fmt.Errorf("no organizations found")
-	} else {
-		return organizations.GetItems()[0].GetId(), nil
-	}
+	orgID := os.Getenv("OASIS_TEST_ORGANIZATION_ID")
+	return orgID, nil
 }
 
 // FetchProjectID will find the first project given an organization and retrieve its ID.

@@ -58,6 +58,7 @@ resource "oasis_ipallowlist" "my_iplist" {
 // This deployment is of type oneshard and defines 3 database nodes. Though note that the node_count
 // field is actually optional.
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   name        = "terraform-deployment"
   description = "Description of the deployment"
   project     = data.oasis_project.my_project.id

@@ -28,8 +28,8 @@ make
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.10.x
-- [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 0.11.x
+- [Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
 
 ## Usage
 
@@ -57,6 +57,7 @@ provider "oasis" {
 
 // Example of oneshard deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   project = "190765139" // If set here, overrides project in provider
   location {
     region = "gcp-europe-west4" // Required
@@ -79,6 +80,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
 
 // Example of oneshard deployment without node specification
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   project = "190765139" // If set here, overrides project in provider
   location {
     region = "gcp-europe-west4" // Required
@@ -100,6 +102,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
 
 // Example of a sharded deployment
 resource "oasis_deployment" "my_sharded_deployment" {
+  terms_and_conditions_accepted = "true"
   project = "190765139" // If set here, overrides project in provider
   location {
     region = "gcp-eu-west4" // Required
@@ -169,15 +172,15 @@ executed. *NOTE* that these tests create real deployments, projects and organiza
 
 Some of them may require additional environment properties to work. I.e.:
 
-```dotenv
-OASIS_TEST_ORGANIZATION_ID=123456789
+```bash
+export OASIS_TEST_ORGANIZATION_ID=123456789
 ```
 
 All of them require the following two environment properties to be set:
 
-```dotenv
-OASIS_API_KEY_ID=<your_key_id>
-OASIS_API_KEY_SECRET=<your_key_secret>
+```bash
+export OASIS_API_KEY_ID=<your_key_id>
+export OASIS_API_KEY_SECRET=<your_key_secret>
 ```
 
 ## Examples

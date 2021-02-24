@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
 // Author Gergely Brautigam
+// Author Robert Stam
 //
 
 package pkg
@@ -114,7 +115,7 @@ func testAccCheckDestroyProject(s *terraform.State) error {
 			continue
 		}
 
-		if _, err := rmc.DeleteProject(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); err == nil {
+		if _, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
 			return fmt.Errorf("project still present")
 		}
 	}
