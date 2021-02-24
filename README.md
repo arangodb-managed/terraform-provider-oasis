@@ -29,7 +29,7 @@ make
 ## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.11.x
-- [Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
+- [Go](https://golang.org/doc/install) 1.16 (to build the provider plugin)
 
 ## Usage
 
@@ -62,8 +62,8 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   location {
     region = "gcp-europe-west4" // Required
   }
-  version {
-    db_version = "3.6.0" // Required
+  version { // this section is optional
+    db_version = "3.6.0" // This is an optional field, if not set the default version will be used
   }
 
   security { // this section is optional
@@ -86,8 +86,8 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4" // Required
   }
 
-  version {
-    db_version = "3.6.0" // Required
+  version { // this section is optional
+    db_version = "3.6.0" // This is an optional field, if not set the default version will be used
   }
 
   security { // this section is optional
@@ -108,8 +108,8 @@ resource "oasis_deployment" "my_sharded_deployment" {
     region = "gcp-eu-west4" // Required
   }
 
-  version {
-    db_version = "3.6.0" // Required
+  version {  // this section is optional
+    db_version = "3.6.0" // This is an optional field, if not set the default version will be used
   }
 
   security { // this section is optional
