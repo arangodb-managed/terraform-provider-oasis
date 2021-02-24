@@ -45,7 +45,7 @@ func Provider() *schema.Provider {
 			"oasis_endpoint": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OASIS_ENDPOINT", "api.cloud.adbtest.xyz"),
+				DefaultFunc: schema.EnvDefaultFunc("OASIS_ENDPOINT", "api.cloud.arangodb.com"),
 				Description: "OASIS API ENDPOINT",
 			},
 			"api_port_suffix": {
