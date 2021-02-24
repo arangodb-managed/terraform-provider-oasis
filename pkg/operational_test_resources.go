@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
 // Author Gergely Brautigam
+// Author Robert Stam
 //
 
 package pkg
@@ -36,7 +37,7 @@ import (
 // FetchOrganizationID finds and retrieves the first Organization ID it finds for a user.
 func FetchOrganizationID(testAccProvider *schema.Provider) (string, error) {
 	if _, ok := os.LookupEnv("OASIS_TEST_ORGANIZATION_ID"); !ok {
-		return "" , fmt.Errorf("This test requires an organization id to be set.")
+		return "", fmt.Errorf("This test requires an organization id to be set.")
 	}
 	orgID := os.Getenv("OASIS_TEST_ORGANIZATION_ID")
 	return orgID, nil
