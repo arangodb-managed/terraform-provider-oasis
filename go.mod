@@ -11,7 +11,7 @@ require (
 	google.golang.org/grpc v1.29.1
 )
 
-go 1.13
+go 1.16
 
 replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.0.1+incompatible
 
