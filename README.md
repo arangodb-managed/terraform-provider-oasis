@@ -121,7 +121,7 @@ resource "oasis_deployment" "my_sharded_deployment" {
     model = "sharded"
     node_size_id = "a4"
     node_disk_size = 20
-    num_nodes = 5
+    node_count = 5
   }
 }
 ```
