@@ -58,6 +58,7 @@ resource "oasis_ipallowlist" "my_iplist" {
 // This deployment is of type oneshard and defines 3 database nodes. Though note that the node_count
 // field is actually optional.
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   name        = "terraform-deployment"
   description = "Description of the deployment"
   project     = data.oasis_project.my_project.id
@@ -65,7 +66,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.6.0"
+    // db_version = "3.6.0" // This is an optional field, if not set the default version will be used
   }
   configuration {
     model      = "oneshard"

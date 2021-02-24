@@ -29,6 +29,7 @@ resource "oasis_ipallowlist" "my_iplist" {
 // This resource uses the computed project ID of the previously defined project resource,
 // and two other resources, ip allowlist and the certificate.
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   name        = "Terraform Deployment"
   description = "Deployment description"
   project     = oasis_project.my_project.id
@@ -36,7 +37,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.6.0"
+    // db_version = "3.6.0" // This is an optional field, if not set the default version will be used
   }
   configuration {
     model      = "oneshard"

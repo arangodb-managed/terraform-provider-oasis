@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
 // Author Gergely Brautigam
+// Author Robert Stam
 //
 
 package pkg
@@ -34,6 +35,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
@@ -48,7 +50,7 @@ func TestResourceCreateProject(t *testing.T) {
 	res := "terraform-project-" + acctest.RandString(10)
 	name := "terraform-project-name" + acctest.RandString(10)
 	orgID, err := FetchOrganizationID(testAccProvider)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -114,7 +116,7 @@ func testAccCheckDestroyProject(s *terraform.State) error {
 			continue
 		}
 
-		if _, err := rmc.DeleteProject(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); err == nil {
+		if _, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
 			return fmt.Errorf("project still present")
 		}
 	}

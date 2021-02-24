@@ -24,13 +24,14 @@ resource "oasis_project" "my_project" {
  * node memory and node count.
  */
 resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
   name    = "Test Terraform Deployment"
   project = oasis_project.my_project.id
   location {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.6.0"
+    // db_version = "3.6.0" // This is an optional field, if not set the default version will be used
   }
   configuration {
     model = "oneshard"
