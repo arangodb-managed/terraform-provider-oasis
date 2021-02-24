@@ -33,6 +33,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	data "github.com/arangodb-managed/apis/data/v1"
@@ -47,9 +48,9 @@ func TestResourceDeployment(t *testing.T) {
 	res := "terraform-deployment-" + acctest.RandString(10)
 	name := "deployment-" + acctest.RandString(10)
 	orgID, err := FetchOrganizationID(testAccProvider)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pid, err := FetchProjectID(orgID, testAccProvider)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

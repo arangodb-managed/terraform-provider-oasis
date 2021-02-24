@@ -35,6 +35,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
@@ -49,7 +50,7 @@ func TestResourceCreateProject(t *testing.T) {
 	res := "terraform-project-" + acctest.RandString(10)
 	name := "terraform-project-name" + acctest.RandString(10)
 	orgID, err := FetchOrganizationID(testAccProvider)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

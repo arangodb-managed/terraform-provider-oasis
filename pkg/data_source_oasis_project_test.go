@@ -32,6 +32,7 @@ import (
 	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
@@ -41,7 +42,7 @@ func TestOasisProjectDataSource_Basic(t *testing.T) {
 		t.Skip()
 	}
 	orgID, err := FetchOrganizationID(testAccProvider)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pid, err := FetchProjectID(orgID, testAccProvider)
 	if err != nil {
 		t.Fatal(err)

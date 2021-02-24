@@ -36,10 +36,10 @@ import (
 
 // FetchOrganizationID finds and retrieves the first Organization ID it finds for a user.
 func FetchOrganizationID(testAccProvider *schema.Provider) (string, error) {
-	if _, ok := os.LookupEnv("OASIS_TEST_ORGANIZATION_ID"); !ok {
+	orgID := os.Getenv("OASIS_TEST_ORGANIZATION_ID")
+	if orgID == "" {
 		return "", fmt.Errorf("This test requires an organization id to be set.")
 	}
-	orgID := os.Getenv("OASIS_TEST_ORGANIZATION_ID")
 	return orgID, nil
 }
 
