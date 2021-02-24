@@ -2,13 +2,24 @@ module github.com/arangodb-managed/terraform-provider-oasis
 
 require (
 	github.com/arangodb-managed/apis v0.59.0
-	github.com/arangodb-managed/log-helper v0.1.4
+	github.com/arangodb-managed/log-helper v0.2.0
 	github.com/gogo/protobuf v1.3.0
+	github.com/golang/protobuf v1.4.1 // indirect
+	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/terraform-plugin-sdk v1.4.1
-	github.com/rs/zerolog v1.17.2
-	github.com/stretchr/testify v1.4.0
+	github.com/hashicorp/terraform-plugin-sdk v1.16.0
+	github.com/kr/text v0.2.0 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/rs/zerolog v1.19.0
+	github.com/sergi/go-diff v1.1.0 // indirect
+	github.com/stretchr/testify v1.6.1
+	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a // indirect
+	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
+	google.golang.org/appengine v1.6.5 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	google.golang.org/grpc v1.29.1
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 )
 
 go 1.16
