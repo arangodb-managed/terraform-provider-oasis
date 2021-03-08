@@ -17,9 +17,6 @@ jobs:
       - restore_cache:
           keys:
             - go-mod-v1-{{ checksum "go.sum.orig" }}
-      - run: |
-          go get
-          make bootstrap
       - when:
           condition: <<parameters.update_modules>>
           steps:
@@ -49,8 +46,6 @@ jobs:
           keys:
             - go-mod-v1-{{ checksum "go.sum.orig" }}
       - run: |
-          go get
-          make bootstrap
           make all
       - run:
           name: "Publish Release on GitHub"
