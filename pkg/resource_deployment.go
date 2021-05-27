@@ -19,6 +19,7 @@
 //
 // Author Gergely Brautigam
 // Author Robert Stam
+// Author Marcin Swiderski
 //
 
 package pkg
