@@ -267,6 +267,9 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	if expandedDepl.Model.NodeCount == 0 {
 		expandedDepl.Model.NodeCount = 3
 	}
+	if expandedDepl.GetModel().GetModel() == data.ModelDeveloper {
+		expandedDepl.Model.NodeCount = 1
+	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
 	proj, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: expandedDepl.GetProjectId()})
@@ -381,11 +384,12 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 // expandLocation gathers location data from the terraform store
 func expandLocation(s []interface{}) (loc location, err error) {
 	for _, v := range s {
-		item := v.(map[string]interface{})
-		if i, ok := item[deplLocationRegionFieldName]; ok {
-			loc.region = i.(string)
-		} else {
-			return loc, fmt.Errorf("failed to parse field %s", deplLocationFieldName)
+		if item, ok := v.(map[string]interface{}); ok {
+			if i, ok := item[deplLocationRegionFieldName]; ok {
+				loc.region = i.(string)
+			} else {
+				return loc, fmt.Errorf("failed to parse field %s", deplLocationFieldName)
+			}
 		}
 	}
 	return
@@ -394,9 +398,10 @@ func expandLocation(s []interface{}) (loc location, err error) {
 // expandVersion gathers version and security data from the terraform store
 func expandVersion(s []interface{}) (ver version, err error) {
 	for _, v := range s {
-		item := v.(map[string]interface{})
-		if i, ok := item[deplVersionDbVersionFieldName]; ok {
-			ver.dbVersion = i.(string)
+		if item, ok := v.(map[string]interface{}); ok {
+			if i, ok := item[deplVersionDbVersionFieldName]; ok {
+				ver.dbVersion = i.(string)
+			}
 		}
 	}
 	return
