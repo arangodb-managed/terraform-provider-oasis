@@ -20,6 +20,7 @@
 // Author Gergely Brautigam
 // Author Robert Stam
 // Author Marcin Swiderski
+// Author Ewout Prangsma
 //
 
 package pkg
@@ -37,22 +38,23 @@ import (
 )
 
 const (
-	deplTAndCAcceptedFieldName             = "terms_and_conditions_accepted"
-	deplProjectFieldName                   = "project"
-	deplNameFieldName                      = "name"
-	deplDescriptionFieldName               = "description"
-	deplLocationFieldName                  = "location"
-	deplLocationRegionFieldName            = "region"
-	deplVersionFieldName                   = "version"
-	deplVersionDbVersionFieldName          = "db_version"
-	deplSecurityFieldName                  = "security"
-	deplSecurityCaCertificateFieldName     = "ca_certificate"
-	deplSecurityIpAllowlistFieldName       = "ip_allowlist"
-	deplConfigurationFieldName             = "configuration"
-	deplConfigurationModelFieldName        = "model"
-	deplConfigurationNodeSizeIdFieldName   = "node_size_id"
-	deplConfigurationNodeCountFieldName    = "node_count"
-	deplConfigurationNodeDiskSizeFieldName = "node_disk_size"
+	deplTAndCAcceptedFieldName                     = "terms_and_conditions_accepted"
+	deplProjectFieldName                           = "project"
+	deplNameFieldName                              = "name"
+	deplDescriptionFieldName                       = "description"
+	deplLocationFieldName                          = "location"
+	deplLocationRegionFieldName                    = "region"
+	deplVersionFieldName                           = "version"
+	deplVersionDbVersionFieldName                  = "db_version"
+	deplSecurityFieldName                          = "security"
+	deplSecurityCaCertificateFieldName             = "ca_certificate"
+	deplSecurityIpAllowlistFieldName               = "ip_allowlist"
+	deplSecurityDisableFoxxAuthenticationFieldName = "disable_foxx_authentication"
+	deplConfigurationFieldName                     = "configuration"
+	deplConfigurationModelFieldName                = "model"
+	deplConfigurationNodeSizeIdFieldName           = "node_size_id"
+	deplConfigurationNodeCountFieldName            = "node_count"
+	deplConfigurationNodeDiskSizeFieldName         = "node_disk_size"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -135,6 +137,10 @@ func resourceDeployment() *schema.Resource {
 						deplSecurityIpAllowlistFieldName: {
 							Type:     schema.TypeString,
 							Optional: true, // If not set, no allowlist is configured
+						},
+						deplSecurityDisableFoxxAuthenticationFieldName: {
+							Type:     schema.TypeBool,
+							Optional: true, // If not set, defaults to enabling foxx authentication
 						},
 					},
 				},
@@ -307,8 +313,9 @@ type version struct {
 
 // security is a convenient wrapper around the security schema for easy parsing
 type securityFields struct {
-	caCertificate string
-	ipAllowlist   string
+	caCertificate             string
+	ipAllowlist               string
+	disableFoxxAuthentication bool
 }
 
 // configuration is a convenient wrapper around the configuration schema for easy parsing
@@ -366,13 +373,14 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 	}
 
 	return &data.Deployment{
-		Name:          name,
-		Description:   description,
-		ProjectId:     project,
-		RegionId:      loc.region,
-		Version:       ver.dbVersion,
-		Certificates:  &data.Deployment_CertificateSpec{CaCertificateId: sec.caCertificate},
-		IpallowlistId: sec.ipAllowlist,
+		Name:                      name,
+		Description:               description,
+		ProjectId:                 project,
+		RegionId:                  loc.region,
+		Version:                   ver.dbVersion,
+		Certificates:              &data.Deployment_CertificateSpec{CaCertificateId: sec.caCertificate},
+		IpallowlistId:             sec.ipAllowlist,
+		DisableFoxxAuthentication: sec.disableFoxxAuthentication,
 		Model: &data.Deployment_ModelSpec{
 			Model:        conf.model,
 			NodeCount:    int32(conf.nodeCount),
@@ -417,6 +425,9 @@ func expandSecurity(s []interface{}) (sec securityFields) {
 		}
 		if i, ok := item[deplSecurityIpAllowlistFieldName]; ok {
 			sec.ipAllowlist = i.(string)
+		}
+		if i, ok := item[deplSecurityDisableFoxxAuthenticationFieldName]; ok {
+			sec.disableFoxxAuthentication = i.(bool)
 		}
 	}
 	return
@@ -500,8 +511,9 @@ func flattenVersion(depl *data.Deployment) []interface{} {
 func flattenSecurity(depl *data.Deployment) []interface{} {
 	return []interface{}{
 		map[string]interface{}{
-			deplSecurityIpAllowlistFieldName:   depl.GetIpallowlistId(),
-			deplSecurityCaCertificateFieldName: depl.GetCertificates().GetCaCertificateId(),
+			deplSecurityIpAllowlistFieldName:               depl.GetIpallowlistId(),
+			deplSecurityCaCertificateFieldName:             depl.GetCertificates().GetCaCertificateId(),
+			deplSecurityDisableFoxxAuthenticationFieldName: depl.GetDisableFoxxAuthentication(),
 		},
 	}
 }
