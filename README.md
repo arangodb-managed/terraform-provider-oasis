@@ -69,6 +69,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   security { // this section is optional
     ca_certificate = "" // If not set, uses default certificate from project
     ip_allowlist = "" // If not set, no allowlist is configured
+    disable_foxx_authentication = false // If set to true, request to Foxx apps are not authentications.
   }
 
   configuration {
