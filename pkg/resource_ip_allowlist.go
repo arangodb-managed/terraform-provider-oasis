@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
 // Author Gergely Brautigam
+// Author Ewout Prangsma
 //
 
 package pkg
@@ -33,12 +34,13 @@ import (
 
 const (
 	// IP Allowlist fields
-	ipNameFieldName        = "name"
-	ipProjectFieldName     = "project"
-	ipDescriptionFieldName = "description"
-	ipCIDRRangeFieldName   = "cidr_ranges"
-	ipIsDeletedFieldName   = "is_deleted"
-	ipCreatedAtFieldName   = "created_at"
+	ipNameFieldName                    = "name"
+	ipProjectFieldName                 = "project"
+	ipDescriptionFieldName             = "description"
+	ipCIDRRangeFieldName               = "cidr_ranges"
+	ipIsDeletedFieldName               = "is_deleted"
+	ipCreatedAtFieldName               = "created_at"
+	ipRemoteInspectionAllowedFieldName = "remote_inspection_allowed"
 )
 
 // resourceIPAllowlist defines the IPAllowlist terraform resource Schema.
@@ -70,6 +72,11 @@ func resourceIPAllowlist() *schema.Resource {
 				Required: true,
 				MinItems: 1,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			ipRemoteInspectionAllowedFieldName: {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 
 			ipIsDeletedFieldName: {
@@ -112,10 +119,11 @@ func resourceIPAllowlistCreate(d *schema.ResourceData, m interface{}) error {
 // expandToIPAllowlist creates an ip allowlist oasis structure out of a terraform schema.
 func expandToIPAllowlist(d *schema.ResourceData, defaultProject string) (*security.IPAllowlist, error) {
 	var (
-		name        string
-		description string
-		cidrRange   []string
-		err         error
+		name                    string
+		description             string
+		cidrRange               []string
+		remoteInspectionAllowed bool
+		err                     error
 	)
 	if v, ok := d.GetOk(ipNameFieldName); ok {
 		name = v.(string)
@@ -130,6 +138,11 @@ func expandToIPAllowlist(d *schema.ResourceData, defaultProject string) (*securi
 	} else {
 		return nil, fmt.Errorf("failed to parse field %s", ipNameFieldName)
 	}
+	if v, ok := d.GetOk(ipRemoteInspectionAllowedFieldName); ok {
+		remoteInspectionAllowed = v.(bool)
+	} else {
+		return nil, fmt.Errorf("failed to parse field %s", ipRemoteInspectionAllowedFieldName)
+	}
 	project := defaultProject
 	if v, ok := d.GetOk(ipDescriptionFieldName); ok {
 		description = v.(string)
@@ -140,10 +153,11 @@ func expandToIPAllowlist(d *schema.ResourceData, defaultProject string) (*securi
 	}
 
 	return &security.IPAllowlist{
-		Name:        name,
-		Description: description,
-		ProjectId:   project,
-		CidrRanges:  cidrRange,
+		Name:                    name,
+		Description:             description,
+		ProjectId:               project,
+		CidrRanges:              cidrRange,
+		RemoteInspectionAllowed: remoteInspectionAllowed,
 	}, nil
 }
 
@@ -165,12 +179,13 @@ func expandStringList(list []interface{}) ([]string, error) {
 // flattenIPAllowlistResource flattens the ip allowlist data into a map interface for easy storage.
 func flattenIPAllowlistResource(ip *security.IPAllowlist) map[string]interface{} {
 	return map[string]interface{}{
-		ipNameFieldName:        ip.GetName(),
-		ipProjectFieldName:     ip.GetProjectId(),
-		ipDescriptionFieldName: ip.GetDescription(),
-		ipCIDRRangeFieldName:   ip.GetCidrRanges(),
-		ipCreatedAtFieldName:   ip.GetCreatedAt().String(),
-		ipIsDeletedFieldName:   ip.GetIsDeleted(),
+		ipNameFieldName:                    ip.GetName(),
+		ipProjectFieldName:                 ip.GetProjectId(),
+		ipDescriptionFieldName:             ip.GetDescription(),
+		ipCIDRRangeFieldName:               ip.GetCidrRanges(),
+		ipRemoteInspectionAllowedFieldName: ip.GetRemoteInspectionAllowed(),
+		ipCreatedAtFieldName:               ip.GetCreatedAt().String(),
+		ipIsDeletedFieldName:               ip.GetIsDeleted(),
 	}
 }
 
@@ -253,6 +268,9 @@ func resourceIPAllowlistUpdate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 		ipAllowlist.CidrRanges = cidrRange
+	}
+	if d.HasChange(ipRemoteInspectionAllowedFieldName) {
+		ipAllowlist.RemoteInspectionAllowed = d.Get(ipRemoteInspectionAllowedFieldName).(bool)
 	}
 	res, err := securityc.UpdateIPAllowlist(client.ctxWithToken, ipAllowlist)
 	if err != nil {

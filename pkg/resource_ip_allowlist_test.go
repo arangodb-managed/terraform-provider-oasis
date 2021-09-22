@@ -74,22 +74,24 @@ func TestResourceIPAllowlist(t *testing.T) {
 
 func TestFlattenIPAllowlistResource(t *testing.T) {
 	expected := map[string]interface{}{
-		ipNameFieldName:        "test-name",
-		ipDescriptionFieldName: "test-description",
-		ipCreatedAtFieldName:   "1980-03-03T01:01:01Z",
-		ipProjectFieldName:     "123456789",
-		ipCIDRRangeFieldName:   []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
-		ipIsDeletedFieldName:   false,
+		ipNameFieldName:                    "test-name",
+		ipDescriptionFieldName:             "test-description",
+		ipCreatedAtFieldName:               "1980-03-03T01:01:01Z",
+		ipProjectFieldName:                 "123456789",
+		ipCIDRRangeFieldName:               []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipRemoteInspectionAllowedFieldName: true,
+		ipIsDeletedFieldName:               false,
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
 	cert := security.IPAllowlist{
-		Name:        "test-name",
-		Description: "test-description",
-		ProjectId:   "123456789",
-		CidrRanges:  []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
-		CreatedAt:   created,
-		IsDeleted:   false,
+		Name:                    "test-name",
+		Description:             "test-description",
+		ProjectId:               "123456789",
+		CidrRanges:              []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		RemoteInspectionAllowed: true,
+		CreatedAt:               created,
+		IsDeleted:               false,
 	}
 	got := flattenIPAllowlistResource(&cert)
 	assert.Equal(t, expected, got)
@@ -97,11 +99,12 @@ func TestFlattenIPAllowlistResource(t *testing.T) {
 
 func TestExpandingIPAllowlistResource(t *testing.T) {
 	raw := map[string]interface{}{
-		ipNameFieldName:        "test-name",
-		ipDescriptionFieldName: "test-description",
-		ipProjectFieldName:     "123456789",
-		ipCIDRRangeFieldName:   []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
-		ipIsDeletedFieldName:   false,
+		ipNameFieldName:                    "test-name",
+		ipDescriptionFieldName:             "test-description",
+		ipProjectFieldName:                 "123456789",
+		ipCIDRRangeFieldName:               []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipRemoteInspectionAllowedFieldName: true,
+		ipIsDeletedFieldName:               false,
 	}
 	cidrRange, err := expandStringList(raw[ipCIDRRangeFieldName].([]interface{}))
 	assert.NoError(t, err)
@@ -113,6 +116,7 @@ func TestExpandingIPAllowlistResource(t *testing.T) {
 	assert.Equal(t, raw[ipDescriptionFieldName], allowlist.GetDescription())
 	assert.Equal(t, raw[ipIsDeletedFieldName], allowlist.GetIsDeleted())
 	assert.Equal(t, raw[ipProjectFieldName], allowlist.GetProjectId())
+	assert.Equal(t, raw[ipRemoteInspectionAllowedFieldName], allowlist.GetRemoteInspectionAllowed())
 	assert.Equal(t, cidrRange, allowlist.GetCidrRanges())
 }
 
