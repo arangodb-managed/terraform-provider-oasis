@@ -172,6 +172,67 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 	assert.Equal(t, expected, flattened)
 }
 
+func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
+	depl := &data.Deployment{
+		Name:        "test-name",
+		Description: "test-desc",
+		ProjectId:   "123456789",
+		RegionId:    "gcp-europe-west4",
+		Version:     "3.6.0",
+		Certificates: &data.Deployment_CertificateSpec{
+			CaCertificateId: "certificate-id",
+		},
+		IpallowlistId:             "ip-allowlist",
+		DisableFoxxAuthentication: true,
+		Model: &data.Deployment_ModelSpec{
+			Model:        "oneshard",
+			NodeSizeId:   "a8",
+			NodeCount:    3,
+			NodeDiskSize: 32,
+		},
+		NotificationSettings: &data.Deployment_NotificationSettings{
+			EmailAddresses: []string{"test@example.test"},
+		},
+	}
+	flattened := flattenDeployment(depl)
+	expected := map[string]interface{}{
+		deplProjectFieldName:     "123456789",
+		deplNameFieldName:        "test-name",
+		deplDescriptionFieldName: "test-desc",
+		deplLocationFieldName: []interface{}{
+			map[string]interface{}{
+				deplLocationRegionFieldName: "gcp-europe-west4",
+			},
+		},
+		deplVersionFieldName: []interface{}{
+			map[string]interface{}{
+				deplVersionDbVersionFieldName: "3.6.0",
+			},
+		},
+		deplSecurityFieldName: []interface{}{
+			map[string]interface{}{
+				deplSecurityCaCertificateFieldName:             "certificate-id",
+				deplSecurityIpAllowlistFieldName:               "ip-allowlist",
+				deplSecurityDisableFoxxAuthenticationFieldName: true,
+			},
+		},
+		deplConfigurationFieldName: []interface{}{
+			map[string]interface{}{
+				deplConfigurationModelFieldName:        "oneshard",
+				deplConfigurationNodeSizeIdFieldName:   "a8",
+				deplConfigurationNodeCountFieldName:    3,
+				deplConfigurationNodeDiskSizeFieldName: 32,
+			},
+		},
+		deplNotificationConfigurationFieldName: []interface{}{
+			map[string]interface{}{
+				deplNotificationConfigurationEmailAddressesFieldName: []string{"test@example.test"},
+			},
+		},
+	}
+	assert.Equal(t, expected, flattened)
+}
+
 func TestExpandingDeploymentResource(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
