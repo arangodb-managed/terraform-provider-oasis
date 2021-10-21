@@ -535,18 +535,21 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	loc := flattenLocationData(depl)
 	ver := flattenVersion(depl)
 	sec := flattenSecurity(depl)
-	not := flattenNotificationSettings(depl)
+	notificationSetting := flattenNotificationSettings(depl)
 
-	return map[string]interface{}{
-		deplNameFieldName:                      depl.GetName(),
-		deplProjectFieldName:                   depl.GetProjectId(),
-		deplDescriptionFieldName:               depl.GetDescription(),
-		deplConfigurationFieldName:             conf,
-		deplLocationFieldName:                  loc,
-		deplVersionFieldName:                   ver,
-		deplSecurityFieldName:                  sec,
-		deplNotificationConfigurationFieldName: not,
+	result := map[string]interface{}{
+		deplNameFieldName:          depl.GetName(),
+		deplProjectFieldName:       depl.GetProjectId(),
+		deplDescriptionFieldName:   depl.GetDescription(),
+		deplConfigurationFieldName: conf,
+		deplLocationFieldName:      loc,
+		deplVersionFieldName:       ver,
+		deplSecurityFieldName:      sec,
 	}
+	if notificationSetting != nil {
+		result[deplNotificationConfigurationFieldName] = notificationSetting
+	}
+	return result
 }
 
 // flattenVersion takes the version part of a deployment and creates a sub map for terraform schema.
@@ -592,6 +595,9 @@ func flattenConfigurationData(depl *data.Deployment) []interface{} {
 
 // flattenNotificationSettings takes the notification settings part of a deployment and creates a sub map for terraform schema.
 func flattenNotificationSettings(depl *data.Deployment) []interface{} {
+	if depl.GetNotificationSettings() == nil {
+		return nil
+	}
 	return []interface{}{
 		map[string]interface{}{
 			deplNotificationConfigurationEmailAddressesFieldName: depl.GetNotificationSettings().GetEmailAddresses(),
