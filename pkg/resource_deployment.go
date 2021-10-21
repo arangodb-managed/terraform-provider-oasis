@@ -38,23 +38,25 @@ import (
 )
 
 const (
-	deplTAndCAcceptedFieldName                     = "terms_and_conditions_accepted"
-	deplProjectFieldName                           = "project"
-	deplNameFieldName                              = "name"
-	deplDescriptionFieldName                       = "description"
-	deplLocationFieldName                          = "location"
-	deplLocationRegionFieldName                    = "region"
-	deplVersionFieldName                           = "version"
-	deplVersionDbVersionFieldName                  = "db_version"
-	deplSecurityFieldName                          = "security"
-	deplSecurityCaCertificateFieldName             = "ca_certificate"
-	deplSecurityIpAllowlistFieldName               = "ip_allowlist"
-	deplSecurityDisableFoxxAuthenticationFieldName = "disable_foxx_authentication"
-	deplConfigurationFieldName                     = "configuration"
-	deplConfigurationModelFieldName                = "model"
-	deplConfigurationNodeSizeIdFieldName           = "node_size_id"
-	deplConfigurationNodeCountFieldName            = "node_count"
-	deplConfigurationNodeDiskSizeFieldName         = "node_disk_size"
+	deplTAndCAcceptedFieldName                           = "terms_and_conditions_accepted"
+	deplProjectFieldName                                 = "project"
+	deplNameFieldName                                    = "name"
+	deplDescriptionFieldName                             = "description"
+	deplLocationFieldName                                = "location"
+	deplLocationRegionFieldName                          = "region"
+	deplVersionFieldName                                 = "version"
+	deplVersionDbVersionFieldName                        = "db_version"
+	deplSecurityFieldName                                = "security"
+	deplSecurityCaCertificateFieldName                   = "ca_certificate"
+	deplSecurityIpAllowlistFieldName                     = "ip_allowlist"
+	deplSecurityDisableFoxxAuthenticationFieldName       = "disable_foxx_authentication"
+	deplConfigurationFieldName                           = "configuration"
+	deplConfigurationModelFieldName                      = "model"
+	deplConfigurationNodeSizeIdFieldName                 = "node_size_id"
+	deplConfigurationNodeCountFieldName                  = "node_count"
+	deplConfigurationNodeDiskSizeFieldName               = "node_disk_size"
+	deplNotificationConfigurationFieldName               = "notification_settings"
+	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -175,6 +177,25 @@ func resourceDeployment() *schema.Resource {
 							Optional: true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == "0"
+							},
+						},
+					},
+				},
+			},
+			deplNotificationConfigurationFieldName: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return new == ""
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						deplNotificationConfigurationEmailAddressesFieldName: {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
 					},
@@ -330,13 +351,14 @@ type configuration struct {
 func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*data.Deployment, error) {
 	project := defaultProject
 	var (
-		name        string
-		description string
-		ver         version
-		loc         location
-		conf        configuration
-		sec         securityFields
-		err         error
+		name                string
+		description         string
+		ver                 version
+		loc                 location
+		conf                configuration
+		sec                 securityFields
+		err                 error
+		notificationSetting *data.Deployment_NotificationSettings
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
@@ -372,6 +394,12 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		return nil, fmt.Errorf("unable to find parse field %s", deplConfigurationFieldName)
 	}
 
+	if v, ok := d.GetOk(deplNotificationConfigurationFieldName); ok {
+		if notificationSetting, err = expandNotificationSettings(v.([]interface{})); err != nil {
+			return nil, err
+		}
+	}
+
 	return &data.Deployment{
 		Name:                      name,
 		Description:               description,
@@ -387,6 +415,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 			NodeDiskSize: int32(conf.nodeDiskSize),
 			NodeSizeId:   conf.nodeSizeId,
 		},
+		NotificationSettings: notificationSetting,
 	}, nil
 }
 
@@ -455,6 +484,26 @@ func expandConfiguration(s []interface{}) (conf configuration, err error) {
 	return
 }
 
+// expandNotificationSettings gathers notification settings data set in terraform schema
+func expandNotificationSettings(s []interface{}) (settings *data.Deployment_NotificationSettings, err error) {
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if emailAddresses, ok := item[deplNotificationConfigurationEmailAddressesFieldName]; ok {
+			emailAddresses, ok := emailAddresses.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("failed to parse field %s", deplNotificationConfigurationEmailAddressesFieldName)
+			}
+			if settings == nil {
+				settings = &data.Deployment_NotificationSettings{}
+			}
+			for _, addr := range emailAddresses {
+				settings.EmailAddresses = append(settings.EmailAddresses, addr.(string))
+			}
+		}
+	}
+	return
+}
+
 // resourceDeploymentRead retrieves deployment information from terraform stores.
 func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
@@ -486,15 +535,17 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	loc := flattenLocationData(depl)
 	ver := flattenVersion(depl)
 	sec := flattenSecurity(depl)
+	not := flattenNotificationSettings(depl)
 
 	return map[string]interface{}{
-		deplNameFieldName:          depl.GetName(),
-		deplProjectFieldName:       depl.GetProjectId(),
-		deplDescriptionFieldName:   depl.GetDescription(),
-		deplConfigurationFieldName: conf,
-		deplLocationFieldName:      loc,
-		deplVersionFieldName:       ver,
-		deplSecurityFieldName:      sec,
+		deplNameFieldName:                      depl.GetName(),
+		deplProjectFieldName:                   depl.GetProjectId(),
+		deplDescriptionFieldName:               depl.GetDescription(),
+		deplConfigurationFieldName:             conf,
+		deplLocationFieldName:                  loc,
+		deplVersionFieldName:                   ver,
+		deplSecurityFieldName:                  sec,
+		deplNotificationConfigurationFieldName: not,
 	}
 }
 
@@ -535,6 +586,15 @@ func flattenConfigurationData(depl *data.Deployment) []interface{} {
 			deplConfigurationNodeSizeIdFieldName:   depl.GetModel().GetNodeSizeId(),
 			deplConfigurationNodeDiskSizeFieldName: int(depl.GetModel().GetNodeDiskSize()),
 			deplConfigurationNodeCountFieldName:    int(depl.GetModel().GetNodeCount()),
+		},
+	}
+}
+
+// flattenNotificationSettings takes the notification settings part of a deployment and creates a sub map for terraform schema.
+func flattenNotificationSettings(depl *data.Deployment) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			deplNotificationConfigurationEmailAddressesFieldName: depl.GetNotificationSettings().GetEmailAddresses(),
 		},
 	}
 }
@@ -596,6 +656,14 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		if conf.nodeCount != 0 {
 			depl.Model.NodeCount = int32(conf.nodeCount)
 		}
+	}
+	// if we have change on NotificationSettings apply it
+	if d.HasChange(deplNotificationConfigurationFieldName) {
+		settings, err := expandNotificationSettings(d.Get(deplNotificationConfigurationFieldName).([]interface{}))
+		if err != nil {
+			return err
+		}
+		depl.NotificationSettings = settings
 	}
 
 	if res, err := datac.UpdateDeployment(client.ctxWithToken, depl); err != nil {

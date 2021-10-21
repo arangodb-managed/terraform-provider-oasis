@@ -77,6 +77,10 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     node_size_id = "a4"
     node_disk_size = 20
   }
+
+  notification_settings {
+    email_addresses = "email@example.test" // this will set email addresses used for notifications regarding depoyment
+  }
 }
 
 // Example of oneshard deployment without node specification
@@ -124,6 +128,7 @@ resource "oasis_deployment" "my_sharded_deployment" {
     node_disk_size = 20
     node_count = 5
   }
+
 }
 ```
 
