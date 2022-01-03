@@ -1,7 +1,7 @@
 module github.com/arangodb-managed/terraform-provider-oasis
 
 require (
-	github.com/arangodb-managed/apis v0.71.2
+	github.com/arangodb-managed/apis v0.72.5
 	github.com/arangodb-managed/log-helper v0.2.0
 	github.com/gogo/protobuf v1.3.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -19,7 +19,7 @@ go 1.16
 
 replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+incompatible
 
-replace github.com/arangodb/kube-arangodb => github.com/arangodb/kube-arangodb v0.0.0-20210528082542-41972ad9b013
+replace github.com/arangodb/kube-arangodb => github.com/arangodb/kube-arangodb v0.0.0-20211215105125-4d01e402c9c9
 
 replace github.com/coreos/go-systemd => github.com/coreos/go-systemd v0.0.0-20190620071333-e64a0ec8b42a
 

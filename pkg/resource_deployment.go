@@ -57,6 +57,7 @@ const (
 	deplConfigurationNodeDiskSizeFieldName               = "node_disk_size"
 	deplNotificationConfigurationFieldName               = "notification_settings"
 	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
+	deplMaximumNodeDiskSizeFieldName                     = "maximum_node_disk_size"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -179,6 +180,13 @@ func resourceDeployment() *schema.Resource {
 								return new == "0"
 							},
 						},
+						deplMaximumNodeDiskSizeFieldName: {
+							Type:     schema.TypeInt,
+							Optional: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return new == ""
+							},
+						},
 					},
 				},
 			},
@@ -219,11 +227,11 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	if v, ok := d.GetOk(deplTAndCAcceptedFieldName); ok {
 		if !v.(bool) {
 			client.log.Error().Str("name", deplTAndCAcceptedFieldName).Msg("Field should be set to accept Terms and Conditions")
-			return fmt.Errorf("Field '%s' should be set to accept Terms and Conditions", deplTAndCAcceptedFieldName)
+			return fmt.Errorf("field '%s' should be set to accept Terms and Conditions", deplTAndCAcceptedFieldName)
 		}
 	} else {
 		client.log.Error().Str("name", deplTAndCAcceptedFieldName).Msg("Unable to find field, which is required to accept Terms and Conditions")
-		return fmt.Errorf("Unable to find field %s", deplTAndCAcceptedFieldName)
+		return fmt.Errorf("unable to find field %s", deplTAndCAcceptedFieldName)
 	}
 
 	datac := data.NewDataServiceClient(client.conn)
@@ -265,7 +273,7 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 
 		if expandedDepl.Certificates.CaCertificateId == "" {
 			client.log.Error().Err(err).Str("project-id", expandedDepl.ProjectId).Msg("Unable to find default certificate for project. Please select one manually.")
-			return fmt.Errorf("Unable to find default certificate for project %s. Please select one manually.", expandedDepl.GetProjectId())
+			return fmt.Errorf("unable to find default certificate for project %s. Please select one manually", expandedDepl.GetProjectId())
 		}
 	}
 
@@ -277,11 +285,11 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 		})
 		if err != nil {
 			client.log.Fatal().Err(err).Msg("Failed to fetch node size list.")
-			return fmt.Errorf("Failed to fetch node size list for region %s", expandedDepl.RegionId)
+			return fmt.Errorf("failed to fetch node size list for region %s", expandedDepl.RegionId)
 		}
 		if len(list.Items) < 1 {
 			client.log.Fatal().Msg("No available node sizes found.")
-			return fmt.Errorf("No available node sizes found for region %s", expandedDepl.RegionId)
+			return fmt.Errorf("no available node sizes found for region %s", expandedDepl.RegionId)
 		}
 		sort.SliceStable(list.Items, func(i, j int) bool {
 			return list.Items[i].MemorySize < list.Items[j].MemorySize
@@ -341,10 +349,11 @@ type securityFields struct {
 
 // configuration is a convenient wrapper around the configuration schema for easy parsing
 type configuration struct {
-	model        string
-	nodeSizeId   string
-	nodeCount    int
-	nodeDiskSize int
+	model               string
+	nodeSizeId          string
+	nodeCount           int
+	nodeDiskSize        int
+	maximumNodeDiskSize int
 }
 
 // expandDeploymentResource creates an oasis deployment structure out of a terraform schema model.
@@ -399,6 +408,12 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 			return nil, err
 		}
 	}
+	var autoSizeSettings *data.Deployment_DiskAutoSizeSettings
+	if conf.maximumNodeDiskSize > 0 {
+		autoSizeSettings = &data.Deployment_DiskAutoSizeSettings{
+			MaximumNodeDiskSize: int32(conf.maximumNodeDiskSize),
+		}
+	}
 
 	return &data.Deployment{
 		Name:                      name,
@@ -416,6 +431,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 			NodeSizeId:   conf.nodeSizeId,
 		},
 		NotificationSettings: notificationSetting,
+		DiskAutoSizeSettings: autoSizeSettings,
 	}, nil
 }
 
@@ -479,6 +495,9 @@ func expandConfiguration(s []interface{}) (conf configuration, err error) {
 		}
 		if i, ok := item[deplConfigurationNodeDiskSizeFieldName]; ok && i.(int) != 0 {
 			conf.nodeDiskSize = i.(int)
+		}
+		if i, ok := item[deplMaximumNodeDiskSizeFieldName]; ok && i.(int) != 0 {
+			conf.maximumNodeDiskSize = i.(int)
 		}
 	}
 	return
@@ -661,6 +680,12 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 		if conf.nodeCount != 0 {
 			depl.Model.NodeCount = int32(conf.nodeCount)
+		}
+		if conf.maximumNodeDiskSize != 0 {
+			if depl.DiskAutoSizeSettings == nil {
+				depl.DiskAutoSizeSettings = &data.Deployment_DiskAutoSizeSettings{}
+			}
+			depl.DiskAutoSizeSettings.MaximumNodeDiskSize = int32(conf.maximumNodeDiskSize)
 		}
 	}
 	// if we have change on NotificationSettings apply it
