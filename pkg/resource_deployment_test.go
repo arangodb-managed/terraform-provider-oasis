@@ -84,6 +84,9 @@ func TestFlattenDeploymentResource(t *testing.T) {
 			NodeCount:    3,
 			NodeDiskSize: 32,
 		},
+		DiskAutoSizeSettings: &data.Deployment_DiskAutoSizeSettings{
+			MaximumNodeDiskSize: 40,
+		},
 	}
 	flattened := flattenDeployment(depl)
 	expected := map[string]interface{}{
@@ -109,10 +112,11 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		},
 		deplConfigurationFieldName: []interface{}{
 			map[string]interface{}{
-				deplConfigurationModelFieldName:        "oneshard",
-				deplConfigurationNodeSizeIdFieldName:   "a8",
-				deplConfigurationNodeCountFieldName:    3,
-				deplConfigurationNodeDiskSizeFieldName: 32,
+				deplConfigurationModelFieldName:               "oneshard",
+				deplConfigurationNodeSizeIdFieldName:          "a8",
+				deplConfigurationNodeCountFieldName:           3,
+				deplConfigurationNodeDiskSizeFieldName:        32,
+				deplConfigurationMaximumNodeDiskSizeFieldName: 40,
 			},
 		},
 	}
@@ -251,6 +255,9 @@ func TestExpandingDeploymentResource(t *testing.T) {
 			NodeCount:    3,
 			NodeDiskSize: 32,
 		},
+		DiskAutoSizeSettings: &data.Deployment_DiskAutoSizeSettings{
+			MaximumNodeDiskSize: 40,
+		},
 	}
 	raw := map[string]interface{}{
 		deplProjectFieldName:     "123456789",
@@ -275,10 +282,11 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		},
 		deplConfigurationFieldName: []interface{}{
 			map[string]interface{}{
-				deplConfigurationModelFieldName:        "oneshard",
-				deplConfigurationNodeSizeIdFieldName:   "a8",
-				deplConfigurationNodeCountFieldName:    3,
-				deplConfigurationNodeDiskSizeFieldName: 32,
+				deplConfigurationModelFieldName:               "oneshard",
+				deplConfigurationNodeSizeIdFieldName:          "a8",
+				deplConfigurationNodeCountFieldName:           3,
+				deplConfigurationNodeDiskSizeFieldName:        32,
+				deplConfigurationMaximumNodeDiskSizeFieldName: 40,
 			},
 		},
 	}
