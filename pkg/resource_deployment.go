@@ -55,9 +55,9 @@ const (
 	deplConfigurationNodeSizeIdFieldName                 = "node_size_id"
 	deplConfigurationNodeCountFieldName                  = "node_count"
 	deplConfigurationNodeDiskSizeFieldName               = "node_disk_size"
+	deplConfigurationMaximumNodeDiskSizeFieldName        = "maximum_node_disk_size"
 	deplNotificationConfigurationFieldName               = "notification_settings"
 	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
-	deplMaximumNodeDiskSizeFieldName                     = "maximum_node_disk_size"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -180,7 +180,7 @@ func resourceDeployment() *schema.Resource {
 								return new == "0"
 							},
 						},
-						deplMaximumNodeDiskSizeFieldName: {
+						deplConfigurationMaximumNodeDiskSizeFieldName: {
 							Type:     schema.TypeInt,
 							Optional: true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
@@ -496,7 +496,7 @@ func expandConfiguration(s []interface{}) (conf configuration, err error) {
 		if i, ok := item[deplConfigurationNodeDiskSizeFieldName]; ok && i.(int) != 0 {
 			conf.nodeDiskSize = i.(int)
 		}
-		if i, ok := item[deplMaximumNodeDiskSizeFieldName]; ok && i.(int) != 0 {
+		if i, ok := item[deplConfigurationMaximumNodeDiskSizeFieldName]; ok && i.(int) != 0 {
 			conf.maximumNodeDiskSize = i.(int)
 		}
 	}
@@ -602,13 +602,17 @@ func flattenLocationData(depl *data.Deployment) []interface{} {
 
 // flattenConfigurationData takes the configuration part of a deployment and creates a sub map for terraform schema.
 func flattenConfigurationData(depl *data.Deployment) []interface{} {
+	conf := map[string]interface{}{
+		deplConfigurationModelFieldName:        depl.GetModel().GetModel(),
+		deplConfigurationNodeSizeIdFieldName:   depl.GetModel().GetNodeSizeId(),
+		deplConfigurationNodeDiskSizeFieldName: int(depl.GetModel().GetNodeDiskSize()),
+		deplConfigurationNodeCountFieldName:    int(depl.GetModel().GetNodeCount()),
+	}
+	if autoSizeSettings := depl.GetDiskAutoSizeSettings(); autoSizeSettings != nil {
+		conf[deplConfigurationMaximumNodeDiskSizeFieldName] = int(autoSizeSettings.GetMaximumNodeDiskSize())
+	}
 	return []interface{}{
-		map[string]interface{}{
-			deplConfigurationModelFieldName:        depl.GetModel().GetModel(),
-			deplConfigurationNodeSizeIdFieldName:   depl.GetModel().GetNodeSizeId(),
-			deplConfigurationNodeDiskSizeFieldName: int(depl.GetModel().GetNodeDiskSize()),
-			deplConfigurationNodeCountFieldName:    int(depl.GetModel().GetNodeCount()),
-		},
+		conf,
 	}
 }
 
