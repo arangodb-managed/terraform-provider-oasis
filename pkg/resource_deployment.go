@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 // limitations under the License.
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
-//
-// Author Gergely Brautigam
-// Author Robert Stam
-// Author Marcin Swiderski
-// Author Ewout Prangsma
 //
 
 package pkg
@@ -58,6 +53,7 @@ const (
 	deplConfigurationMaximumNodeDiskSizeFieldName        = "maximum_node_disk_size"
 	deplNotificationConfigurationFieldName               = "notification_settings"
 	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
+	deplDiskPerformanceFieldName                         = "disk_performance"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -208,6 +204,11 @@ func resourceDeployment() *schema.Resource {
 						},
 					},
 				},
+			},
+
+			deplDiskPerformanceFieldName: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
@@ -368,6 +369,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		sec                 securityFields
 		err                 error
 		notificationSetting *data.Deployment_NotificationSettings
+		diskPerformanceID   string
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
@@ -414,6 +416,9 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 			MaximumNodeDiskSize: int32(conf.maximumNodeDiskSize),
 		}
 	}
+	if v, ok := d.GetOk(deplDiskPerformanceFieldName); ok {
+		diskPerformanceID = v.(string)
+	}
 
 	return &data.Deployment{
 		Name:                      name,
@@ -432,6 +437,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		},
 		NotificationSettings: notificationSetting,
 		DiskAutoSizeSettings: autoSizeSettings,
+		DiskPerformanceId:    diskPerformanceID,
 	}, nil
 }
 
@@ -557,13 +563,14 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	notificationSetting := flattenNotificationSettings(depl)
 
 	result := map[string]interface{}{
-		deplNameFieldName:          depl.GetName(),
-		deplProjectFieldName:       depl.GetProjectId(),
-		deplDescriptionFieldName:   depl.GetDescription(),
-		deplConfigurationFieldName: conf,
-		deplLocationFieldName:      loc,
-		deplVersionFieldName:       ver,
-		deplSecurityFieldName:      sec,
+		deplNameFieldName:            depl.GetName(),
+		deplProjectFieldName:         depl.GetProjectId(),
+		deplDescriptionFieldName:     depl.GetDescription(),
+		deplConfigurationFieldName:   conf,
+		deplLocationFieldName:        loc,
+		deplVersionFieldName:         ver,
+		deplSecurityFieldName:        sec,
+		deplDiskPerformanceFieldName: depl.GetDiskPerformanceId(),
 	}
 	if notificationSetting != nil {
 		result[deplNotificationConfigurationFieldName] = notificationSetting
@@ -699,6 +706,10 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 		depl.NotificationSettings = settings
+	}
+
+	if d.HasChange(deplDiskPerformanceFieldName) {
+		depl.DiskPerformanceId = d.Get(deplDiskPerformanceFieldName).(string)
 	}
 
 	if res, err := datac.UpdateDeployment(client.ctxWithToken, depl); err != nil {
