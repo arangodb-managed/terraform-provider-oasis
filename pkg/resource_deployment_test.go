@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 // limitations under the License.
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
-//
-// Author Gergely Brautigam
-// Author Robert Stam
 //
 
 package pkg
@@ -61,6 +58,7 @@ func TestResourceDeployment(t *testing.T) {
 				Config: testDeploymentConfig(res, name, pid),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_deployment."+res, deplNameFieldName, name),
+					resource.TestCheckResourceAttr("oasis_deployment."+res, deplDiskPerformanceFieldName, "dp-3"),
 				),
 			},
 		},
@@ -87,6 +85,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		DiskAutoSizeSettings: &data.Deployment_DiskAutoSizeSettings{
 			MaximumNodeDiskSize: 40,
 		},
+		DiskPerformanceId: "dp-1",
 	}
 	flattened := flattenDeployment(depl)
 	expected := map[string]interface{}{
@@ -119,6 +118,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 				deplConfigurationMaximumNodeDiskSizeFieldName: 40,
 			},
 		},
+		deplDiskPerformanceFieldName: "dp-1",
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -172,6 +172,7 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 				deplConfigurationNodeDiskSizeFieldName: 32,
 			},
 		},
+		deplDiskPerformanceFieldName: "", // Not set
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -233,6 +234,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 				deplNotificationConfigurationEmailAddressesFieldName: []string{"test@example.test"},
 			},
 		},
+		deplDiskPerformanceFieldName: "",
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -258,6 +260,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		DiskAutoSizeSettings: &data.Deployment_DiskAutoSizeSettings{
 			MaximumNodeDiskSize: 40,
 		},
+		DiskPerformanceId: "dp-2",
 	}
 	raw := map[string]interface{}{
 		deplProjectFieldName:     "123456789",
@@ -289,6 +292,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 				deplConfigurationMaximumNodeDiskSizeFieldName: 40,
 			},
 		},
+		deplDiskPerformanceFieldName: "dp-2",
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
@@ -420,6 +424,7 @@ func testDeploymentConfig(resource, name, project string) string {
 	  model      = "oneshard"
 	  node_count = 3
 	}
+	disk_performance = "dp-3"
   }`, resource, name, project)
 }
 
