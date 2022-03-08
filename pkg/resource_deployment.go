@@ -309,13 +309,12 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	orgURL, err := expandedDepl.GetOrganizationID()
+	proj, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: expandedDepl.GetProjectId()})
 	if err != nil {
-		client.log.Error().Err(err).Msg("GetOrganizationID failed")
+		client.log.Error().Err(err).Msg("Failed to get project")
 		return err
 	}
-
-	tAndC, err := rmc.GetCurrentTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: orgURL})
+	tAndC, err := rmc.GetCurrentTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: proj.GetOrganizationId()})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to get Terms and Conditions")
 		return err
