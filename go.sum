@@ -45,8 +45,8 @@ github.com/apparentlymart/go-dump v0.0.0-20190214190832-042adf3cf4a0 h1:MzVXffFU
 github.com/apparentlymart/go-dump v0.0.0-20190214190832-042adf3cf4a0/go.mod h1:oL81AME2rN47vu18xqj1S1jPIPuN7afo62yKTNn3XMM=
 github.com/apparentlymart/go-textseg v1.0.0 h1:rRmlIsPEEhUTIKQb7T++Nz/A5Q6C9IuX2wFoYVvnCs0=
 github.com/apparentlymart/go-textseg v1.0.0/go.mod h1:z96Txxhf3xSFMPmb5X/1W05FF/Nj9VFpLOpjS5yuumk=
-github.com/arangodb-managed/apis v0.73.1 h1:jewiM4D0weW2epIZQeZttd7IEWHWV/dGltyMAYMF++s=
-github.com/arangodb-managed/apis v0.73.1/go.mod h1:dSEV+DTPdZNH06qVqFWA+F0OcaL2ePGEo+odyMaU72Y=
+github.com/arangodb-managed/apis v0.73.8 h1:D0QZsNNC/eF2wIdNHkH8izPu4TYydzX7rl8epiBIPK0=
+github.com/arangodb-managed/apis v0.73.8/go.mod h1:dSEV+DTPdZNH06qVqFWA+F0OcaL2ePGEo+odyMaU72Y=
 github.com/arangodb-managed/log-helper v0.2.0 h1:QK85i0a+mGM++wK625Oe1z4HuXhvaN3vR/Nunwa1qAA=
 github.com/arangodb-managed/log-helper v0.2.0/go.mod h1:WJogNCCXWM5OQx/ZYvtRo/1zwm/IpKj+f4QVtM8hNJw=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
