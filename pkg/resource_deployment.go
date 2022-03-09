@@ -54,7 +54,7 @@ const (
 	deplNotificationConfigurationFieldName               = "notification_settings"
 	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
 	deplDiskPerformanceFieldName                         = "disk_performance"
-	deplScheduledRootPasswordRotationFieldName           = "enable_scheduled_root_password_rotation"
+	deplScheduledRootPasswordRotationFieldName           = "disable_scheduled_root_password_rotation"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -328,12 +328,23 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	client.log.Info().Str("id", tAndC.GetId()).Msg("Terms and Conditions are accepted")
 	expandedDepl.AcceptedTermsAndConditionsId = tAndC.GetId()
 
-	if depl, err := datac.CreateDeployment(client.ctxWithToken, expandedDepl); err != nil {
+	depl, err := datac.CreateDeployment(client.ctxWithToken, expandedDepl)
+	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create deployment.")
 		return err
-	} else {
-		d.SetId(depl.GetId())
 	}
+	d.SetId(depl.GetId())
+
+	if !expandedDepl.GetIsScheduledRootPasswordRotationEnabled() {
+		if _, err := datac.UpdateDeploymentScheduledRootPasswordRotation(client.ctxWithToken, &data.UpdateDeploymentScheduledRootPasswordRotationRequest{
+			DeploymentId: depl.GetId(),
+			Enabled:      false,
+		}); err != nil {
+			client.log.Error().Err(err).Msg("Failed to update scheduled root password rotation setting.")
+			return err
+		}
+	}
+
 	return resourceDeploymentRead(d, m)
 }
 
@@ -367,15 +378,16 @@ type configuration struct {
 func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*data.Deployment, error) {
 	project := defaultProject
 	var (
-		name                string
-		description         string
-		ver                 version
-		loc                 location
-		conf                configuration
-		sec                 securityFields
-		err                 error
-		notificationSetting *data.Deployment_NotificationSettings
-		diskPerformanceID   string
+		name                                  string
+		description                           string
+		ver                                   version
+		loc                                   location
+		conf                                  configuration
+		sec                                   securityFields
+		err                                   error
+		notificationSetting                   *data.Deployment_NotificationSettings
+		diskPerformanceID                     string
+		scheduledRootPasswordRotationDisabled bool
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
@@ -425,6 +437,9 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 	if v, ok := d.GetOk(deplDiskPerformanceFieldName); ok {
 		diskPerformanceID = v.(string)
 	}
+	if v, ok := d.GetOk(deplScheduledRootPasswordRotationFieldName); ok {
+		scheduledRootPasswordRotationDisabled = v.(bool)
+	}
 
 	return &data.Deployment{
 		Name:                      name,
@@ -444,7 +459,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		NotificationSettings:                   notificationSetting,
 		DiskAutoSizeSettings:                   autoSizeSettings,
 		DiskPerformanceId:                      diskPerformanceID,
-		IsScheduledRootPasswordRotationEnabled: true,
+		IsScheduledRootPasswordRotationEnabled: !scheduledRootPasswordRotationDisabled,
 	}, nil
 }
 
@@ -727,15 +742,15 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if d.HasChange(deplScheduledRootPasswordRotationFieldName) {
-		enabled := d.Get(deplScheduledRootPasswordRotationFieldName).(bool)
+		disabled := d.Get(deplScheduledRootPasswordRotationFieldName).(bool)
 		if _, err := datac.UpdateDeploymentScheduledRootPasswordRotation(client.ctxWithToken, &data.UpdateDeploymentScheduledRootPasswordRotationRequest{
 			DeploymentId: depl.GetId(),
-			Enabled:      enabled,
+			Enabled:      !disabled,
 		}); err != nil {
 			client.log.Error().Err(err).Msg("Failed to update scheduled root password rotation setting")
 			return err
 		}
-		depl.IsScheduledRootPasswordRotationEnabled = enabled
+		depl.IsScheduledRootPasswordRotationEnabled = !disabled
 	}
 
 	return resourceDeploymentRead(d, m)
