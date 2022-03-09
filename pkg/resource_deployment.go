@@ -54,7 +54,7 @@ const (
 	deplNotificationConfigurationFieldName               = "notification_settings"
 	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
 	deplDiskPerformanceFieldName                         = "disk_performance"
-	deplScheduledRootPasswordRotationFieldName           = "disable_scheduled_root_password_rotation"
+	deplDisableScheduledRootPasswordRotationFieldName    = "disable_scheduled_root_password_rotation"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -212,7 +212,7 @@ func resourceDeployment() *schema.Resource {
 				Optional: true,
 			},
 
-			deplScheduledRootPasswordRotationFieldName: {
+			deplDisableScheduledRootPasswordRotationFieldName: {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
@@ -437,7 +437,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 	if v, ok := d.GetOk(deplDiskPerformanceFieldName); ok {
 		diskPerformanceID = v.(string)
 	}
-	if v, ok := d.GetOk(deplScheduledRootPasswordRotationFieldName); ok {
+	if v, ok := d.GetOk(deplDisableScheduledRootPasswordRotationFieldName); ok {
 		scheduledRootPasswordRotationDisabled = v.(bool)
 	}
 
@@ -585,14 +585,15 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	notificationSetting := flattenNotificationSettings(depl)
 
 	result := map[string]interface{}{
-		deplNameFieldName:            depl.GetName(),
-		deplProjectFieldName:         depl.GetProjectId(),
-		deplDescriptionFieldName:     depl.GetDescription(),
-		deplConfigurationFieldName:   conf,
-		deplLocationFieldName:        loc,
-		deplVersionFieldName:         ver,
-		deplSecurityFieldName:        sec,
-		deplDiskPerformanceFieldName: depl.GetDiskPerformanceId(),
+		deplNameFieldName:                                 depl.GetName(),
+		deplProjectFieldName:                              depl.GetProjectId(),
+		deplDescriptionFieldName:                          depl.GetDescription(),
+		deplConfigurationFieldName:                        conf,
+		deplLocationFieldName:                             loc,
+		deplVersionFieldName:                              ver,
+		deplSecurityFieldName:                             sec,
+		deplDiskPerformanceFieldName:                      depl.GetDiskPerformanceId(),
+		deplDisableScheduledRootPasswordRotationFieldName: !depl.GetIsScheduledRootPasswordRotationEnabled(),
 	}
 	if notificationSetting != nil {
 		result[deplNotificationConfigurationFieldName] = notificationSetting
@@ -741,8 +742,8 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		d.SetId(res.GetId())
 	}
 
-	if d.HasChange(deplScheduledRootPasswordRotationFieldName) {
-		disabled := d.Get(deplScheduledRootPasswordRotationFieldName).(bool)
+	if d.HasChange(deplDisableScheduledRootPasswordRotationFieldName) {
+		disabled := d.Get(deplDisableScheduledRootPasswordRotationFieldName).(bool)
 		if _, err := datac.UpdateDeploymentScheduledRootPasswordRotation(client.ctxWithToken, &data.UpdateDeploymentScheduledRootPasswordRotationRequest{
 			DeploymentId: depl.GetId(),
 			Enabled:      !disabled,
