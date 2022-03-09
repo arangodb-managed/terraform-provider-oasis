@@ -54,6 +54,7 @@ const (
 	deplNotificationConfigurationFieldName               = "notification_settings"
 	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
 	deplDiskPerformanceFieldName                         = "disk_performance"
+	deplDisableScheduledRootPasswordRotationFieldName    = "disable_scheduled_root_password_rotation"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -210,6 +211,11 @@ func resourceDeployment() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
+			deplDisableScheduledRootPasswordRotationFieldName: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -309,13 +315,12 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
-	orgURL, err := expandedDepl.GetOrganizationID()
+	proj, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: expandedDepl.GetProjectId()})
 	if err != nil {
-		client.log.Error().Err(err).Msg("GetOrganizationID failed")
+		client.log.Error().Err(err).Msg("Failed to get project")
 		return err
 	}
-
-	tAndC, err := rmc.GetCurrentTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: orgURL})
+	tAndC, err := rmc.GetCurrentTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: proj.GetOrganizationId()})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to get Terms and Conditions")
 		return err
@@ -323,12 +328,23 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	client.log.Info().Str("id", tAndC.GetId()).Msg("Terms and Conditions are accepted")
 	expandedDepl.AcceptedTermsAndConditionsId = tAndC.GetId()
 
-	if depl, err := datac.CreateDeployment(client.ctxWithToken, expandedDepl); err != nil {
+	depl, err := datac.CreateDeployment(client.ctxWithToken, expandedDepl)
+	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create deployment.")
 		return err
-	} else {
-		d.SetId(depl.GetId())
 	}
+	d.SetId(depl.GetId())
+
+	if !expandedDepl.GetIsScheduledRootPasswordRotationEnabled() {
+		if _, err := datac.UpdateDeploymentScheduledRootPasswordRotation(client.ctxWithToken, &data.UpdateDeploymentScheduledRootPasswordRotationRequest{
+			DeploymentId: depl.GetId(),
+			Enabled:      false,
+		}); err != nil {
+			client.log.Error().Err(err).Msg("Failed to update scheduled root password rotation setting.")
+			return err
+		}
+	}
+
 	return resourceDeploymentRead(d, m)
 }
 
@@ -362,15 +378,16 @@ type configuration struct {
 func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*data.Deployment, error) {
 	project := defaultProject
 	var (
-		name                string
-		description         string
-		ver                 version
-		loc                 location
-		conf                configuration
-		sec                 securityFields
-		err                 error
-		notificationSetting *data.Deployment_NotificationSettings
-		diskPerformanceID   string
+		name                                  string
+		description                           string
+		ver                                   version
+		loc                                   location
+		conf                                  configuration
+		sec                                   securityFields
+		err                                   error
+		notificationSetting                   *data.Deployment_NotificationSettings
+		diskPerformanceID                     string
+		scheduledRootPasswordRotationDisabled bool
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
@@ -420,6 +437,9 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 	if v, ok := d.GetOk(deplDiskPerformanceFieldName); ok {
 		diskPerformanceID = v.(string)
 	}
+	if v, ok := d.GetOk(deplDisableScheduledRootPasswordRotationFieldName); ok {
+		scheduledRootPasswordRotationDisabled = v.(bool)
+	}
 
 	return &data.Deployment{
 		Name:                      name,
@@ -436,9 +456,10 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 			NodeDiskSize: int32(conf.nodeDiskSize),
 			NodeSizeId:   conf.nodeSizeId,
 		},
-		NotificationSettings: notificationSetting,
-		DiskAutoSizeSettings: autoSizeSettings,
-		DiskPerformanceId:    diskPerformanceID,
+		NotificationSettings:                   notificationSetting,
+		DiskAutoSizeSettings:                   autoSizeSettings,
+		DiskPerformanceId:                      diskPerformanceID,
+		IsScheduledRootPasswordRotationEnabled: !scheduledRootPasswordRotationDisabled,
 	}, nil
 }
 
@@ -564,14 +585,15 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	notificationSetting := flattenNotificationSettings(depl)
 
 	result := map[string]interface{}{
-		deplNameFieldName:            depl.GetName(),
-		deplProjectFieldName:         depl.GetProjectId(),
-		deplDescriptionFieldName:     depl.GetDescription(),
-		deplConfigurationFieldName:   conf,
-		deplLocationFieldName:        loc,
-		deplVersionFieldName:         ver,
-		deplSecurityFieldName:        sec,
-		deplDiskPerformanceFieldName: depl.GetDiskPerformanceId(),
+		deplNameFieldName:                                 depl.GetName(),
+		deplProjectFieldName:                              depl.GetProjectId(),
+		deplDescriptionFieldName:                          depl.GetDescription(),
+		deplConfigurationFieldName:                        conf,
+		deplLocationFieldName:                             loc,
+		deplVersionFieldName:                              ver,
+		deplSecurityFieldName:                             sec,
+		deplDiskPerformanceFieldName:                      depl.GetDiskPerformanceId(),
+		deplDisableScheduledRootPasswordRotationFieldName: !depl.GetIsScheduledRootPasswordRotationEnabled(),
 	}
 	if notificationSetting != nil {
 		result[deplNotificationConfigurationFieldName] = notificationSetting
@@ -719,6 +741,19 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 	} else {
 		d.SetId(res.GetId())
 	}
+
+	if d.HasChange(deplDisableScheduledRootPasswordRotationFieldName) {
+		disabled := d.Get(deplDisableScheduledRootPasswordRotationFieldName).(bool)
+		if _, err := datac.UpdateDeploymentScheduledRootPasswordRotation(client.ctxWithToken, &data.UpdateDeploymentScheduledRootPasswordRotationRequest{
+			DeploymentId: depl.GetId(),
+			Enabled:      !disabled,
+		}); err != nil {
+			client.log.Error().Err(err).Msg("Failed to update scheduled root password rotation setting")
+			return err
+		}
+		depl.IsScheduledRootPasswordRotationEnabled = !disabled
+	}
+
 	return resourceDeploymentRead(d, m)
 }
 
