@@ -79,21 +79,30 @@ func TestFlattenIPAllowlistResource(t *testing.T) {
 		ipCreatedAtFieldName:               "1980-03-03T01:01:01Z",
 		ipProjectFieldName:                 "123456789",
 		ipCIDRRangeFieldName:               []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
-		ipRemoteInspectionAllowedFieldName: true,
+		ipRemoteInspectionAllowedFieldName: false,
 		ipIsDeletedFieldName:               false,
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
 	cert := security.IPAllowlist{
-		Name:                    "test-name",
-		Description:             "test-description",
-		ProjectId:               "123456789",
-		CidrRanges:              []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
-		RemoteInspectionAllowed: true,
-		CreatedAt:               created,
-		IsDeleted:               false,
+		Name:        "test-name",
+		Description: "test-description",
+		ProjectId:   "123456789",
+		CidrRanges:  []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		CreatedAt:   created,
+		IsDeleted:   false,
 	}
 	got := flattenIPAllowlistResource(&cert)
+	assert.Equal(t, expected, got)
+
+	cert.RemoteInspectionAllowed = true
+	expected[ipRemoteInspectionAllowedFieldName] = true
+	got = flattenIPAllowlistResource(&cert)
+	assert.Equal(t, expected, got)
+
+	cert.RemoteInspectionAllowed = false
+	expected[ipRemoteInspectionAllowedFieldName] = false
+	got = flattenIPAllowlistResource(&cert)
 	assert.Equal(t, expected, got)
 }
 
