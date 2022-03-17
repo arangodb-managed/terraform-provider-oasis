@@ -51,6 +51,7 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             github-release release --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG}
+            sleep 10
             github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis.zip --file ./assets/terraform-provider-oasis.zip
 
 workflows:
