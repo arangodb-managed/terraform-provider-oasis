@@ -693,9 +693,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 		if sec.caCertificate != "" {
 			depl.Certificates.CaCertificateId = sec.caCertificate
 		}
-		if sec.ipAllowlist != "" {
-			depl.IpallowlistId = sec.ipAllowlist
-		}
+		depl.IpallowlistId = sec.ipAllowlist
 	}
 	if d.HasChange(deplConfigurationFieldName) {
 		conf, err := expandConfiguration(d.Get(deplConfigurationFieldName).([]interface{}))

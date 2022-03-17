@@ -140,8 +140,6 @@ func expandToIPAllowlist(d *schema.ResourceData, defaultProject string) (*securi
 	}
 	if v, ok := d.GetOk(ipRemoteInspectionAllowedFieldName); ok {
 		remoteInspectionAllowed = v.(bool)
-	} else {
-		return nil, fmt.Errorf("failed to parse field %s", ipRemoteInspectionAllowedFieldName)
 	}
 	project := defaultProject
 	if v, ok := d.GetOk(ipDescriptionFieldName); ok {
