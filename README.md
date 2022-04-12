@@ -28,8 +28,8 @@ make
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.11.x
-- [Go](https://golang.org/doc/install) 1.16 (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 1.1.4+
+- [Go](https://golang.org/doc/install) 1.17 (to build the provider plugin)
 
 ## Usage
 
@@ -79,7 +79,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   }
 
   notification_settings {
-    email_addresses = "email@example.test" // this will set email addresses used for notifications regarding depoyment
+    email_addresses = ["email@example.test"] // this will set email addresses used for notifications regarding depoyment
   }
 }
 
