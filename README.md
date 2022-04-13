@@ -28,7 +28,7 @@ make
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 1.1.4+
+- [Terraform](https://www.terraform.io/downloads.html) 1.1.4
 - [Go](https://golang.org/doc/install) 1.17 (to build the provider plugin)
 
 ## Usage
@@ -46,91 +46,6 @@ After a key has been obtained, the relevant API can be called to list organizati
 ## Configuration
 
 The following is an example of a terraform deployment configuration:
-
-```hcl
-provider "oasis" {
-  api_key_id = "xx"
-  api_key_secret  = "xxx"
-  organization = "190765105"
-  project = "foo"
-}
-
-// Example of oneshard deployment
-resource "oasis_deployment" "my_oneshard_deployment" {
-  terms_and_conditions_accepted = "true"
-  project = "190765139" // If set here, overrides project in provider
-  location {
-    region = "gcp-europe-west4" // Required
-  }
-  version { // this section is optional
-    db_version = "3.6.0" // This is an optional field, if not set the default version will be used
-  }
-
-  security { // this section is optional
-    ca_certificate = "" // If not set, uses default certificate from project
-    ip_allowlist = "" // If not set, no allowlist is configured
-    disable_foxx_authentication = false // If set to true, request to Foxx apps are not authentications.
-  }
-
-  configuration {
-    model = "oneshard"
-    node_size_id = "a4"
-    node_disk_size = 20
-  }
-
-  notification_settings {
-    email_addresses = ["email@example.test"] // this will set email addresses used for notifications regarding depoyment
-  }
-}
-
-// Example of oneshard deployment without node specification
-resource "oasis_deployment" "my_oneshard_deployment" {
-  terms_and_conditions_accepted = "true"
-  project = "190765139" // If set here, overrides project in provider
-  location {
-    region = "gcp-europe-west4" // Required
-  }
-
-  version { // this section is optional
-    db_version = "3.6.0" // This is an optional field, if not set the default version will be used
-  }
-
-  security { // this section is optional
-    ca_certificate = "" // If not set, uses default certificate from project
-    ip_allowlist = "" // If not set, no allowlist is configured
-  }
-
-  configuration {
-    model = "oneshard" // the smallest will be selected that's available in the given region
-  }
-}
-
-// Example of a sharded deployment
-resource "oasis_deployment" "my_sharded_deployment" {
-  terms_and_conditions_accepted = "true"
-  project = "190765139" // If set here, overrides project in provider
-  location {
-    region = "gcp-eu-west4" // Required
-  }
-
-  version {  // this section is optional
-    db_version = "3.6.0" // This is an optional field, if not set the default version will be used
-  }
-
-  security { // this section is optional
-    ca_certificate = "" // If not set, uses default certificate from project
-    ip_allowlist = "" // If not set, no allowlist is configured
-  }
-
-  configuration {
-    model = "sharded"
-    node_size_id = "a4"
-    node_disk_size = 20
-    node_count = 5
-  }
-
-}
-```
 
 ## Data sources
 
