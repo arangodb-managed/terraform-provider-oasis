@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,25 +17,24 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-// Author Robert Stam
 //
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
-// FetchOrganizationID finds and retrieves the first Organization ID it finds for a user.
-func FetchOrganizationID(testAccProvider *schema.Provider) (string, error) {
+//FetchOrganizationID finds and retrieves the first Organization ID it finds for a user.
+func FetchOrganizationID() (string, error) {
 	orgID := os.Getenv("OASIS_TEST_ORGANIZATION_ID")
 	if orgID == "" {
 		return "", fmt.Errorf("This test requires an organization id to be set.")
@@ -46,8 +45,8 @@ func FetchOrganizationID(testAccProvider *schema.Provider) (string, error) {
 // FetchProjectID will find the first project given an organization and retrieve its ID.
 func FetchProjectID(orgID string, testAccProvider *schema.Provider) (string, error) {
 	// Initialize Client with connection settings
-	if err := testAccProvider.Configure(terraform.NewResourceConfigRaw(nil)); err != nil {
-		return "", err
+	if err := testAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil)); err != nil {
+		return "", fmt.Errorf("terraform config error")
 	}
 	client := testAccProvider.Meta().(*Client)
 	if err := client.Connect(); err != nil {

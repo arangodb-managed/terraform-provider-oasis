@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Joerg Schad
 //
 
 package pkg
@@ -25,19 +24,24 @@ package pkg
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var (
-	testAccProviders map[string]terraform.ResourceProvider
-	testAccProvider  *schema.Provider
+	testAccProviders      map[string]*schema.Provider
+	testAccProvider       *schema.Provider
+	testProviderFactories map[string]func() (*schema.Provider, error)
 )
 
 func init() {
 	testAccProvider = Provider()
-	testAccProviders = map[string]terraform.ResourceProvider{
+	testAccProviders = map[string]*schema.Provider{
 		"oasis": testAccProvider,
+	}
+	testProviderFactories = map[string]func() (*schema.Provider, error){
+		"oasis": func() (*schema.Provider, error) {
+			return testAccProvider, nil
+		},
 	}
 }
 

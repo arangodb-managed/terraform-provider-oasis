@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
 //
 
 package pkg
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	example "github.com/arangodb-managed/apis/example/v1"
 )
@@ -42,7 +44,7 @@ var (
 // dataSourceOasisExampleDataset defines an Example Dataset datasource terraform type.
 func dataSourceOasisExampleDataset() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceOasisExampleDatasetRead,
+		ReadContext: dataSourceOasisExampleDatasetRead,
 
 		Schema: map[string]*schema.Schema{
 			exampleOrganizationIDFieldName: {
@@ -82,11 +84,11 @@ func dataSourceOasisExampleDataset() *schema.Resource {
 }
 
 // dataSourceOasisExampleDatasetRead reloads the resource object from the terraform store.
-func dataSourceOasisExampleDatasetRead(data *schema.ResourceData, m interface{}) error {
+func dataSourceOasisExampleDatasetRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	examplec := example.NewExampleDatasetServiceClient(client.conn)
@@ -99,12 +101,12 @@ func dataSourceOasisExampleDatasetRead(data *schema.ResourceData, m interface{})
 	})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to get list of example datasets.")
-		return err
+		return diag.FromErr(err)
 	}
 
 	for k, v := range flattenExampleDatasets(orgID, response.GetItems()) {
 		if err := data.Set(k, v); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	data.SetId(uniqueResourceID(exampleResourceName))

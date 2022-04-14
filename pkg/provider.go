@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Joerg Schad
-// Author Robert Stam
 //
 
 package pkg
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider defines an ArangoDB Oasis Terraform provider.
@@ -83,11 +84,11 @@ func Provider() *schema.Provider {
 			"oasis_example_dataset_installations": dataSourceOasisExampleDatasetInstallation(),
 			"oasis_example_datasets":              dataSourceOasisExampleDataset(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	// Initialize Client with connection settings
 	client := Client{
 		ApiKeyID:      d.Get("api_key_id").(string),

@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
 //
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/gogo/protobuf/types"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -78,12 +79,12 @@ const (
 // resourceBackupPolicy defines a BackupPolicy oasis resource.
 func resourceBackupPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBackupPolicyCreate,
-		Read:   resourceBackupPolicyRead,
-		Update: resourceBackupPolicyUpdate,
-		Delete: resourceBackupPolicyDelete,
+		CreateContext: resourceBackupPolicyCreate,
+		ReadContext:   resourceBackupPolicyRead,
+		UpdateContext: resourceBackupPolicyUpdate,
+		DeleteContext: resourceBackupPolicyDelete,
 
-		CustomizeDiff: func(diff *schema.ResourceDiff, meta interface{}) error {
+		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 			o, n := diff.GetChange(backupPolicyDeploymentIDFieldName)
 			if o != "" && o != n {
 				return fmt.Errorf("Cannot change deployment ID once it has been set.")
@@ -268,18 +269,18 @@ func resourceBackupPolicy() *schema.Resource {
 }
 
 // resourceBackupPolicyUpdate will take a resource diff and apply changes accordingly if there are any.
-func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 	backupc := backup.NewBackupServiceClient(client.conn)
 	policy, err := backupc.GetBackupPolicy(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to find backup policy")
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 	// Main fields
 	if d.HasChange(backupPolicyNameFieldName) {
@@ -322,11 +323,11 @@ func resourceBackupPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	res, err := backupc.UpdateBackupPolicy(client.ctxWithToken, policy)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to update backup policy")
-		return err
+		return diag.FromErr(err)
 	} else {
 		d.SetId(res.GetId())
 	}
-	return resourceBackupPolicyRead(d, m)
+	return resourceBackupPolicyRead(ctx, d, m)
 }
 
 // getRetentionPeriod calculates the retention period.
@@ -336,11 +337,11 @@ func getRetentionPeriod(v interface{}) *types.Duration {
 }
 
 // resourceBackupPolicyRead will gather information from the terraform store and display it accordingly.
-func resourceBackupPolicyRead(d *schema.ResourceData, m interface{}) error {
+func resourceBackupPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	backupc := backup.NewBackupServiceClient(client.conn)
@@ -348,7 +349,7 @@ func resourceBackupPolicyRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		client.log.Error().Err(err).Str("backup-policy-id", d.Id()).Msg("Failed to find backup policy")
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 	if policy == nil {
 		client.log.Error().Err(err).Str("backup-policy-id", d.Id()).Msg("Failed to find backup policy")
@@ -358,7 +359,7 @@ func resourceBackupPolicyRead(d *schema.ResourceData, m interface{}) error {
 
 	for k, v := range flattenBackupPolicyResource(policy) {
 		if err := d.Set(k, v); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	return nil
@@ -602,46 +603,46 @@ func expandHourlySchedule(s []interface{}) *backup.BackupPolicy_HourlySchedule {
 // resourceBackupPolicyCreate will take the schema data from the terraform config file and call the oasis client
 // to initiate a create procedure for a BackupPolicy. It will call helper methods to construct the necessary data
 // in order to create this object.
-func resourceBackupPolicyCreate(d *schema.ResourceData, m interface{}) error {
+func resourceBackupPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	backupc := backup.NewBackupServiceClient(client.conn)
 	expandedPolicy, err := expandBackupPolicyResource(d)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to expand on policy")
-		return err
+		return diag.FromErr(err)
 	}
 	// Pre-check for the given deployment
 	datac := data.NewDataServiceClient(client.conn)
 	if _, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: expandedPolicy.DeploymentId}); err != nil {
 		client.log.Error().Err(err).Str("deployment-id", expandedPolicy.DeploymentId).Msg("Deployment with ID not found.")
-		return err
+		return diag.FromErr(err)
 	}
 	if b, err := backupc.CreateBackupPolicy(client.ctxWithToken, expandedPolicy); err != nil {
 		client.log.Error().Err(err).Msg("Failed to create backup policy")
-		return err
+		return diag.FromErr(err)
 	} else {
 		d.SetId(b.GetId())
 	}
-	return resourceBackupPolicyRead(d, m)
+	return resourceBackupPolicyRead(ctx, d, m)
 }
 
 // resourceBackupPolicyDelete will delete a given resource based on the calculated ID.
-func resourceBackupPolicyDelete(d *schema.ResourceData, m interface{}) error {
+func resourceBackupPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	backupc := backup.NewBackupServiceClient(client.conn)
 	if _, err := backupc.DeleteBackupPolicy(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
 		client.log.Error().Err(err).Str("backup-policy-id", d.Id()).Msg("Failed to delete backup policy")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("") // called automatically, but added to be explicit
 	return nil

@@ -21,10 +21,12 @@
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"sort"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
@@ -59,10 +61,10 @@ const (
 
 func resourceDeployment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDeploymentCreate,
-		Read:   resourceDeploymentRead,
-		Update: resourceDeploymentUpdate,
-		Delete: resourceDeploymentDelete,
+		CreateContext: resourceDeploymentCreate,
+		ReadContext:   resourceDeploymentRead,
+		UpdateContext: resourceDeploymentUpdate,
+		DeleteContext: resourceDeploymentDelete,
 
 		Schema: map[string]*schema.Schema{
 			deplTAndCAcceptedFieldName: {
@@ -141,6 +143,7 @@ func resourceDeployment() *schema.Resource {
 						deplSecurityDisableFoxxAuthenticationFieldName: {
 							Type:     schema.TypeBool,
 							Optional: true, // If not set, defaults to enabling foxx authentication
+							Default:  false,
 						},
 					},
 				},
@@ -223,34 +226,34 @@ func resourceDeployment() *schema.Resource {
 // resourceDeploymentCreate creates an oasis deployment given a project id.
 // It will automatically select a certificate if none is provided and will
 // automatically select the smallest node size if none is provided.
-func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Check if the T&C has been accepted
 	if v, ok := d.GetOk(deplTAndCAcceptedFieldName); ok {
 		if !v.(bool) {
 			client.log.Error().Str("name", deplTAndCAcceptedFieldName).Msg("Field should be set to accept Terms and Conditions")
-			return fmt.Errorf("field '%s' should be set to accept Terms and Conditions", deplTAndCAcceptedFieldName)
+			return diag.Errorf("field '%s' should be set to accept Terms and Conditions", deplTAndCAcceptedFieldName)
 		}
 	} else {
 		client.log.Error().Str("name", deplTAndCAcceptedFieldName).Msg("Unable to find field, which is required to accept Terms and Conditions")
-		return fmt.Errorf("unable to find field %s", deplTAndCAcceptedFieldName)
+		return diag.Errorf("unable to find field %s", deplTAndCAcceptedFieldName)
 	}
 
 	datac := data.NewDataServiceClient(client.conn)
 	expandedDepl, err := expandDeploymentResource(d, client.ProjectID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if expandedDepl.Version == "" {
 		defaultVersion, err := datac.GetDefaultVersion(client.ctxWithToken, &common.Empty{})
 		if err != nil {
 			client.log.Error().Err(err).Msg("Failed to get default version")
-			return err
+			return diag.FromErr(err)
 		}
 		expandedDepl.Version = defaultVersion.Version
 	}
@@ -259,11 +262,11 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 		list, err := cryptoc.ListCACertificates(client.ctxWithToken, &common.ListOptions{ContextId: expandedDepl.GetProjectId()})
 		if err != nil {
 			client.log.Error().Err(err).Msg("Failed to list CA certificates")
-			return err
+			return diag.FromErr(err)
 		}
 		if len(list.GetItems()) < 1 {
 			client.log.Error().Err(err).Msg("Failed to find any CA certificates")
-			return fmt.Errorf("failed to find any CA certificates for project %s", expandedDepl.GetProjectId())
+			return diag.Errorf("failed to find any CA certificates for project %s", expandedDepl.GetProjectId())
 		}
 		// Select the default certificate
 		for _, c := range list.GetItems() {
@@ -280,7 +283,7 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 
 		if expandedDepl.Certificates.CaCertificateId == "" {
 			client.log.Error().Err(err).Str("project-id", expandedDepl.ProjectId).Msg("Unable to find default certificate for project. Please select one manually.")
-			return fmt.Errorf("unable to find default certificate for project %s. Please select one manually", expandedDepl.GetProjectId())
+			return diag.Errorf("unable to find default certificate for project %s. Please select one manually", expandedDepl.GetProjectId())
 		}
 	}
 
@@ -292,11 +295,11 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 		})
 		if err != nil {
 			client.log.Fatal().Err(err).Msg("Failed to fetch node size list.")
-			return fmt.Errorf("failed to fetch node size list for region %s", expandedDepl.RegionId)
+			return diag.Errorf("failed to fetch node size list for region %s", expandedDepl.RegionId)
 		}
 		if len(list.Items) < 1 {
 			client.log.Fatal().Msg("No available node sizes found.")
-			return fmt.Errorf("no available node sizes found for region %s", expandedDepl.RegionId)
+			return diag.Errorf("no available node sizes found for region %s", expandedDepl.RegionId)
 		}
 		sort.SliceStable(list.Items, func(i, j int) bool {
 			return list.Items[i].MemorySize < list.Items[j].MemorySize
@@ -318,12 +321,12 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	proj, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: expandedDepl.GetProjectId()})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to get project")
-		return err
+		return diag.FromErr(err)
 	}
 	tAndC, err := rmc.GetCurrentTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: proj.GetOrganizationId()})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to get Terms and Conditions")
-		return err
+		return diag.FromErr(err)
 	}
 	client.log.Info().Str("id", tAndC.GetId()).Msg("Terms and Conditions are accepted")
 	expandedDepl.AcceptedTermsAndConditionsId = tAndC.GetId()
@@ -331,7 +334,7 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 	depl, err := datac.CreateDeployment(client.ctxWithToken, expandedDepl)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create deployment.")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(depl.GetId())
 
@@ -341,11 +344,11 @@ func resourceDeploymentCreate(d *schema.ResourceData, m interface{}) error {
 			Enabled:      false,
 		}); err != nil {
 			client.log.Error().Err(err).Msg("Failed to update scheduled root password rotation setting.")
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
-	return resourceDeploymentRead(d, m)
+	return resourceDeploymentRead(ctx, d, m)
 }
 
 // location is a convenient wrapper around the location schema for easy parsing
@@ -552,11 +555,11 @@ func expandNotificationSettings(s []interface{}) (settings *data.Deployment_Noti
 }
 
 // resourceDeploymentRead retrieves deployment information from terraform stores.
-func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	datac := data.NewDataServiceClient(client.conn)
@@ -564,13 +567,13 @@ func resourceDeploymentRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to find deployment")
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	for k, v := range flattenDeployment(depl) {
 		if err := d.Set(k, v); err != nil {
 			d.SetId("")
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	return nil
@@ -659,18 +662,18 @@ func flattenNotificationSettings(depl *data.Deployment) []interface{} {
 }
 
 // resourceDeploymentUpdate checks fields for differences and updates a deployment if necessary.
-func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 	datac := data.NewDataServiceClient(client.conn)
 	depl, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to find deployment")
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange(deplNameFieldName) {
@@ -682,7 +685,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange(deplVersionFieldName) {
 		ver, err := expandVersion(d.Get(deplVersionFieldName).([]interface{}))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if ver.dbVersion != "" {
 			depl.Version = ver.dbVersion
@@ -698,7 +701,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange(deplConfigurationFieldName) {
 		conf, err := expandConfiguration(d.Get(deplConfigurationFieldName).([]interface{}))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if conf.model != "" {
@@ -724,7 +727,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange(deplNotificationConfigurationFieldName) {
 		settings, err := expandNotificationSettings(d.Get(deplNotificationConfigurationFieldName).([]interface{}))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		depl.NotificationSettings = settings
 	}
@@ -735,7 +738,7 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 
 	if res, err := datac.UpdateDeployment(client.ctxWithToken, depl); err != nil {
 		client.log.Error().Err(err).Msg("Failed to update deployment")
-		return err
+		return diag.FromErr(err)
 	} else {
 		d.SetId(res.GetId())
 	}
@@ -747,25 +750,25 @@ func resourceDeploymentUpdate(d *schema.ResourceData, m interface{}) error {
 			Enabled:      !disabled,
 		}); err != nil {
 			client.log.Error().Err(err).Msg("Failed to update scheduled root password rotation setting")
-			return err
+			return diag.FromErr(err)
 		}
 		depl.IsScheduledRootPasswordRotationEnabled = !disabled
 	}
 
-	return resourceDeploymentRead(d, m)
+	return resourceDeploymentRead(ctx, d, m)
 }
 
-func resourceDeploymentDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	datac := data.NewDataServiceClient(client.conn)
 	if _, err := datac.DeleteDeployment(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
 		client.log.Error().Err(err).Str("deployment-id", d.Id()).Msg("Failed to delete deployment")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("") // called automatically, but added to be explicit
 	return nil

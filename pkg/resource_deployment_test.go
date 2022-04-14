@@ -25,10 +25,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -44,21 +44,21 @@ func TestResourceDeployment(t *testing.T) {
 
 	res := "terraform-deployment-" + acctest.RandString(10)
 	name := "deployment-" + acctest.RandString(10)
-	orgID, err := FetchOrganizationID(testAccProvider)
+	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
 	pid, err := FetchProjectID(orgID, testAccProvider)
 	require.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDestroyDeployment,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testProviderFactories,
+		CheckDestroy:      testAccCheckDestroyDeployment,
 		Steps: []resource.TestStep{
 			{
 				Config: testDeploymentConfig(res, name, pid),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_deployment."+res, deplNameFieldName, name),
-					resource.TestCheckResourceAttr("oasis_deployment."+res, deplDiskPerformanceFieldName, "dp-3"),
+					resource.TestCheckResourceAttr("oasis_deployment."+res, deplDiskPerformanceFieldName, "dp30"),
 				),
 			},
 		},
@@ -71,7 +71,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		Description: "test-desc",
 		ProjectId:   "123456789",
 		RegionId:    "gcp-europe-west4",
-		Version:     "3.6.0",
+		Version:     "3.9.1",
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
@@ -100,7 +100,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		},
 		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionDbVersionFieldName: "3.6.0",
+				deplVersionDbVersionFieldName: "3.9.1",
 			},
 		},
 		deplSecurityFieldName: []interface{}{
@@ -131,7 +131,7 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 		Description: "test-desc",
 		ProjectId:   "123456789",
 		RegionId:    "gcp-europe-west4",
-		Version:     "3.6.0",
+		Version:     "3.9.1",
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
@@ -157,7 +157,7 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 		},
 		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionDbVersionFieldName: "3.6.0",
+				deplVersionDbVersionFieldName: "3.9.1",
 			},
 		},
 		deplSecurityFieldName: []interface{}{
@@ -187,7 +187,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 		Description: "test-desc",
 		ProjectId:   "123456789",
 		RegionId:    "gcp-europe-west4",
-		Version:     "3.6.0",
+		Version:     "3.9.1",
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
@@ -216,7 +216,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 		},
 		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionDbVersionFieldName: "3.6.0",
+				deplVersionDbVersionFieldName: "3.9.1",
 			},
 		},
 		deplSecurityFieldName: []interface{}{
@@ -251,7 +251,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		Description: "test-desc",
 		ProjectId:   "123456789",
 		RegionId:    "gcp-europe-west4",
-		Version:     "3.6.0",
+		Version:     "3.9.1",
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
@@ -280,7 +280,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		},
 		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionDbVersionFieldName: "3.6.0",
+				deplVersionDbVersionFieldName: "3.9.1",
 			},
 		},
 		deplSecurityFieldName: []interface{}{
@@ -315,7 +315,7 @@ func TestExpandingDeploymentResourceDisableFoxxAuth(t *testing.T) {
 		Description: "test-desc",
 		ProjectId:   "123456789",
 		RegionId:    "gcp-europe-west4",
-		Version:     "3.6.0",
+		Version:     "3.9.1",
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
@@ -340,7 +340,7 @@ func TestExpandingDeploymentResourceDisableFoxxAuth(t *testing.T) {
 		},
 		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionDbVersionFieldName: "3.6.0",
+				deplVersionDbVersionFieldName: "3.9.1",
 			},
 		},
 		deplSecurityFieldName: []interface{}{
@@ -373,7 +373,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 		Description: "test-desc",
 		ProjectId:   "overrideid",
 		RegionId:    "gcp-europe-west4",
-		Version:     "3.6.0",
+		Version:     "3.9.1",
 		Certificates: &data.Deployment_CertificateSpec{
 			CaCertificateId: "certificate-id",
 		},
@@ -397,7 +397,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 		},
 		deplVersionFieldName: []interface{}{
 			map[string]interface{}{
-				deplVersionDbVersionFieldName: "3.6.0",
+				deplVersionDbVersionFieldName: "3.9.1",
 			},
 		},
 		deplSecurityFieldName: []interface{}{
@@ -432,11 +432,18 @@ func testDeploymentConfig(resource, name, project string) string {
 	location {
 	  region = "gcp-europe-west4"
 	}
+	version {
+	  db_version = "3.8.6"
+	}
 	configuration {
 	  model      = "oneshard"
 	  node_count = 3
+      maximum_node_disk_size = 20
 	}
-	disk_performance = "dp-3"
+	disk_performance = "dp30"
+	notification_settings {
+	  email_addresses = ["adonis.murati@arangodb.com"]
+	}
   }`, resource, name, project)
 }
 

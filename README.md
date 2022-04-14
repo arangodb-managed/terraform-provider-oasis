@@ -47,39 +47,6 @@ After a key has been obtained, the relevant API can be called to list organizati
 
 The following is an example of a terraform deployment configuration:
 
-## Data sources
-
-### Project Data Source
-
-To define and use a project as data source, consider the following terraform configuration:
-
-```hcl
-data "oasis_project" "my_project" {
-  name = "MyProject"
-  id = "123456789"
-}
-
-resource "oasis_deployment" "my_flexible_deployment" {
-  project = data.oasis_project.my_project.id
-}
-```
-
-### Organization Data Source
-
-To define and use an organization as data source, consider the following terraform configuration:
-
-```hcl
-data "oasis_organization" "my_organization" {
-  name = "MyOrganization"
-  id = "123456789"
-}
-
-resource "oasis_deployment" "my_flexible_deployment" {
-  organization = data.oasis_organization.my_organization.id
-  ...
-}
-```
-
 ## Running Acceptance Tests
 
 In order to run acceptance tests, the following make target needs to be executed:
@@ -102,6 +69,13 @@ All of them require the following two environment properties to be set:
 ```bash
 export OASIS_API_KEY_ID=<your_key_id>
 export OASIS_API_KEY_SECRET=<your_key_secret>
+```
+
+In addition, those properties might be needed:
+```bash
+export OASIS_ENDPOINT=<oasis_endpoint>, 
+exprt OASIS_TEST_ORGANIZATION_ID=<organization_id>, 
+export OASIS_PROJECT=<oasis_project>
 ```
 
 ## Examples

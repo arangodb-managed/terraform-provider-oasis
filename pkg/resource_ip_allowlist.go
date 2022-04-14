@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-// Author Ewout Prangsma
 //
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	security "github.com/arangodb-managed/apis/security/v1"
@@ -46,10 +46,10 @@ const (
 // resourceIPAllowlist defines the IPAllowlist terraform resource Schema.
 func resourceIPAllowlist() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIPAllowlistCreate,
-		Read:   resourceIPAllowlistRead,
-		Update: resourceIPAllowlistUpdate,
-		Delete: resourceIPAllowlistDelete,
+		CreateContext: resourceIPAllowlistCreate,
+		ReadContext:   resourceIPAllowlistRead,
+		UpdateContext: resourceIPAllowlistUpdate,
+		DeleteContext: resourceIPAllowlistDelete,
 
 		Schema: map[string]*schema.Schema{
 			ipNameFieldName: {
@@ -94,26 +94,26 @@ func resourceIPAllowlist() *schema.Resource {
 
 // resourceIPAllowlistCreate handles the creation lifecycle of the IPAllowlist resource
 // sets the ID of a given IPAllowlist once the creation is successful. This will be stored in local terraform store.
-func resourceIPAllowlistCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIPAllowlistCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 	securityc := security.NewSecurityServiceClient(client.conn)
 	expanded, err := expandToIPAllowlist(d, client.ProjectID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	result, err := securityc.CreateIPAllowlist(client.ctxWithToken, expanded)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create ip allowlist")
-		return err
+		return diag.FromErr(err)
 	}
 	if result != nil {
 		d.SetId(result.Id)
 	}
-	return resourceIPAllowlistRead(d, m)
+	return resourceIPAllowlistRead(ctx, d, m)
 }
 
 // expandToIPAllowlist creates an ip allowlist oasis structure out of a terraform schema.
@@ -188,18 +188,18 @@ func flattenIPAllowlistResource(ip *security.IPAllowlist) map[string]interface{}
 }
 
 // resourceIPAllowlistRead handles the read lifecycle of the IPAllowlist resource.
-func resourceIPAllowlistRead(d *schema.ResourceData, m interface{}) error {
+func resourceIPAllowlistRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	securityc := security.NewSecurityServiceClient(client.conn)
 	ipAllowlist, err := securityc.GetIPAllowlist(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
 		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed to find ip allowlist")
-		return err
+		return diag.FromErr(err)
 	}
 	if ipAllowlist == nil {
 		client.log.Error().Str("ipallowlist-id", d.Id()).Msg("Failed to find ip allowlist")
@@ -210,7 +210,7 @@ func resourceIPAllowlistRead(d *schema.ResourceData, m interface{}) error {
 	for k, v := range flattenIPAllowlistResource(ipAllowlist) {
 		if _, ok := d.GetOk(k); ok {
 			if err := d.Set(k, v); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -218,35 +218,35 @@ func resourceIPAllowlistRead(d *schema.ResourceData, m interface{}) error {
 }
 
 // resourceIPAllowlistDelete will be called once the resource is destroyed.
-func resourceIPAllowlistDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIPAllowlistDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	securityc := security.NewSecurityServiceClient(client.conn)
 	if _, err := securityc.DeleteIPAllowlist(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
 		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed to delete ip allowlist")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("") // called automatically, but added to be explicit
 	return nil
 }
 
 // resourceIPAllowlistUpdate handles the update lifecycle of the IPAllowlist resource.
-func resourceIPAllowlistUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIPAllowlistUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	securityc := security.NewSecurityServiceClient(client.conn)
 	ipAllowlist, err := securityc.GetIPAllowlist(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
 		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed get ip allowlist")
-		return err
+		return diag.FromErr(err)
 	}
 	if ipAllowlist == nil {
 		client.log.Error().Str("ipallowlist-id", d.Id()).Msg("Failed to find certificate")
@@ -263,7 +263,7 @@ func resourceIPAllowlistUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange(ipCIDRRangeFieldName) {
 		cidrRange, err := expandStringList(d.Get(ipCIDRRangeFieldName).([]interface{}))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		ipAllowlist.CidrRanges = cidrRange
 	}
@@ -273,8 +273,8 @@ func resourceIPAllowlistUpdate(d *schema.ResourceData, m interface{}) error {
 	res, err := securityc.UpdateIPAllowlist(client.ctxWithToken, ipAllowlist)
 	if err != nil {
 		client.log.Error().Err(err).Str("ipallowlist-id", d.Id()).Msg("Failed to update ip allowlist")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(res.Id)
-	return resourceIPAllowlistRead(d, m)
+	return resourceIPAllowlistRead(ctx, d, m)
 }

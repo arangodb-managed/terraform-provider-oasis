@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
 //
 
 package pkg
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
@@ -48,7 +50,7 @@ const (
 // dataSourceOasisOrganization defines an Organization datasource terraform type.
 func dataSourceOasisOrganization() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceOasisOrganizationRead,
+		ReadContext: dataSourceOasisOrganizationRead,
 
 		Schema: map[string]*schema.Schema{
 			orgIdFieldName: {
@@ -108,22 +110,22 @@ func dataSourceOasisOrganization() *schema.Resource {
 }
 
 // dataSourceOasisOrganizationRead reloads the resource object from the terraform store.
-func dataSourceOasisOrganizationRead(data *schema.ResourceData, m interface{}) error {
+func dataSourceOasisOrganizationRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
 	oid := data.Get(orgIdFieldName).(string)
 	org, err := rmc.GetOrganization(client.ctxWithToken, &common.IDOptions{Id: oid})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	for k, v := range flattenOrganizationObject(org) {
 		if err := data.Set(k, v); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	data.SetId(org.GetId())

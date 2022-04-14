@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
 //
 
 package pkg
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	example "github.com/arangodb-managed/apis/example/v1"
@@ -43,9 +45,9 @@ var (
 // resourceExampleDatasetInstallation defines an Example Dataset Installation resource.
 func resourceExampleDatasetInstallation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceExampleDatasetInstallationCreate,
-		Read:   resourceExampleDatasetInstallationRead,
-		Delete: resourceExampleDatasetInstallationDelete,
+		CreateContext: resourceExampleDatasetInstallationCreate,
+		ReadContext:   resourceExampleDatasetInstallationRead,
+		DeleteContext: resourceExampleDatasetInstallationDelete,
 
 		Schema: map[string]*schema.Schema{
 			datasetDeploymentIdFieldName: {
@@ -65,7 +67,6 @@ func resourceExampleDatasetInstallation() *schema.Resource {
 			datasetStatusFieldName: {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						datasetStatusDatabaseNameFieldName: {
@@ -91,11 +92,11 @@ func resourceExampleDatasetInstallation() *schema.Resource {
 	}
 }
 
-func resourceExampleDatasetInstallationCreate(data *schema.ResourceData, m interface{}) error {
+func resourceExampleDatasetInstallationCreate(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	examplec := example.NewExampleDatasetServiceClient(client.conn)
@@ -103,11 +104,11 @@ func resourceExampleDatasetInstallationCreate(data *schema.ResourceData, m inter
 	resp, err := examplec.CreateExampleDatasetInstallation(client.ctxWithToken, req)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create example dataset installation.")
-		return err
+		return diag.FromErr(err)
 	}
 
 	data.SetId(resp.GetId())
-	return resourceExampleDatasetInstallationRead(data, m)
+	return resourceExampleDatasetInstallationRead(ctx, data, m)
 }
 
 func expandExampleDatasetInstallation(data *schema.ResourceData) *example.ExampleDatasetInstallation {
@@ -121,12 +122,12 @@ func expandExampleDatasetInstallation(data *schema.ResourceData) *example.Exampl
 	return ret
 }
 
-func resourceExampleDatasetInstallationRead(data *schema.ResourceData, m interface{}) error {
+func resourceExampleDatasetInstallationRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	examplec := example.NewExampleDatasetServiceClient(client.conn)
@@ -136,13 +137,13 @@ func resourceExampleDatasetInstallationRead(data *schema.ResourceData, m interfa
 	if err != nil {
 		client.log.Error().Str("installation-id", data.Id()).Err(err).Msg("Failed to get example dataset installation.")
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	for k, v := range flattenExampleDatasetInstallation(response) {
 		if err := data.Set(k, v); err != nil {
 			data.SetId("")
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	return nil
@@ -170,17 +171,17 @@ func flattenStatus(status *example.ExampleDatasetInstallation_Status) []interfac
 	}
 }
 
-func resourceExampleDatasetInstallationDelete(data *schema.ResourceData, m interface{}) error {
+func resourceExampleDatasetInstallationDelete(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	examplec := example.NewExampleDatasetServiceClient(client.conn)
 	if _, err := examplec.DeleteExampleDatasetInstallation(client.ctxWithToken, &common.IDOptions{Id: data.Id()}); err != nil {
 		client.log.Error().Err(err).Str("installation-id", data.Id()).Msg("Failed to delete installation")
-		return err
+		return diag.FromErr(err)
 	}
 	data.SetId("") // called automatically, but added to be explicit
 	return nil

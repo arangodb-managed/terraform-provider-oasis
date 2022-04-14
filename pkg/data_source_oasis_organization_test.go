@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
 //
 
 package pkg
@@ -29,7 +28,7 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/types"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/stretchr/testify/assert"
 
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
@@ -39,13 +38,13 @@ func TestOasisOrganizationDataSource_Basic(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
 	}
-	organizationID, err := FetchOrganizationID(testAccProvider)
+	organizationID, err := FetchOrganizationID()
 	if err != nil {
 		t.Fatal(err)
 	}
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testOrgAccDataSourcePreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testOrgAccDataSourcePreCheck(t) },
+		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testBasicOasisOrganizationDataSourceConfig(organizationID),
