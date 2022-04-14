@@ -433,7 +433,7 @@ func testDeploymentConfig(resource, name, project string) string {
 	  region = "gcp-europe-west4"
 	}
 	version {
-	  db_version = "3.8.6"
+	  db_version = "3.9.1"
 	}
 	configuration {
 	  model      = "oneshard"
@@ -442,7 +442,7 @@ func testDeploymentConfig(resource, name, project string) string {
 	}
 	disk_performance = "dp30"
 	notification_settings {
-	  email_addresses = ["adonis.murati@arangodb.com"]
+	  email_addresses = ["test@arangodb.com"]
 	}
   }`, resource, name, project)
 }

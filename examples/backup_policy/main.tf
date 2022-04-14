@@ -20,18 +20,18 @@ resource "oasis_project" "oasis_test_project" {
   description = "A test Oasis project within an organization from the Terraform Provider"
 }
 
-// Example of a one-shard deployment
+// Example of a oneshard deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
   project = oasis_project.oasis_test_project.id // If set here, overrides project in provider
   name = "oasis_test_dep_tf"
   location {
-    region = "gcp-europe-west4" // Required
+    region = "gcp-europe-west4"
   }
-  version { // this section is optional
-    db_version = "3.8.6" // This is an optional field, if not set the default version will be used
+  version {
+    db_version = "3.8.6"
   }
-  security { // this section is optional
+  security {
     ca_certificate = "" // If not set, uses default certificate from project
     ip_allowlist = "" // If not set, no allowlist is configured
     disable_foxx_authentication = false // If set to true, request to Foxx apps are not authentications.
@@ -43,7 +43,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   }
   notification_settings {
     email_addresses = [
-      "test@arangodb.com" // this will set email addresses used for notifications regarding depoyment
+      "test@arangodb.com"
     ]
   }
 }

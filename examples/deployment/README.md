@@ -1,6 +1,6 @@
 # Example: Deployment
 
-This example shows how to use the Terraform Oasis provider to create an Oasis Deployment.
+This example shows how to use the Terraform Oasis provider to create an Oasis Deployment. A deployment contains an ArangoDB, configured as you choose. You can have any number of deployments under one project.
 
 ## Prerequsites
 

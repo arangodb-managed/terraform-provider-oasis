@@ -1,6 +1,6 @@
 # Example: Terms and Conditions
 
-This example shows how to use the Terraform Oasis provider to get the terms and conditions.
+This example shows how to use the Terraform Oasis provider to get the default terms and conditions.
 
 ## Prerequsites
 
