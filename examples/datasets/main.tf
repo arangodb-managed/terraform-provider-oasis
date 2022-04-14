@@ -32,8 +32,6 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     db_version = "3.8.6"
   }
   security {
-    ca_certificate = ""
-    ip_allowlist = ""
     disable_foxx_authentication = false
   }
   configuration {
