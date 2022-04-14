@@ -17,7 +17,7 @@ provider "oasis" {
 // Example of a oneshard deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
-  project = "3440115841"
+  project = "" // Project id where deployment will be created
   name = "oasis_test_dep_tf"
   location {
     region = "gcp-europe-west4"
@@ -26,8 +26,6 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     db_version = "3.8.6"
   }
   security {
-    ca_certificate = ""
-    ip_allowlist = ""
     disable_foxx_authentication = false
   }
   configuration {
@@ -47,18 +45,18 @@ resource "oasis_deployment" "my_oneshard_deployment" {
 resource "oasis_deployment" "my_sharded_deployment" {
   terms_and_conditions_accepted = "true"
   name = "oasis_sharded_dep_tf"
-  project = "3440115841" // If set here, overrides project in provider
+  project = "" // Project id where deployment will be created
   location {
-    region = "gcp-europe-west4" // Required
+    region = "gcp-europe-west4"
   }
 
-  version {  // this section is optional
-    db_version = "3.8.6" // This is an optional field, if not set the default version will be used
+  version {
+    db_version = "3.9.1"
   }
 
   security { // this section is optional
-    ca_certificate = "" // If not set, uses default certificate from project
-    ip_allowlist = "" // If not set, no allowlist is configured
+    ca_certificate = "" // If not set, uses default certificate from project (this is here as an empty string for documentation purposes)
+    ip_allowlist = "" // If not set, no allowlist is configured (this is here as an empty string for documentation purposes)
     disable_foxx_authentication = false // If set to true, request to Foxx apps are not authentications.
   }
 

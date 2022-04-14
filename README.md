@@ -74,7 +74,7 @@ export OASIS_API_KEY_SECRET=<your_key_secret>
 In addition, those properties might be needed:
 ```bash
 export OASIS_ENDPOINT=<oasis_endpoint>, 
-exprt OASIS_TEST_ORGANIZATION_ID=<organization_id>, 
+export OASIS_TEST_ORGANIZATION_ID=<organization_id>, 
 export OASIS_PROJECT=<oasis_project>
 ```
 
