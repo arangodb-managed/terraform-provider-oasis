@@ -1,6 +1,6 @@
 # Example: Certificate
 
-This example shows how to use the Terraform Oasis provider to create a Certificate a project in Oasis.
+This example shows how to use the Terraform Oasis provider to create a Certificate for a specific project within Oasis.
 
 ## Prerequsites
 
