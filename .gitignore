@@ -3,3 +3,11 @@ bin/
 .*.swp
 .idea
 assets
+terraform.tfstate
+.terraform.lock.hcl
+*.backup
+./*.tfstate
+.terraform/
+terraform.tfplan
+*~
+*.log

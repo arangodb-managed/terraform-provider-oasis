@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
 
 package pkg
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
@@ -40,7 +41,7 @@ const (
 // dataSourceTermsAndConditions defines a T&C datasource terraform type.
 func dataSourceTermsAndConditions() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceTermsAndConditionsRead,
+		ReadContext: dataSourceTermsAndConditionsRead,
 
 		Schema: map[string]*schema.Schema{
 			tcIDFieldName: {
@@ -65,11 +66,11 @@ func dataSourceTermsAndConditions() *schema.Resource {
 }
 
 // dataSourceTermsAndConditionsRead reloads the resource object from the terraform store.
-func dataSourceTermsAndConditionsRead(data *schema.ResourceData, m interface{}) error {
+func dataSourceTermsAndConditionsRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
@@ -80,7 +81,7 @@ func dataSourceTermsAndConditionsRead(data *schema.ResourceData, m interface{}) 
 	if v, ok := data.GetOk(tcIDFieldName); ok {
 		tc, err = rmc.GetTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: v.(string)})
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
 		var orgID string
@@ -89,13 +90,13 @@ func dataSourceTermsAndConditionsRead(data *schema.ResourceData, m interface{}) 
 		}
 		tc, err = rmc.GetCurrentTermsAndConditions(client.ctxWithToken, &common.IDOptions{Id: orgID})
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	for k, v := range flattenTCObject(tc) {
 		if err := data.Set(k, v); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	data.SetId(tc.GetId())

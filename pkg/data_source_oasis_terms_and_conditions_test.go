@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
 
 package pkg
 
@@ -28,10 +26,11 @@ import (
 	"testing"
 	"time"
 
-	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 	"github.com/gogo/protobuf/types"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/stretchr/testify/assert"
+
+	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
 func TestOasisTermsAndConditionsDataSource_Basic(t *testing.T) {
@@ -43,8 +42,8 @@ func TestOasisTermsAndConditionsDataSource_Basic(t *testing.T) {
 	}
 	tAndCID := os.Getenv("TF_OASIS_TERMS_AND_CONDITIONS")
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testTAndCAccDataSourcePreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:          func() { testTAndCAccDataSourcePreCheck(t) },
+		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testBasicOasisTandCDataSourceConfig(tAndCID),

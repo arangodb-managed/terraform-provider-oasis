@@ -53,10 +53,6 @@ docker-push:
 update-modules:
 	zutano update-check --quiet --fail
 	test -f go.mod || go mod init
-	go mod edit \
-		$(shell zutano go mod replacements \
-			--replace github.com/hashicorp/terraform-plugin-sdk=github.com/hashicorp/terraform-plugin-sdk@v1.4.1 \
-		)
 	go get \
 		$(shell zutano go mod latest \
 			github.com/arangodb-managed/apis \

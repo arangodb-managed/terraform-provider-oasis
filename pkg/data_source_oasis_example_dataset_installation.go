@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
 
 package pkg
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	example "github.com/arangodb-managed/apis/example/v1"
 )
@@ -44,7 +45,7 @@ var (
 // dataSourceOasisExampleDatasetInstallation defines an Example Dataset Installation datasource terraform type.
 func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceOasisExampleDatasetInstallationRead,
+		ReadContext: dataSourceOasisExampleDatasetInstallationRead,
 
 		Schema: map[string]*schema.Schema{
 			installationDeploymentIdFieldName: {
@@ -67,7 +68,6 @@ func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 						installationStatusFieldName: {
 							Type:     schema.TypeList,
 							Computed: true,
-							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									installationStatusDatabaseNameFieldName: {
@@ -97,11 +97,11 @@ func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 }
 
 // dataSourceOasisExampleDatasetInstallationRead reloads the resource object from the terraform store.
-func dataSourceOasisExampleDatasetInstallationRead(data *schema.ResourceData, m interface{}) error {
+func dataSourceOasisExampleDatasetInstallationRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	examplec := example.NewExampleDatasetServiceClient(client.conn)
@@ -111,12 +111,12 @@ func dataSourceOasisExampleDatasetInstallationRead(data *schema.ResourceData, m 
 	})
 	if err != nil {
 		client.log.Error().Str("deployment-id", deplID).Err(err).Msg("Failed to get list of example installations for deployment.")
-		return err
+		return diag.FromErr(err)
 	}
 
 	for k, v := range flattenExampleDatasetInstallations(deplID, response.GetItems()) {
 		if err := data.Set(k, v); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	data.SetId(uniqueResourceID(installationResourceName))

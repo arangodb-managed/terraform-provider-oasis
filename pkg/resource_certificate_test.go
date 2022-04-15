@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,22 +17,21 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/gogo/protobuf/types"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -46,19 +45,19 @@ func TestResourceCertificate(t *testing.T) {
 	t.Parallel()
 	res := "test-cert-" + acctest.RandString(10)
 	certName := "terraform-cert-" + acctest.RandString(10)
-	orgID, err := FetchOrganizationID(testAccProvider)
+	orgID, err := FetchOrganizationID()
 	if err != nil {
 		t.Fatal(err)
 	}
-	pid, err := FetchProjectID(orgID, testAccProvider)
+	pid, err := FetchProjectID(context.Background(), orgID, testAccProvider)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCertificatePreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDestroyCertificate,
+		PreCheck:          func() { testAccCertificatePreCheck(t) },
+		ProviderFactories: testProviderFactories,
+		CheckDestroy:      testAccCheckDestroyCertificate,
 		Steps: []resource.TestStep{
 			{
 				Config: testBasicCertificateConfig(res, certName, pid),

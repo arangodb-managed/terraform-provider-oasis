@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
 
 package pkg
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
@@ -41,7 +42,7 @@ const (
 // dataSourceOasisProject defines a Project datasource terraform type.
 func dataSourceOasisProject() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceOasisProjectRead,
+		ReadContext: dataSourceOasisProjectRead,
 
 		Schema: map[string]*schema.Schema{
 			projIdFieldName: {
@@ -69,23 +70,23 @@ func dataSourceOasisProject() *schema.Resource {
 }
 
 // dataSourceOasisProjectRead reloads the resource object from the terraform store.
-func dataSourceOasisProjectRead(data *schema.ResourceData, m interface{}) error {
+func dataSourceOasisProjectRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
 	pid := data.Get(projIdFieldName).(string)
 	proj, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: pid})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	for k, v := range flattenProjectObject(proj) {
 		if err := data.Set(k, v); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	data.SetId(proj.GetId())

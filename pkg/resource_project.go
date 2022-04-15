@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
@@ -43,10 +43,10 @@ const (
 // resourceProject defines the Project terraform resource Schema.
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectCreate,
-		Read:   resourceProjectRead,
-		Update: resourceProjectUpdate,
-		Delete: resourceProjectDelete,
+		CreateContext: resourceProjectCreate,
+		ReadContext:   resourceProjectRead,
+		UpdateContext: resourceProjectUpdate,
+		DeleteContext: resourceProjectDelete,
 
 		Schema: map[string]*schema.Schema{
 			projectNameFieldName: {
@@ -82,26 +82,26 @@ func resourceProject() *schema.Resource {
 
 // resourceProjectCreate handles the creation lifecycle of the Project resource
 // sets the ID of a given Project once the creation is successful. This will be stored in local terraform store.
-func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
 	expanded, err := expandToProject(d, client.OrganizationID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	result, err := rmc.CreateProject(client.ctxWithToken, expanded)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create project")
-		return err
+		return diag.FromErr(err)
 	}
 	if result != nil {
 		d.SetId(result.Id)
 	}
-	return resourceProjectRead(d, m)
+	return resourceProjectRead(ctx, d, m)
 }
 
 // expandToProject creates a project oasis structure out of a terraform schema.
@@ -143,11 +143,11 @@ func flattenProjectResource(project *rm.Project) map[string]interface{} {
 }
 
 // resourceProjectRead handles the read lifecycle of the project resource.
-func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
@@ -155,7 +155,7 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		client.log.Error().Err(err).Str("project-id", d.Id()).Msg("Failed to find project")
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 	if p == nil {
 		client.log.Error().Str("project-id", d.Id()).Msg("Failed to find project")
@@ -165,42 +165,42 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 
 	for k, v := range flattenProjectResource(p) {
 		if err := d.Set(k, v); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	return nil
 }
 
 // resourceProjectDelete will be called once the resource is destroyed.
-func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
 	if _, err := rmc.DeleteProject(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
 		client.log.Error().Err(err).Str("project-id", d.Id()).Msg("Failed to delete project")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("") // called automatically, but added to be explicit
 	return nil
 }
 
 // resourceProjectUpdate handles the update lifecycle of the project resource.
-func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	rmc := rm.NewResourceManagerServiceClient(client.conn)
 	p, err := rmc.GetProject(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
 		client.log.Error().Err(err).Str("project-id", d.Id()).Msg("Failed get project")
-		return err
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange(projectNameFieldName) {
@@ -212,8 +212,8 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	res, err := rmc.UpdateProject(client.ctxWithToken, p)
 	if err != nil {
 		client.log.Error().Err(err).Str("project-id", d.Id()).Msg("Failed to update project")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(res.Id)
-	return resourceProjectRead(d, m)
+	return resourceProjectRead(ctx, d, m)
 }

@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
 
 package pkg
 
 import (
+	"context"
 	"time"
 
 	"github.com/gogo/protobuf/types"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
@@ -47,10 +47,10 @@ const (
 // resourceCertificate defines the Certificate terraform resource Schema.
 func resourceCertificate() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCertificateCreate,
-		Read:   resourceCertificateRead,
-		Update: resourceCertificateUpdate,
-		Delete: resourceCertificateDelete,
+		CreateContext: resourceCertificateCreate,
+		ReadContext:   resourceCertificateRead,
+		UpdateContext: resourceCertificateUpdate,
+		DeleteContext: resourceCertificateDelete,
 
 		Schema: map[string]*schema.Schema{
 			nameFieldName: {
@@ -97,39 +97,39 @@ func resourceCertificate() *schema.Resource {
 
 // resourceCertificateCreate handles the creation lifecycle of the certificate resource.
 // sets the ID of a given certificate once the creation is successful. This will be stored in local terraform store.
-func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 
 	result, err := cryptoc.CreateCACertificate(client.ctxWithToken, expandToCertificate(d))
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create certificate")
-		return err
+		return diag.FromErr(err)
 	}
 	if result != nil {
 		d.SetId(result.Id)
 	}
-	return resourceCertificateRead(d, m)
+	return resourceCertificateRead(ctx, d, m)
 }
 
 // resourceCertificateRead handles storing and showing data about the certificate given a stored ID.
 // This function should always be called from create and update.
-func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 	cert, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
 		client.log.Error().Err(err).Str("certificate-id", d.Id()).Msg("Failed to find certificate")
-		return err
+		return diag.FromErr(err)
 	}
 	if cert == nil {
 		client.log.Error().Str("certificate-id", d.Id()).Msg("Failed to find certificate")
@@ -140,7 +140,7 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	for k, v := range flattenCertificateResource(cert) {
 		if _, ok := d.GetOk(k); ok {
 			if err := d.Set(k, v); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -195,18 +195,18 @@ func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
 
 // resourceCertificateUpdate handles events in case there is change to the certificate data.
 // Only relevant fields are checked for update. Computed fields are ignored.
-func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 	cert, err := cryptoc.GetCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed get certificate")
-		return err
+		return diag.FromErr(err)
 	}
 	if cert == nil {
 		client.log.Error().Str("certificate-id", d.Id()).Msg("Failed to find certificate")
@@ -229,24 +229,24 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	res, err := cryptoc.UpdateCACertificate(client.ctxWithToken, cert)
 	if err != nil {
 		client.log.Error().Err(err).Str("certificate-id", d.Id()).Msg("Failed to update certificate")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(res.Id)
-	return resourceCertificateRead(d, m)
+	return resourceCertificateRead(ctx, d, m)
 }
 
 // resourceCertificateDelete will be called once the resource is destroyed.
-func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
+		return diag.FromErr(err)
 	}
 
 	cryptoc := crypto.NewCryptoServiceClient(client.conn)
 	if _, err := cryptoc.DeleteCACertificate(client.ctxWithToken, &common.IDOptions{Id: d.Id()}); err != nil {
 		client.log.Error().Err(err).Str("certificate-id", d.Id()).Msg("Failed to delete certificate")
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("") // called automatically, but added to be explicit
 	return nil
