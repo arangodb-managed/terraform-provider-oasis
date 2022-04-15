@@ -17,11 +17,11 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-//
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -49,7 +49,7 @@ func TestResourceCertificate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pid, err := FetchProjectID(orgID, testAccProvider)
+	pid, err := FetchProjectID(context.Background(), orgID, testAccProvider)
 	if err != nil {
 		t.Fatal(err)
 	}

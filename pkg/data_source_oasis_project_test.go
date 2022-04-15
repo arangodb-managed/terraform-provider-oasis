@@ -17,11 +17,11 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-//
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -41,7 +41,7 @@ func TestOasisProjectDataSource_Basic(t *testing.T) {
 	}
 	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
-	pid, err := FetchProjectID(orgID, testAccProvider)
+	pid, err := FetchProjectID(context.Background(), orgID, testAccProvider)
 	if err != nil {
 		t.Fatal(err)
 	}

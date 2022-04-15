@@ -21,6 +21,7 @@
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -46,7 +47,7 @@ func TestResourceDeployment(t *testing.T) {
 	name := "deployment-" + acctest.RandString(10)
 	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
-	pid, err := FetchProjectID(orgID, testAccProvider)
+	pid, err := FetchProjectID(context.Background(), orgID, testAccProvider)
 	require.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{
@@ -438,7 +439,7 @@ func testDeploymentConfig(resource, name, project string) string {
 	configuration {
 	  model      = "oneshard"
 	  node_count = 3
-      maximum_node_disk_size = 20
+	  maximum_node_disk_size = 20
 	}
 	disk_performance = "dp30"
 	notification_settings {

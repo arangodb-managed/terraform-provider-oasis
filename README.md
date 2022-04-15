@@ -28,7 +28,7 @@ make
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 1.1.4
+- [Terraform](https://www.terraform.io/downloads.html) 0.13+ (recommend 1.1.4+) 
 - [Go](https://golang.org/doc/install) 1.17 (to build the provider plugin)
 
 ## Usage
@@ -42,10 +42,6 @@ labeled `New API key`. This will generate a set of keys which can be used with A
 ### Retrieving relevant IDs
 
 After a key has been obtained, the relevant API can be called to list organizations, projects etc.
-
-## Configuration
-
-The following is an example of a terraform deployment configuration:
 
 ## Running Acceptance Tests
 

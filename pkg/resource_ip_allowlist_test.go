@@ -17,11 +17,11 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-//
 
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -48,7 +48,7 @@ func TestResourceIPAllowlist(t *testing.T) {
 	name := "ipallowlist-" + acctest.RandString(10)
 	orgID, err := FetchOrganizationID()
 	assert.NoError(t, err)
-	pid, err := FetchProjectID(orgID, testAccProvider)
+	pid, err := FetchProjectID(context.Background(), orgID, testAccProvider)
 	assert.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{

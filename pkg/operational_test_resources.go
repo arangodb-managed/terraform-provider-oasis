@@ -17,7 +17,6 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-//
 
 package pkg
 
@@ -43,9 +42,9 @@ func FetchOrganizationID() (string, error) {
 }
 
 // FetchProjectID will find the first project given an organization and retrieve its ID.
-func FetchProjectID(orgID string, testAccProvider *schema.Provider) (string, error) {
+func FetchProjectID(ctx context.Context, orgID string, testAccProvider *schema.Provider) (string, error) {
 	// Initialize Client with connection settings
-	if err := testAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil)); err != nil {
+	if err := testAccProvider.Configure(ctx, terraform.NewResourceConfigRaw(nil)); err != nil {
 		return "", fmt.Errorf("terraform config error")
 	}
 	client := testAccProvider.Meta().(*Client)
