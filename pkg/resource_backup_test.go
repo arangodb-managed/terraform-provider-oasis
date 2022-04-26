@@ -37,6 +37,7 @@ import (
 	backup "github.com/arangodb-managed/apis/backup/v1"
 )
 
+// TestResourceBackup verifies the Oasis Backup resource is created along with the specified properties
 func TestResourceBackup(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
@@ -72,6 +73,7 @@ func TestResourceBackup(t *testing.T) {
 	})
 }
 
+// testBackupConfig contains the Terraform resource definitions for testing usage
 func testBackupConfig(project, res, name string) string {
 	return fmt.Sprintf(`resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
@@ -110,6 +112,7 @@ resource "oasis_backup" "%s" {
 `, project, res, name)
 }
 
+// TestExpandBackup tests the Oasis Backup expansion for Terraform schema compatibility.
 func TestExpandBackup(t *testing.T) {
 	raw := map[string]interface{}{
 		backupNameFieldName:         "test-backup",
@@ -159,6 +162,7 @@ func TestExpandBackup(t *testing.T) {
 	})
 }
 
+// TestFlattenBackup tests the Oasis Backup flattening for Terraform schema compatibility.
 func TestFlattenBackup(t *testing.T) {
 	backup := &backup.Backup{
 		Name:           "test-backup",

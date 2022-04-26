@@ -30,6 +30,7 @@ import (
 	backup "github.com/arangodb-managed/apis/backup/v1"
 )
 
+// TestFlattenBackupObject tests the Oasis Backup flattening for Terraform schema compatibility.
 func TestFlattenBackupObject(t *testing.T) {
 	createdAtTimeStamp, _ := types.TimestampProto(time.Date(2022, 1, 1, 1, 1, 1, 0, time.UTC))
 	backup := backup.Backup{
