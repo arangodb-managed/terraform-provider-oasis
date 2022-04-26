@@ -72,6 +72,7 @@ func Provider() *schema.Provider {
 			"oasis_deployment":                   resourceDeployment(),
 			"oasis_ipallowlist":                  resourceIPAllowlist(),
 			"oasis_certificate":                  resourceCertificate(),
+			"oasis_backup":                       resourceBackup(),
 			"oasis_backup_policy":                resourceBackupPolicy(),
 			"oasis_project":                      resourceProject(),
 			"oasis_example_dataset_installation": resourceExampleDatasetInstallation(),
@@ -82,6 +83,7 @@ func Provider() *schema.Provider {
 			"oasis_terms_and_conditions":          dataSourceTermsAndConditions(),
 			"oasis_example_dataset_installations": dataSourceOasisExampleDatasetInstallation(),
 			"oasis_example_datasets":              dataSourceOasisExampleDataset(),
+			"oasis_backup":                        dataSourceOasisBackup(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
