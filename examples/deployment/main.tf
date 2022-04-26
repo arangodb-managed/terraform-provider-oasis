@@ -30,7 +30,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   }
   configuration {
     model = "oneshard"
-    node_size_id = "a4"
+    node_size_id = "c4-a8"
     node_disk_size = 20
   }
   notification_settings {
