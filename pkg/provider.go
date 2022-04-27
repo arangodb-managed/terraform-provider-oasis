@@ -75,6 +75,9 @@ func Provider() *schema.Provider {
 			"oasis_backup_policy":                resourceBackupPolicy(),
 			"oasis_project":                      resourceProject(),
 			"oasis_example_dataset_installation": resourceExampleDatasetInstallation(),
+			"oasis_organization":                 resourceOrganization(),
+			"oasis_organization_lock":            resourceOrganizationLock(),
+			"oasis_organization_unlock":          resourceOrganizationUnLock(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"oasis_project":                       dataSourceOasisProject(),

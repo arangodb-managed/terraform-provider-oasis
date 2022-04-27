@@ -22,14 +22,16 @@ package pkg
 
 import (
 	"fmt"
-	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
+	"os"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"regexp"
-	"testing"
+
+	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
 // TestAccResourceOrganization verifies the Oasis Organization resource is created along with the specified properties
@@ -55,7 +57,7 @@ func TestAccResourceOrganization(t *testing.T) {
 				Config: testOrganizationConfig(res, name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_organization."+res, organizationNameFieldName, name),
-					resource.TestCheckResourceAttr("oasis_organization."+res, organizationDescriptionFieldName, "A test Oasis organization within from Terraform Provider"),
+					resource.TestCheckResourceAttr("oasis_organization."+res, organizationDescriptionFieldName, "A test Oasis organization from Terraform Provider"),
 				),
 			},
 		},
@@ -66,7 +68,7 @@ func TestAccResourceOrganization(t *testing.T) {
 func testOrganizationConfig(res, name string) string {
 	return fmt.Sprintf(`resource "oasis_organization" "%s" {
   name        = "%s"
-  description = "A test Oasis organization within from Terraform Provider"
+  description = "A test Oasis organization from Terraform Provider"
 }
 `, res, name)
 }
@@ -87,7 +89,7 @@ func TestFlattenOrganization(t *testing.T) {
 	assert.Equal(t, expected, flattened)
 }
 
-// TestExpandOrganization tests the Oasis Backup expansion for Terraform schema compatibility.
+// TestExpandOrganization tests the Oasis Organization expansion for Terraform schema compatibility.
 func TestExpandOrganization(t *testing.T) {
 	raw := map[string]interface{}{
 		organizationNameFieldName:        "test-organization",

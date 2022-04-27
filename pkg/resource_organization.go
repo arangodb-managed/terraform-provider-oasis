@@ -23,16 +23,19 @@ package pkg
 import (
 	"context"
 	"fmt"
-	common "github.com/arangodb-managed/apis/common/v1"
-	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	common "github.com/arangodb-managed/apis/common/v1"
+	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
 const (
 	// Organization field names
 	organizationNameFieldName        = "name"
 	organizationDescriptionFieldName = "description"
+	organizationIdNameFieldName      = "organization_id"
 )
 
 // resourceOrganization defines an Organization Oasis resource.
@@ -163,7 +166,7 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	res, err := rmc.UpdateOrganization(client.ctxWithToken, organization)
 	if err != nil {
-		client.log.Error().Err(err).Msg("Failed to update organization")
+		client.log.Error().Err(err).Msg("Failed to update Organization")
 		return diag.FromErr(err)
 	} else {
 		d.SetId(res.GetId())
@@ -177,4 +180,23 @@ func flattenOrganizationResource(organization *rm.Organization) map[string]inter
 		organizationNameFieldName:        organization.GetName(),
 		organizationDescriptionFieldName: organization.GetDescription(),
 	}
+}
+
+// flattenResourceLockedOrganizationResource will take a Resource Locked Organization object and turn it into a flat map for terraform digestion.
+func flattenResourceLockedOrganizationResource(organization *rm.Organization) map[string]interface{} {
+	return map[string]interface{}{
+		organizationIdNameFieldName: organization.GetId(),
+	}
+}
+
+// expandResourceLockedOrganizationResource will take a Terraform flat map schema data and turn it into an Oasis Resource Locked Organization.
+func expandResourceLockedOrganizationResource(d *schema.ResourceData) (*rm.Organization, error) {
+	ret := &rm.Organization{}
+	if v, ok := d.GetOk(organizationIdNameFieldName); ok {
+		ret.Id = v.(string)
+	} else {
+		return nil, fmt.Errorf("unable to find parse field %s", organizationIdNameFieldName)
+	}
+
+	return ret, nil
 }
