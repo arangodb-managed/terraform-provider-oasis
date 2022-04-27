@@ -3,7 +3,7 @@ terraform {
   required_providers {
     oasis = {
       source = "arangodb.com/managed/oasis"
-      version = "1.5.1"
+      version = ">=1.5.1"
     }
   }
 }
@@ -31,9 +31,6 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   version {
     db_version = "3.8.6"
   }
-  security {
-    disable_foxx_authentication = false
-  }
   configuration {
     model = "oneshard"
     node_size_id = "c4-a8"
@@ -53,5 +50,5 @@ resource "oasis_backup" "my_backup" {
   description = "test backup description from terraform"
   deployment_id = oasis_deployment.my_oneshard_deployment.id
   upload = true
-  auto_deleted_at = 3 // auto delete after 3 days
+  auto_deleted_at = -3 // auto delete after 3 days
 }

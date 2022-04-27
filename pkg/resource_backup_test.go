@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -37,8 +38,8 @@ import (
 	backup "github.com/arangodb-managed/apis/backup/v1"
 )
 
-// TestResourceBackup verifies the Oasis Backup resource is created along with the specified properties
-func TestResourceBackup(t *testing.T) {
+// TestAccResourceBackup verifies the Oasis Backup resource is created along with the specified properties
+func TestAccResourceBackup(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
 	}
@@ -57,6 +58,14 @@ func TestResourceBackup(t *testing.T) {
 		ProviderFactories: testProviderFactories,
 		CheckDestroy:      testAccCheckDestroyDeployment,
 		Steps: []resource.TestStep{
+			{
+				Config:      testBackupConfigIncomplete(pid, res, name),
+				ExpectError: regexp.MustCompile("auto_delete_at: must be within range 1-31"),
+			},
+			{
+				Config:      testBackupConfig("", res, name),
+				ExpectError: regexp.MustCompile("Project ID missing"),
+			},
 			{
 				Config: testBackupConfig(pid, res, name),
 				Check: resource.ComposeTestCheckFunc(
@@ -108,6 +117,45 @@ resource "oasis_backup" "%s" {
   deployment_id = oasis_deployment.my_oneshard_deployment.id
   upload = true
   auto_deleted_at = 3
+}
+`, project, res, name)
+}
+
+// testBackupConfigIncomplete contains the incomplete Terraform resource definitions for regression testing (expected failure)
+func testBackupConfigIncomplete(project, res, name string) string {
+	return fmt.Sprintf(`resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
+  project = "%s" 
+  name = "oasis_test_dep_tf"
+  location {
+    region = "gcp-europe-west4"
+  }
+  version {
+    db_version = "3.8.6"
+  }
+  security {
+    disable_foxx_authentication = false
+  }
+  disk_performance = "dp30"
+  configuration {
+    model = "oneshard"
+    node_size_id = "c4-a8"
+    node_disk_size = 20
+	maximum_node_disk_size = 40
+  }
+  notification_settings {
+    email_addresses = [
+      "test@arangodb.com"
+    ]
+  }
+}
+
+resource "oasis_backup" "%s" {
+  name = "%s"
+  description = "test backup description update from terraform"
+  deployment_id = oasis_deployment.my_oneshard_deployment.id
+  upload = true
+  auto_deleted_at = -3
 }
 `, project, res, name)
 }
