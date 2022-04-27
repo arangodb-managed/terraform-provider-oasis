@@ -9,7 +9,12 @@ terraform {
 }
 
 provider "oasis" {
-  api_key_id     = "" // API Key ID generated in Oasis platform
-  api_key_secret = "" // API Key Secret generated in Oasis platform
-  organization   = "" // Your Oasis organization where you want to create the resources
+  api_key_id     = "bqtrx1j8aoyjybqcpdw4" // API Key ID generated in Oasis platform
+  api_key_secret = "44a268d1-50fd-27be-eac6-a81d6cfdf5b8" // API Key Secret generated in Oasis platform
+}
+
+// Terraform created organization
+resource "oasis_organization" "oasis_test_organization" {
+  name        = "Terraform Oasis Organization"
+  description = "A test Oasis organization within from Terraform Provider"
 }
