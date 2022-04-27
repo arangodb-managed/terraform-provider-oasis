@@ -22,3 +22,7 @@ resource "oasis_organization" "oasis_test_organization" {
 resource "oasis_organization_lock" "oasis_test_organization_lock" {
   organization_id = oasis_organization.oasis_test_organization.id
 }
+
+resource "oasis_organization_unlock" "oasis_test_organization_unlock" {
+  organization_id = oasis_organization.oasis_test_organization.id
+}
