@@ -54,6 +54,12 @@ func TestAccResourceOrganization(t *testing.T) {
 				ExpectError: regexp.MustCompile("unable to find parse field name"),
 			},
 			{
+				Config: testOrganizationLockedConfig(res, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("oasis_organization."+res, organizationLockFieldName, "true"),
+				),
+			},
+			{
 				Config: testOrganizationConfig(res, name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_organization."+res, organizationNameFieldName, name),
@@ -73,6 +79,16 @@ func testOrganizationConfig(res, name string) string {
 `, res, name)
 }
 
+// testOrganizationLockedConfig contains the Terraform resource definitions for testing usage
+func testOrganizationLockedConfig(res, name string) string {
+	return fmt.Sprintf(`resource "oasis_organization" "%s" {
+  name        = "%s"
+  description = "A test Oasis organization from Terraform Provider"
+  locked = true
+}
+`, res, name)
+}
+
 // TestFlattenOrganization tests the Oasis Organization flattening for Terraform schema compatibility.
 func TestFlattenOrganization(t *testing.T) {
 	organization := &rm.Organization{
@@ -84,9 +100,21 @@ func TestFlattenOrganization(t *testing.T) {
 		organizationNameFieldName:        "test-organization",
 		organizationDescriptionFieldName: "test-description",
 	}
+	t.Run("with resource locking disabled", func(tt *testing.T) {
+		organization.Locked = false
+		expected[organizationLockFieldName] = false
 
-	flattened := flattenOrganizationResource(organization)
-	assert.Equal(t, expected, flattened)
+		flattened := flattenOrganizationResource(organization)
+		assert.Equal(tt, expected, flattened)
+	})
+
+	t.Run("with resource locking enabled", func(tt *testing.T) {
+		organization.Locked = true
+		expected[organizationLockFieldName] = true
+
+		flattened := flattenOrganizationResource(organization)
+		assert.Equal(tt, expected, flattened)
+	})
 }
 
 // TestExpandOrganization tests the Oasis Organization expansion for Terraform schema compatibility.

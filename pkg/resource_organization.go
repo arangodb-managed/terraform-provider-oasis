@@ -35,7 +35,7 @@ const (
 	// Organization field names
 	organizationNameFieldName        = "name"
 	organizationDescriptionFieldName = "description"
-	organizationIdNameFieldName      = "organization_id"
+	organizationLockFieldName        = "locked"
 )
 
 // resourceOrganization defines an Organization Oasis resource.
@@ -52,6 +52,10 @@ func resourceOrganization() *schema.Resource {
 			},
 			organizationDescriptionFieldName: {
 				Type:     schema.TypeString,
+				Optional: true,
+			},
+			organizationLockFieldName: {
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 		},
@@ -120,6 +124,9 @@ func expandOrganizationResource(d *schema.ResourceData) (*rm.Organization, error
 	if v, ok := d.GetOk(organizationDescriptionFieldName); ok {
 		ret.Description = v.(string)
 	}
+	if v, ok := d.GetOk(organizationLockFieldName); ok {
+		ret.Locked = v.(bool)
+	}
 
 	return ret, nil
 }
@@ -163,6 +170,9 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	if d.HasChange(organizationDescriptionFieldName) {
 		organization.Description = d.Get(organizationDescriptionFieldName).(string)
 	}
+	if d.HasChange(organizationLockFieldName) {
+		organization.Locked = d.Get(organizationLockFieldName).(bool)
+	}
 
 	res, err := rmc.UpdateOrganization(client.ctxWithToken, organization)
 	if err != nil {
@@ -179,24 +189,6 @@ func flattenOrganizationResource(organization *rm.Organization) map[string]inter
 	return map[string]interface{}{
 		organizationNameFieldName:        organization.GetName(),
 		organizationDescriptionFieldName: organization.GetDescription(),
+		organizationLockFieldName:        organization.GetLocked(),
 	}
-}
-
-// flattenResourceLockedOrganizationResource will take a Resource Locked Organization object and turn it into a flat map for terraform digestion.
-func flattenResourceLockedOrganizationResource(organization *rm.Organization) map[string]interface{} {
-	return map[string]interface{}{
-		organizationIdNameFieldName: organization.GetId(),
-	}
-}
-
-// expandResourceLockedOrganizationResource will take a Terraform flat map schema data and turn it into an Oasis Resource Locked Organization.
-func expandResourceLockedOrganizationResource(d *schema.ResourceData) (*rm.Organization, error) {
-	ret := &rm.Organization{}
-	if v, ok := d.GetOk(organizationIdNameFieldName); ok {
-		ret.Id = v.(string)
-	} else {
-		return nil, fmt.Errorf("unable to find parse field %s", organizationIdNameFieldName)
-	}
-
-	return ret, nil
 }
