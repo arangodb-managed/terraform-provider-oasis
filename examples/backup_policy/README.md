@@ -41,7 +41,7 @@ resource "oasis_backup_policy" "my_backup_policy" {
 }
 ```
 Note: if you run `terraform destroy` while the Backup Policy is locked, an error is shown, that's because you can't delete a locked Backup Policy.
-To delete it you have to either remove the property or set `lock=false`:
+To delete it you have to either remove the property or set `locked=false`:
 ```terraform
 resource "oasis_backup_policy" "my_backup_policy" {
   name               = "Test Backup Policy"
