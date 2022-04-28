@@ -178,7 +178,7 @@ func testAccCheckDestroyIPAllowlist(s *terraform.State) error {
 
 func testBasicConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_ipallowlist" "%s" {
-  name 	       = "%s"
+  name         = "%s"
   description  = "Terraform Generated IPAllowlist"
   project      = "%s"
   cidr_ranges  = ["1.2.3.4/32", "88.11.0.0/16"]
