@@ -16,7 +16,7 @@ provider "oasis" {
 // Terraform created organization
 resource "oasis_organization" "oasis_test_organization" {
   name        = "Terraform Oasis Organization"
-  description = "A test Oasis organization within from Terraform Provider"
+  description = "A test Oasis organization from Terraform Provider"
 }
 
 resource "oasis_organization_lock" "oasis_test_organization_lock" {
