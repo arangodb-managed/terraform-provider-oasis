@@ -22,7 +22,7 @@ You can lock a project by specifying the lock as an option in the schema:
 resource "oasis_project" "oasis_test_project" {
   name        = "Terraform Oasis Project"
   description = "A test Oasis project within an organization from the Terraform Provider"
-  locked = true
+  locked      = true
 }
 ```
 Note: if you run `terraform destroy` while the project is locked, an error is shown, that's because you can't delete a locked project.
@@ -31,7 +31,7 @@ To delete it you have to either remove the property or set `lock=false`:
 resource "oasis_project" "oasis_test_project" {
   name        = "Terraform Oasis Project"
   description = "A test Oasis project within an organization from the Terraform Provider"
-  locked = false
+  locked      = false
 }
 ```
 After running `terraform plan` and then `terraform apply --auto-approve` you update the project to not be locked anymore. This way you can run `terraform destroy` without errors, this way deleting the project.
