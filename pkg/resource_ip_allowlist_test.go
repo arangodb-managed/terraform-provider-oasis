@@ -70,10 +70,9 @@ func TestResourceIPAllowlist(t *testing.T) {
 			{
 				Config: testBasicConfig(res, name, pid),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".#", "3"),
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".#", "2"),
 					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".0", "1.2.3.4/32"),
 					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".1", "88.11.0.0/16"),
-					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".2", "0.0.0.0/0"),
 					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipNameFieldName, name),
 				),
 			},
@@ -87,7 +86,7 @@ func TestFlattenIPAllowlistResource(t *testing.T) {
 		ipDescriptionFieldName:             "test-description",
 		ipCreatedAtFieldName:               "1980-03-03T01:01:01Z",
 		ipProjectFieldName:                 "123456789",
-		ipCIDRRangeFieldName:               []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipCIDRRangeFieldName:               []string{"1.2.3.4/32", "88.11.0.0/16"},
 		ipRemoteInspectionAllowedFieldName: false,
 		ipIsDeletedFieldName:               false,
 		ipLockedFieldName:                  true,
@@ -98,7 +97,7 @@ func TestFlattenIPAllowlistResource(t *testing.T) {
 		Name:        "test-name",
 		Description: "test-description",
 		ProjectId:   "123456789",
-		CidrRanges:  []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		CidrRanges:  []string{"1.2.3.4/32", "88.11.0.0/16"},
 		CreatedAt:   created,
 		IsDeleted:   false,
 		Locked:      true,
@@ -122,7 +121,7 @@ func TestExpandingIPAllowlistResource(t *testing.T) {
 		ipNameFieldName:                    "test-name",
 		ipDescriptionFieldName:             "test-description",
 		ipProjectFieldName:                 "123456789",
-		ipCIDRRangeFieldName:               []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipCIDRRangeFieldName:               []interface{}{"1.2.3.4/32", "88.11.0.0/16"},
 		ipRemoteInspectionAllowedFieldName: true,
 		ipIsDeletedFieldName:               false,
 		ipLockedFieldName:                  true,
@@ -146,7 +145,7 @@ func TestExpandingIPAllowlistResourceNameNotDefinedError(t *testing.T) {
 	raw := map[string]interface{}{
 		ipDescriptionFieldName: "test-description",
 		ipProjectFieldName:     "123456789",
-		ipCIDRRangeFieldName:   []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipCIDRRangeFieldName:   []interface{}{"1.2.3.4/32", "88.11.0.0/16"},
 		ipIsDeletedFieldName:   false,
 		ipLockedFieldName:      true,
 	}
@@ -179,20 +178,20 @@ func testAccCheckDestroyIPAllowlist(s *terraform.State) error {
 
 func testBasicConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_ipallowlist" "%s" {
-  name = "%s"
+  name 	       = "%s"
   description  = "Terraform Generated IPAllowlist"
   project      = "%s"
-  cidr_ranges  = ["1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"]
+  cidr_ranges  = ["1.2.3.4/32", "88.11.0.0/16"]
 }`, resource, name, project)
 }
 
 func testLockedIpAllowListConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_ipallowlist" "%s" {
-  name = "%s"
+  name         = "%s"
   description  = "Terraform Generated IPAllowlist"
   project      = "%s"
-  cidr_ranges  = ["1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"]
-  locked	   = true
+  cidr_ranges  = ["1.2.3.4/32", "88.11.0.0/16"]
+  locked       = true
 }`, resource, name, project)
 }
 
