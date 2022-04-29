@@ -50,5 +50,5 @@ resource "oasis_backup" "my_backup" {
   description = "test backup description from terraform"
   deployment_id = oasis_deployment.my_oneshard_deployment.id
   upload = true
-  auto_deleted_at = -3 // auto delete after 3 days
+  auto_deleted_at = 3 // auto delete after 3 days
 }
