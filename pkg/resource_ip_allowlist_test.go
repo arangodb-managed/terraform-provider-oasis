@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -57,12 +58,21 @@ func TestResourceIPAllowlist(t *testing.T) {
 		CheckDestroy:      testAccCheckDestroyIPAllowlist,
 		Steps: []resource.TestStep{
 			{
+				Config:      testBasicConfig(res, "", pid),
+				ExpectError: regexp.MustCompile("failed to parse field name"),
+			},
+			{
+				Config: testLockedIpAllowListConfig(res, name, pid),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipLockedFieldName, "true"),
+				),
+			},
+			{
 				Config: testBasicConfig(res, name, pid),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".#", "3"),
+					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".#", "2"),
 					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".0", "1.2.3.4/32"),
 					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".1", "88.11.0.0/16"),
-					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipCIDRRangeFieldName+".2", "0.0.0.0/0"),
 					resource.TestCheckResourceAttr("oasis_ipallowlist."+res, ipNameFieldName, name),
 				),
 			},
@@ -76,9 +86,10 @@ func TestFlattenIPAllowlistResource(t *testing.T) {
 		ipDescriptionFieldName:             "test-description",
 		ipCreatedAtFieldName:               "1980-03-03T01:01:01Z",
 		ipProjectFieldName:                 "123456789",
-		ipCIDRRangeFieldName:               []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipCIDRRangeFieldName:               []string{"1.2.3.4/32", "88.11.0.0/16"},
 		ipRemoteInspectionAllowedFieldName: false,
 		ipIsDeletedFieldName:               false,
+		ipLockedFieldName:                  true,
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
@@ -86,9 +97,10 @@ func TestFlattenIPAllowlistResource(t *testing.T) {
 		Name:        "test-name",
 		Description: "test-description",
 		ProjectId:   "123456789",
-		CidrRanges:  []string{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		CidrRanges:  []string{"1.2.3.4/32", "88.11.0.0/16"},
 		CreatedAt:   created,
 		IsDeleted:   false,
+		Locked:      true,
 	}
 	got := flattenIPAllowlistResource(&cert)
 	assert.Equal(t, expected, got)
@@ -109,9 +121,10 @@ func TestExpandingIPAllowlistResource(t *testing.T) {
 		ipNameFieldName:                    "test-name",
 		ipDescriptionFieldName:             "test-description",
 		ipProjectFieldName:                 "123456789",
-		ipCIDRRangeFieldName:               []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipCIDRRangeFieldName:               []interface{}{"1.2.3.4/32", "88.11.0.0/16"},
 		ipRemoteInspectionAllowedFieldName: true,
 		ipIsDeletedFieldName:               false,
+		ipLockedFieldName:                  true,
 	}
 	cidrRange, err := expandStringList(raw[ipCIDRRangeFieldName].([]interface{}))
 	assert.NoError(t, err)
@@ -124,6 +137,7 @@ func TestExpandingIPAllowlistResource(t *testing.T) {
 	assert.Equal(t, raw[ipIsDeletedFieldName], allowlist.GetIsDeleted())
 	assert.Equal(t, raw[ipProjectFieldName], allowlist.GetProjectId())
 	assert.Equal(t, raw[ipRemoteInspectionAllowedFieldName], allowlist.GetRemoteInspectionAllowed())
+	assert.Equal(t, raw[ipLockedFieldName], allowlist.GetLocked())
 	assert.Equal(t, cidrRange, allowlist.GetCidrRanges())
 }
 
@@ -131,8 +145,9 @@ func TestExpandingIPAllowlistResourceNameNotDefinedError(t *testing.T) {
 	raw := map[string]interface{}{
 		ipDescriptionFieldName: "test-description",
 		ipProjectFieldName:     "123456789",
-		ipCIDRRangeFieldName:   []interface{}{"1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"},
+		ipCIDRRangeFieldName:   []interface{}{"1.2.3.4/32", "88.11.0.0/16"},
 		ipIsDeletedFieldName:   false,
+		ipLockedFieldName:      true,
 	}
 	s := resourceIPAllowlist().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
@@ -163,10 +178,20 @@ func testAccCheckDestroyIPAllowlist(s *terraform.State) error {
 
 func testBasicConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_ipallowlist" "%s" {
-  name = "%s"
-  description = "Terraform Generated IPAllowlist"
+  name         = "%s"
+  description  = "Terraform Generated IPAllowlist"
   project      = "%s"
-  cidr_ranges = ["1.2.3.4/32", "88.11.0.0/16", "0.0.0.0/0"]
+  cidr_ranges  = ["1.2.3.4/32", "88.11.0.0/16"]
+}`, resource, name, project)
+}
+
+func testLockedIpAllowListConfig(resource, name, project string) string {
+	return fmt.Sprintf(`resource "oasis_ipallowlist" "%s" {
+  name         = "%s"
+  description  = "Terraform Generated IPAllowlist"
+  project      = "%s"
+  cidr_ranges  = ["1.2.3.4/32", "88.11.0.0/16"]
+  locked       = true
 }`, resource, name, project)
 }
 
