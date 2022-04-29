@@ -14,16 +14,16 @@ provider "oasis" {
   organization   = "" // Your Oasis organization where you want to create the resources
 }
 
-// Create a project
+// Terraform created project.
 resource "oasis_project" "oasis_test_project" {
   name        = "Terraform Oasis Project"
   description = "A test Oasis project within an organization from the Terraform Provider"
 }
 
-// Create a oneshard deployment
+// Example of a oneshard deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
-  project = oasis_project.oasis_test_project.id // If set here, overrides project in provider
+  project = oasis_project.oasis_test_project.id // Project id where deployment will be created
   name = "oasis_test_dep_tf"
   location {
     region = "gcp-europe-west4"
@@ -31,12 +31,9 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   version {
     db_version = "3.8.6"
   }
-  security {
-    disable_foxx_authentication = false
-  }
   configuration {
     model = "oneshard"
-    node_size_id = "a4"
+    node_size_id = "c4-a8"
     node_disk_size = 20
   }
   notification_settings {
@@ -46,10 +43,12 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   }
 }
 
-
-// Create an example dataset installation for the deployment to have some data
-// to play with once it finishes bootstrapping.
-resource "oasis_example_dataset_installation" "imdb-movie-data" {
+// Oasis backup
+// This resources uses the computed ID of the deployment created above.
+resource "oasis_backup" "my_backup" {
+  name = "test tf backup"
+  description = "test backup description from terraform"
   deployment_id = oasis_deployment.my_oneshard_deployment.id
-  example_dataset_id = "imdb"
+  upload = true
+  auto_deleted_at = 3 // auto delete after 3 days
 }

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     oasis = {
       source = "arangodb.com/managed/oasis"
-      version = "1.5.1"
+      version = ">=1.5.1"
     }
   }
 }
@@ -14,10 +14,16 @@ provider "oasis" {
   organization   = "" // Your Oasis organization where you want to create the resources
 }
 
+// Terraform created project.
+resource "oasis_project" "oasis_test_project" {
+  name        = "Terraform Oasis Project"
+  description = "A test Oasis project within an organization from the Terraform Provider"
+}
+
 // Example of a oneshard deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
-  project = "" // Project id where deployment will be created
+  project = oasis_project.oasis_test_project.id // Project id where deployment will be created
   name = "oasis_test_dep_tf"
   location {
     region = "gcp-europe-west4"
@@ -25,12 +31,9 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   version {
     db_version = "3.8.6"
   }
-  security {
-    disable_foxx_authentication = false
-  }
   configuration {
     model = "oneshard"
-    node_size_id = "a4"
+    node_size_id = "c4-a4"
     node_disk_size = 20
   }
   notification_settings {
@@ -45,7 +48,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
 resource "oasis_deployment" "my_sharded_deployment" {
   terms_and_conditions_accepted = "true"
   name = "oasis_sharded_dep_tf"
-  project = "" // Project id where deployment will be created
+  project = oasis_project.oasis_test_project.id // Project id where deployment will be created
   location {
     region = "gcp-europe-west4"
   }
@@ -62,7 +65,7 @@ resource "oasis_deployment" "my_sharded_deployment" {
 
   configuration {
     model = "sharded"
-    node_size_id = "a4"
+    node_size_id = "c4-a4"
     node_disk_size = 20
     node_count = 5
   }

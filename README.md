@@ -54,12 +54,6 @@ make test-acc
 It is recommended that on a schema addition / deprecation and general larger refactorings the acceptance tests are
 executed. *NOTE* that these tests create real deployments, projects and organizations.
 
-Some of them may require additional environment properties to work. I.e.:
-
-```bash
-export OASIS_TEST_ORGANIZATION_ID=123456789
-```
-
 All of them require the following two environment properties to be set:
 
 ```bash
