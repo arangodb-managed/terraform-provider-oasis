@@ -38,6 +38,7 @@ const (
 	projectCreatedAtFieldName    = "created_at"
 	projectOrganizationFieldName = "organization"
 	projectIsDeletedFieldName    = "is_deleted"
+	projectLockedFieldName       = "locked"
 )
 
 // resourceProject defines the Project terraform resource Schema.
@@ -76,6 +77,10 @@ func resourceProject() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			projectLockedFieldName: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -106,29 +111,24 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 // expandToProject creates a project oasis structure out of a terraform schema.
 func expandToProject(d *schema.ResourceData, defaultOrganization string) (*rm.Project, error) {
-	var (
-		name         string
-		description  string
-		organization string
-	)
+	proj := &rm.Project{}
 	if v, ok := d.GetOk(projectNameFieldName); ok {
-		name = v.(string)
+		proj.Name = v.(string)
 	} else {
 		return nil, fmt.Errorf("failed to parse field %s", projectNameFieldName)
 	}
 	if v, ok := d.GetOk(projectDescriptionFieldName); ok {
-		description = v.(string)
+		proj.Description = v.(string)
 	}
-	// Overwrite organization if it exists
-	organization = defaultOrganization
 	if v, ok := d.GetOk(projectOrganizationFieldName); ok {
-		organization = v.(string)
+		proj.OrganizationId = v.(string)
+	} else {
+		proj.OrganizationId = defaultOrganization
 	}
-	return &rm.Project{
-		Name:           name,
-		Description:    description,
-		OrganizationId: organization,
-	}, nil
+	if v, ok := d.GetOk(projectLockedFieldName); ok {
+		proj.Locked = v.(bool)
+	}
+	return proj, nil
 }
 
 // flattenProjectResource flattens the project data into a map interface for easy storage.
@@ -139,6 +139,7 @@ func flattenProjectResource(project *rm.Project) map[string]interface{} {
 		projectOrganizationFieldName: project.GetOrganizationId(),
 		projectCreatedAtFieldName:    project.GetCreatedAt().String(),
 		projectIsDeletedFieldName:    project.GetIsDeleted(),
+		projectLockedFieldName:       project.GetLocked(),
 	}
 }
 
@@ -208,6 +209,9 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	if d.HasChange(projectDescriptionFieldName) {
 		p.Description = d.Get(projectDescriptionFieldName).(string)
+	}
+	if d.HasChange(projectLockedFieldName) {
+		p.Locked = d.Get(projectLockedFieldName).(bool)
 	}
 	res, err := rmc.UpdateProject(client.ctxWithToken, p)
 	if err != nil {

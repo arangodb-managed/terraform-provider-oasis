@@ -23,6 +23,7 @@ package pkg
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -55,6 +56,16 @@ func TestResourceCreateProject(t *testing.T) {
 		CheckDestroy:      testAccCheckDestroyProject,
 		Steps: []resource.TestStep{
 			{
+				Config:      testBasicProjectConfig(res, "", orgID),
+				ExpectError: regexp.MustCompile("failed to parse field name"),
+			},
+			{
+				Config: testLockedProjectConfig(res, name, orgID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("oasis_project."+res, projectLockedFieldName, "true"),
+				),
+			},
+			{
 				Config: testBasicProjectConfig(res, name, orgID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_project."+res, projectNameFieldName, name),
@@ -71,6 +82,7 @@ func TestFlattenProjectResource(t *testing.T) {
 		projectCreatedAtFieldName:    "1980-03-03T01:01:01Z",
 		projectOrganizationFieldName: "_support",
 		projectIsDeletedFieldName:    true,
+		projectLockedFieldName:       false,
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
@@ -80,6 +92,7 @@ func TestFlattenProjectResource(t *testing.T) {
 		OrganizationId: "_support",
 		CreatedAt:      created,
 		IsDeleted:      true,
+		Locked:         false,
 	}
 	got := flattenProjectResource(&proj)
 	assert.Equal(t, expected, got)
@@ -126,5 +139,14 @@ func testBasicProjectConfig(res string, name string, id string) string {
   name = "%s"
   description = "Terraform Generated Project"
   organization = "%s"
+}`, res, name, id)
+}
+
+func testLockedProjectConfig(res string, name string, id string) string {
+	return fmt.Sprintf(`resource "oasis_project" "%s" {
+ name = "%s"
+ description = "Terraform Generated Project"
+ organization = "%s"
+ locked = true
 }`, res, name, id)
 }
