@@ -42,6 +42,7 @@ const (
 	backupPolicyIsPausedFieldName     = "is_paused"
 	backupPolicyScheduleFieldName     = "schedule"
 	backupPolicyDeploymentIDFieldName = "deployment_id"
+	backupPolicyLockedFieldName       = "locked"
 	// Schedule
 	backupPolicyScheduleTypeFieldName = "type"
 	// Hourly
@@ -263,6 +264,10 @@ func resourceBackupPolicy() *schema.Resource {
 					},
 				},
 			},
+			backupPolicyLockedFieldName: {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -317,6 +322,9 @@ func resourceBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData, m i
 	case monthlySchedule:
 		policy.Schedule.HourlySchedule = nil
 		policy.Schedule.DailySchedule = nil
+	}
+	if d.HasChange(backupPolicyLockedFieldName) {
+		policy.Locked = d.Get(backupPolicyLockedFieldName).(bool)
 	}
 
 	res, err := backupc.UpdateBackupPolicy(client.ctxWithToken, policy)
@@ -375,6 +383,7 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 		backupPolicyUploadFieldName:            policy.GetUpload(),
 		backupPolictEmailNotificationFieldName: policy.GetEmailNotification(),
 		backupPolicyScheduleFieldName:          schedule,
+		backupPolicyLockedFieldName:            policy.GetLocked(),
 	}
 	if policy.GetRetentionPeriod() != nil {
 		seconds := policy.GetRetentionPeriod().GetSeconds()
@@ -475,6 +484,9 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 	}
 	if v, ok := d.GetOk(backupPolicyScheduleFieldName); ok {
 		ret.Schedule = expandBackupPolicySchedule(v.([]interface{}))
+	}
+	if v, ok := d.GetOk(backupPolicyLockedFieldName); ok {
+		ret.Locked = v.(bool)
 	}
 	return ret, nil
 }
