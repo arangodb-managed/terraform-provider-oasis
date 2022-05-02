@@ -94,6 +94,7 @@ func TestFlattenCertificateResource(t *testing.T) {
 		isDefaultFieldName:               false,
 		expiresAtFieldName:               "1980-03-10T01:01:01Z",
 		createdAtFieldName:               "1980-03-03T01:01:01Z",
+		lockedFieldName:                  false,
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
@@ -107,6 +108,7 @@ func TestFlattenCertificateResource(t *testing.T) {
 		ExpiresAt:               expires,
 		IsDefault:               false,
 		UseWellKnownCertificate: true,
+		Locked:                  false,
 	}
 	got := flattenCertificateResource(&cert)
 	assert.Equal(t, expected, got)
@@ -119,6 +121,7 @@ func TestExpandingCertificateResource(t *testing.T) {
 		projectFieldName:                 "123456789",
 		useWellKnownCertificateFieldName: true,
 		lifetimeFieldName:                3600,
+		lockedFieldName:                  true,
 	}
 	s := resourceCertificate().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
@@ -128,6 +131,7 @@ func TestExpandingCertificateResource(t *testing.T) {
 	assert.Equal(t, raw[projectFieldName], cert.GetProjectId())
 	assert.Equal(t, raw[useWellKnownCertificateFieldName], cert.GetUseWellKnownCertificate())
 	assert.Equal(t, raw[lifetimeFieldName], int(cert.GetLifetime().GetSeconds()))
+	assert.Equal(t, raw[lockedFieldName], cert.GetLocked())
 }
 
 func testAccCheckDestroyCertificate(s *terraform.State) error {
