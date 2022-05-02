@@ -17,6 +17,25 @@ terraform plan
 terraform apply
 ```
 
+You can lock an organization by specifying it as an option in the schema:
+```terraform
+resource "oasis_organization" "oasis_test_organization" {
+  name        = "Terraform Oasis Organization"
+  description = "A test Oasis organization from Terraform Provider"
+  lock = true 
+}
+```
+Note: if you run `terraform destroy` while the organization is locked an error is shown, that's because you can't delete a locked organization.
+To delete it you have to either remove the property or set `lock=false`:
+```terraform
+resource "oasis_organization" "oasis_test_organization" {
+  name        = "Terraform Oasis Organization"
+  description = "A test Oasis organization from Terraform Provider"
+  lock = false 
+}
+```
+After running `terraform plan` and then `terraform apply --auto-approve` you update the organization to not be locked anymore. This way you can run `terraform destroy` without errors.
+
 To remove the resources created run:
 ```
 terraform destroy

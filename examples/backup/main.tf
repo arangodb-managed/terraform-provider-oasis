@@ -25,19 +25,17 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
   project = oasis_project.oasis_test_project.id // Project id where deployment will be created
   name = "oasis_test_dep_tf"
-
   location {
     region = "gcp-europe-west4"
   }
-
   version {
     db_version = "3.8.6"
   }
-
   configuration {
     model = "oneshard"
+    node_size_id = "c4-a8"
+    node_disk_size = 20
   }
-
   notification_settings {
     email_addresses = [
       "test@arangodb.com"
@@ -45,30 +43,12 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   }
 }
 
-
-// Example of a sharded deployment
-resource "oasis_deployment" "my_sharded_deployment" {
-  terms_and_conditions_accepted = "true"
-  name = "oasis_sharded_dep_tf"
-  project = oasis_project.oasis_test_project.id // Project id where deployment will be created
-  location {
-    region = "gcp-europe-west4"
-  }
-
-  version {
-    db_version = "3.9.1"
-  }
-
-  security { // this section is optional
-    ca_certificate = "" // If not set, uses default certificate from project (this is here as an empty string for documentation purposes)
-    ip_allowlist = "" // If not set, no allowlist is configured (this is here as an empty string for documentation purposes)
-    disable_foxx_authentication = false // If set to true, request to Foxx apps are not authentications.
-  }
-
-  configuration {
-    model = "sharded"
-    node_size_id = "c4-a4"
-    node_disk_size = 20
-    node_count = 5
-  }
+// Oasis backup
+// This resources uses the computed ID of the deployment created above.
+resource "oasis_backup" "my_backup" {
+  name = "test tf backup"
+  description = "test backup description from terraform"
+  deployment_id = oasis_deployment.my_oneshard_deployment.id
+  upload = true
+  auto_deleted_at = 3 // auto delete after 3 days
 }
