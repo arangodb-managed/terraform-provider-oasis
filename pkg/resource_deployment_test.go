@@ -88,6 +88,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		},
 		DiskPerformanceId:                      "dp-1",
 		IsScheduledRootPasswordRotationEnabled: false,
+		Locked:                                 false,
 	}
 	flattened := flattenDeployment(depl)
 	expected := map[string]interface{}{
@@ -122,6 +123,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		},
 		deplDiskPerformanceFieldName:                      "dp-1",
 		deplDisableScheduledRootPasswordRotationFieldName: true,
+		deplLockedFieldName:                               false,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -145,6 +147,7 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 			NodeDiskSize: 32,
 		},
 		IsScheduledRootPasswordRotationEnabled: true,
+		Locked:                                 true,
 	}
 	flattened := flattenDeployment(depl)
 	expected := map[string]interface{}{
@@ -178,6 +181,7 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 		},
 		deplDiskPerformanceFieldName:                      "", // Not set
 		deplDisableScheduledRootPasswordRotationFieldName: false,
+		deplLockedFieldName:                               true,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -204,6 +208,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 			EmailAddresses: []string{"test@example.test"},
 		},
 		IsScheduledRootPasswordRotationEnabled: false,
+		Locked:                                 true,
 	}
 	flattened := flattenDeployment(depl)
 	expected := map[string]interface{}{
@@ -242,6 +247,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 		},
 		deplDiskPerformanceFieldName:                      "",
 		deplDisableScheduledRootPasswordRotationFieldName: true,
+		deplLockedFieldName:                               true,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -269,6 +275,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		},
 		DiskPerformanceId:                      "dp-2",
 		IsScheduledRootPasswordRotationEnabled: true,
+		Locked:                                 false,
 	}
 	raw := map[string]interface{}{
 		deplProjectFieldName:     "123456789",
@@ -302,6 +309,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		},
 		deplDiskPerformanceFieldName:                      "dp-2",
 		deplDisableScheduledRootPasswordRotationFieldName: false,
+		deplLockedFieldName:                               false,
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
@@ -329,6 +337,7 @@ func TestExpandingDeploymentResourceDisableFoxxAuth(t *testing.T) {
 			NodeDiskSize: 32,
 		},
 		IsScheduledRootPasswordRotationEnabled: true,
+		Locked:                                 true,
 	}
 	raw := map[string]interface{}{
 		deplProjectFieldName:     "123456789",
@@ -360,6 +369,7 @@ func TestExpandingDeploymentResourceDisableFoxxAuth(t *testing.T) {
 			},
 		},
 		deplDisableScheduledRootPasswordRotationFieldName: false,
+		deplLockedFieldName: true,
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
@@ -386,6 +396,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 			NodeDiskSize: 32,
 		},
 		IsScheduledRootPasswordRotationEnabled: false,
+		Locked:                                 true,
 	}
 	raw := map[string]interface{}{
 		deplProjectFieldName:     "overrideid",
@@ -416,6 +427,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 			},
 		},
 		deplDisableScheduledRootPasswordRotationFieldName: true,
+		deplLockedFieldName: true,
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
