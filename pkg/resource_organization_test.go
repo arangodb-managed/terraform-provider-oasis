@@ -22,6 +22,8 @@ package pkg
 
 import (
 	"fmt"
+	common "github.com/arangodb-managed/apis/common/v1"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"regexp"
 	"testing"
@@ -47,7 +49,7 @@ func TestAccResourceOrganization(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
-		CheckDestroy:      testAccCheckDestroyDeployment,
+		CheckDestroy:      testAccCheckDestroyOrganization,
 		Steps: []resource.TestStep{
 			{
 				Config:      testOrganizationConfig(res, ""),
@@ -68,6 +70,27 @@ func TestAccResourceOrganization(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckDestroyOrganization(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+	rmc := rm.NewResourceManagerServiceClient(client.conn)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "oasis_organization" {
+			continue
+		}
+
+		if _, err := rmc.GetOrganization(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); err == nil {
+			return fmt.Errorf("organization still present")
+		}
+	}
+
+	return nil
 }
 
 // testOrganizationConfig contains the Terraform resource definitions for testing usage
