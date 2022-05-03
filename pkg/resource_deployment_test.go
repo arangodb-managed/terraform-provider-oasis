@@ -474,7 +474,7 @@ func testAccCheckDestroyDeployment(s *terraform.State) error {
 		}
 
 		if _, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
-			return fmt.Errorf("Deployment still present")
+			return fmt.Errorf("deployment still present")
 		}
 	}
 
