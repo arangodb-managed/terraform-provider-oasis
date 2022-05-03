@@ -42,6 +42,7 @@ const (
 	isDefaultFieldName               = "is_default"
 	createdAtFieldName               = "created_at"
 	expiresAtFieldName               = "expires_at"
+	lockedFieldName                  = "locked"
 )
 
 // resourceCertificate defines the Certificate terraform resource Schema.
@@ -90,6 +91,10 @@ func resourceCertificate() *schema.Resource {
 			expiresAtFieldName: {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			lockedFieldName: {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 		},
 	}
@@ -158,6 +163,7 @@ func flattenCertificateResource(cert *crypto.CACertificate) map[string]interface
 		isDefaultFieldName:               cert.GetIsDefault(),
 		expiresAtFieldName:               cert.GetExpiresAt().String(),
 		createdAtFieldName:               cert.GetCreatedAt().String(),
+		lockedFieldName:                  cert.GetLocked(),
 	}
 	return flatted
 }
@@ -171,6 +177,7 @@ func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
 		lifetime                int
 		useWellKnownCertificate bool
 		lt                      *types.Duration
+		locked                  bool
 	)
 	if v, ok := d.GetOk(descriptionFieldName); ok {
 		description = v.(string)
@@ -184,12 +191,16 @@ func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
 	if v, ok := d.GetOk(useWellKnownCertificateFieldName); ok {
 		useWellKnownCertificate = v.(bool)
 	}
+	if v, ok := d.GetOk(lockedFieldName); ok {
+		locked = v.(bool)
+	}
 	return &crypto.CACertificate{
 		Name:                    n,
 		Description:             description,
 		ProjectId:               pid,
 		Lifetime:                lt,
 		UseWellKnownCertificate: useWellKnownCertificate,
+		Locked:                  locked,
 	}
 }
 
@@ -225,6 +236,9 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 	}
 	if d.HasChange(lifetimeFieldName) {
 		cert.Lifetime = types.DurationProto(time.Duration(d.Get(lifetimeFieldName).(int)))
+	}
+	if d.HasChange(lockedFieldName) {
+		cert.Locked = d.Get(lockedFieldName).(bool)
 	}
 	res, err := cryptoc.UpdateCACertificate(client.ctxWithToken, cert)
 	if err != nil {

@@ -37,6 +37,7 @@ import (
 	data "github.com/arangodb-managed/apis/data/v1"
 )
 
+// TestResourceDeployment verifies the Oasis Deployment resource is created along with the specified properties.
 func TestResourceDeployment(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
@@ -66,6 +67,7 @@ func TestResourceDeployment(t *testing.T) {
 	})
 }
 
+// TestFlattenDeploymentResource tests the Oasis Deployment flattening for Terraform schema compatibility.
 func TestFlattenDeploymentResource(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
@@ -128,6 +130,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 	assert.Equal(t, expected, flattened)
 }
 
+// TestFlattenDeploymentResourceDisableFoxxAuth tests the Oasis Deployment flattening with DisableFoxxAuthentication set to true.
 func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
@@ -186,6 +189,7 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 	assert.Equal(t, expected, flattened)
 }
 
+// TestFlattenDeploymentResourceNotificationSettings tests the Oasis Deployment flattening with notification settings.
 func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
@@ -252,6 +256,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 	assert.Equal(t, expected, flattened)
 }
 
+// TestExpandingDeploymentResource tests the Oasis Deployment expansion for Terraform schema compatibility.
 func TestExpandingDeploymentResource(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
@@ -318,6 +323,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 	assert.Equal(t, depl, expandedDepl)
 }
 
+// TestExpandingDeploymentResourceDisableFoxxAuth tests the Oasis Deployment expansion with DisableFoxxAuthentication set to true.
 func TestExpandingDeploymentResourceDisableFoxxAuth(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
@@ -378,6 +384,7 @@ func TestExpandingDeploymentResourceDisableFoxxAuth(t *testing.T) {
 	assert.Equal(t, depl, expandedDepl)
 }
 
+// TestExpandDeploymentOverrideProjectID tests the Oasis Deployment expansion when overriding project id.
 func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 	depl := &data.Deployment{
 		Name:        "test-name",
@@ -436,6 +443,7 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 	assert.Equal(t, depl, expandedDepl)
 }
 
+// testDeploymentConfig contains the Terraform resource definitions for testing usage
 func testDeploymentConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_deployment" "%s" {
 	terms_and_conditions_accepted = "true"
@@ -460,6 +468,7 @@ func testDeploymentConfig(resource, name, project string) string {
   }`, resource, name, project)
 }
 
+// testAccCheckDestroyDeployment verifies the Terraform oasis_deployment resource cleanup.
 func testAccCheckDestroyDeployment(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 	if err := client.Connect(); err != nil {
@@ -469,12 +478,12 @@ func testAccCheckDestroyDeployment(s *terraform.State) error {
 	datac := data.NewDataServiceClient(client.conn)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "oasis_ipallowlist" {
+		if rs.Type != "oasis_deployment" {
 			continue
 		}
 
 		if _, err := datac.GetDeployment(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
-			return fmt.Errorf("Deployment still present")
+			return fmt.Errorf("deployment still present")
 		}
 	}
 

@@ -17,6 +17,26 @@ terraform plan
 terraform apply
 ```
 
+You can lock a Certificate by specifying the lock as an option in the schema:
+```terraform
+resource "oasis_certificate" "my_oasis_cert" {
+  name        = "Terraform certificate"
+  description = "Certificate description."
+  project     = oasis_project.oasis_test_project.id
+  locked      = true
+}
+```
+Note: if you run `terraform destroy` while the Certificate is locked, an error is shown, that's because you can't delete a locked CA Certificate.
+To delete it you have to either remove the property or set `locked=false`:
+```terraform
+resource "oasis_certificate" "my_oasis_cert" {
+  name        = "Terraform certificate"
+  description = "Certificate description."
+  project     = oasis_project.oasis_test_project.id
+  locked      = false
+}
+```
+
 To remove the resources created run:
 ```
 terraform destroy

@@ -78,6 +78,7 @@ func Provider() *schema.Provider {
 			"oasis_example_dataset_installation": resourceExampleDatasetInstallation(),
 			"oasis_organization":                 resourceOrganization(),
 			"oasis_iam_group":                    resourceIAMGroup(),
+			"oasis_organization_invite":          resourceOrganizationInvite(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"oasis_project":                       dataSourceOasisProject(),

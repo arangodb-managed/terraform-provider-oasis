@@ -38,6 +38,7 @@ import (
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
 )
 
+// TestResourceCertificate verifies the Oasis CA Certificate resource is created along with the specified properties.
 func TestResourceCertificate(t *testing.T) {
 	if _, ok := os.LookupEnv("TF_ACC"); !ok {
 		t.Skip()
@@ -84,6 +85,7 @@ func TestResourceCertificate(t *testing.T) {
 	})
 }
 
+// TestFlattenCertificateResource tests the Oasis CA Certificate flattening for Terraform schema compatibility.
 func TestFlattenCertificateResource(t *testing.T) {
 	expected := map[string]interface{}{
 		nameFieldName:                    "test-name",
@@ -94,6 +96,7 @@ func TestFlattenCertificateResource(t *testing.T) {
 		isDefaultFieldName:               false,
 		expiresAtFieldName:               "1980-03-10T01:01:01Z",
 		createdAtFieldName:               "1980-03-03T01:01:01Z",
+		lockedFieldName:                  false,
 	}
 
 	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
@@ -107,11 +110,13 @@ func TestFlattenCertificateResource(t *testing.T) {
 		ExpiresAt:               expires,
 		IsDefault:               false,
 		UseWellKnownCertificate: true,
+		Locked:                  false,
 	}
 	got := flattenCertificateResource(&cert)
 	assert.Equal(t, expected, got)
 }
 
+// TestExpandingCertificateResource tests the Oasis CA Certificate expansion for Terraform schema compatibility.
 func TestExpandingCertificateResource(t *testing.T) {
 	raw := map[string]interface{}{
 		nameFieldName:                    "test-name",
@@ -119,6 +124,7 @@ func TestExpandingCertificateResource(t *testing.T) {
 		projectFieldName:                 "123456789",
 		useWellKnownCertificateFieldName: true,
 		lifetimeFieldName:                3600,
+		lockedFieldName:                  true,
 	}
 	s := resourceCertificate().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
@@ -128,8 +134,10 @@ func TestExpandingCertificateResource(t *testing.T) {
 	assert.Equal(t, raw[projectFieldName], cert.GetProjectId())
 	assert.Equal(t, raw[useWellKnownCertificateFieldName], cert.GetUseWellKnownCertificate())
 	assert.Equal(t, raw[lifetimeFieldName], int(cert.GetLifetime().GetSeconds()))
+	assert.Equal(t, raw[lockedFieldName], cert.GetLocked())
 }
 
+// testAccCheckDestroyCertificate verifies the Terraform oasis_certificate resource cleanup.
 func testAccCheckDestroyCertificate(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 	if err := client.Connect(); err != nil {
@@ -151,6 +159,7 @@ func testAccCheckDestroyCertificate(s *terraform.State) error {
 	return nil
 }
 
+// testBasicCertificateConfig contains the Terraform resource definitions for basic testing usage.
 func testBasicCertificateConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
   name = "%s"
@@ -160,6 +169,7 @@ func testBasicCertificateConfig(resource, name, project string) string {
 }`, resource, name, project)
 }
 
+// testUseWellKnownConfig contains the Terraform resource definitions for well known config testing usage.
 func testUseWellKnownConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
   name = "%s"
@@ -169,6 +179,7 @@ func testUseWellKnownConfig(resource, name, project string) string {
 }`, resource, name, project)
 }
 
+// testOptionalFieldsConfig contains the Terraform resource definitions for optional config testing usage.
 func testOptionalFieldsConfig(resource, name, project string) string {
 	return fmt.Sprintf(`resource "oasis_certificate" "%s" {
   name = "%s"
@@ -176,6 +187,7 @@ func testOptionalFieldsConfig(resource, name, project string) string {
 }`, resource, name, project)
 }
 
+// testAccCertificatePreCheck verifies the specified env variables are set before tests run.
 func testAccCertificatePreCheck(t *testing.T) {
 	if v := os.Getenv("OASIS_API_KEY_ID"); v == "" {
 		t.Fatal("the test needs a test account key to run")

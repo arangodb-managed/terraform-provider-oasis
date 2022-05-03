@@ -32,10 +32,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
+	common "github.com/arangodb-managed/apis/common/v1"
 )
 
 // TestAccResourceBackup verifies the Oasis Backup resource is created along with the specified properties
@@ -56,7 +58,7 @@ func TestAccResourceBackup(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
-		CheckDestroy:      testAccCheckDestroyDeployment,
+		CheckDestroy:      testAccCheckDestroyBackup,
 		Steps: []resource.TestStep{
 			{
 				Config:      testBackupConfigIncomplete(pid, res, name),
@@ -230,4 +232,26 @@ func TestFlattenBackup(t *testing.T) {
 
 	flattened := flattenBackupResource(backup)
 	assert.Equal(t, expected, flattened)
+}
+
+// testAccCheckDestroyBackup verifies the Terraform oasis_backup resource cleanup.
+func testAccCheckDestroyBackup(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+	backupc := backup.NewBackupServiceClient(client.conn)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "oasis_backup" {
+			continue
+		}
+
+		if _, err := backupc.GetBackup(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
+			return fmt.Errorf("backup still present")
+		}
+	}
+
+	return nil
 }
