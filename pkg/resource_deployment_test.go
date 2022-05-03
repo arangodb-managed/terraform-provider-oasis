@@ -469,7 +469,7 @@ func testAccCheckDestroyDeployment(s *terraform.State) error {
 	datac := data.NewDataServiceClient(client.conn)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "oasis_ipallowlist" {
+		if rs.Type != "oasis_deployment" {
 			continue
 		}
 
