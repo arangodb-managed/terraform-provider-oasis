@@ -234,6 +234,7 @@ func TestFlattenBackup(t *testing.T) {
 	assert.Equal(t, expected, flattened)
 }
 
+// testAccCheckDestroyBackup verifies the Terraform oasis_backup resource cleanup.
 func testAccCheckDestroyBackup(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 	if err := client.Connect(); err != nil {
