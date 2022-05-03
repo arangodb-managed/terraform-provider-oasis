@@ -72,6 +72,7 @@ func TestAccResourceOrganization(t *testing.T) {
 	})
 }
 
+// testAccCheckDestroyOrganization verifies the Terraform oasis_organization resource cleanup.
 func testAccCheckDestroyOrganization(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 	if err := client.Connect(); err != nil {
