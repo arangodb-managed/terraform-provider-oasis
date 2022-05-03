@@ -26,6 +26,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -46,19 +47,21 @@ func TestAccResourceOrganizationInvite(t *testing.T) {
 	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
 
+	username := acctest.RandString(7)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
 		CheckDestroy:      testAccCheckDestroyOrganizationInvoice,
 		Steps: []resource.TestStep{
 			{
-				Config:      testOrganizationInviteConfig(""),
+				Config:      testOrganizationInviteConfig("", username),
 				ExpectError: regexp.MustCompile("failed to parse field organization"),
 			},
 			{
-				Config: testOrganizationInviteConfig(orgID),
+				Config: testOrganizationInviteConfig(orgID, username),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("oasis_organization_invite.oasis_organization_invite_test", organizationInviteEmailFieldName, "test.oasis@arangodb.com"),
+					resource.TestCheckResourceAttr("oasis_organization_invite.oasis_organization_invite_test", organizationInviteEmailFieldName, username+"@arangodb.com"),
 					resource.TestCheckResourceAttr("oasis_organization_invite.oasis_organization_invite_test", organizationInviteOrganizationFieldName, orgID),
 				),
 			},
@@ -90,14 +93,16 @@ func testAccCheckDestroyOrganizationInvoice(s *terraform.State) error {
 
 // TestFlattenOrganizationInvite tests the Oasis Organization Invite flattening for Terraform schema compatibility.
 func TestFlattenOrganizationInvite(t *testing.T) {
+	organizationId := acctest.RandString(10)
+	testUsername := acctest.RandString(7)
 	organizationInvite := &rm.OrganizationInvite{
-		OrganizationId: "7035699473",
-		Email:          "testemail@arangodb.com",
+		OrganizationId: organizationId,
+		Email:          testUsername + "@arangodb.com",
 	}
 
 	expected := map[string]interface{}{
-		organizationInviteOrganizationFieldName: "7035699473",
-		organizationInviteEmailFieldName:        "testemail@arangodb.com",
+		organizationInviteOrganizationFieldName: organizationId,
+		organizationInviteEmailFieldName:        testUsername + "@arangodb.com",
 	}
 	flattened := flattenOrganizationInviteResource(organizationInvite)
 	assert.Equal(t, expected, flattened)
@@ -105,9 +110,11 @@ func TestFlattenOrganizationInvite(t *testing.T) {
 
 // TestExpandOrganizationInvite tests the Oasis Organization Invite expansion for Terraform schema compatibility.
 func TestExpandOrganizationInvite(t *testing.T) {
+	organizationId := acctest.RandString(10)
+	testUsername := acctest.RandString(7)
 	raw := map[string]interface{}{
-		organizationInviteOrganizationFieldName: "7035699473",
-		organizationInviteEmailFieldName:        "testemail@arangodb.com",
+		organizationInviteOrganizationFieldName: organizationId,
+		organizationInviteEmailFieldName:        testUsername + "@arangodb.com",
 	}
 	s := resourceOrganizationInvite().Schema
 	data := schema.TestResourceDataRaw(t, s, raw)
@@ -118,10 +125,10 @@ func TestExpandOrganizationInvite(t *testing.T) {
 }
 
 // testOrganizationInviteConfig contains the Terraform resource definitions for testing usage
-func testOrganizationInviteConfig(orgID string) string {
+func testOrganizationInviteConfig(orgID, username string) string {
 	return fmt.Sprintf(`resource "oasis_organization_invite" "oasis_organization_invite_test" {
   organization        = "%s"
-  email			 	  = "test.oasis@arangodb.com"
+  email			 	  = "%s@arangodb.com"
 }
-`, orgID)
+`, orgID, username)
 }
