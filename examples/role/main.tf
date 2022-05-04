@@ -25,5 +25,5 @@ resource "oasis_iam_role" "my_iam_role" {
   name         = "Terraform IAM Role"
   description  = "IAM Role created by Terraform"
   organization = oasis_organization.oasis_test_organization.id
-  permissions  = ["audit.auditlog.testinvalidpermission"] // optional
+  permissions  = ["audit.auditlog.list"] // optional
 }

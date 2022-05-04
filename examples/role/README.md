@@ -17,7 +17,13 @@ terraform plan
 terraform apply
 ```
 
-__Note__: When creating a role please make sure to look in Oasis dashboard for the list of allowed permissions, if you specify a permission that is not allowed, you will not be able to create the role. Note that permissions is an optional field, it can be updated later.
+__Note__: When creating a role please make sure to look in Oasis dashboard or use [oasisctl](https://github.com/arangodb-managed/oasisctl) to get the list of allowed permissions, if you specify a permission that is not allowed, you will not be able to create the role. Note that permissions is an optional field, it can be updated later.
+
+To use `oasisctl` to get the list of permissions you can run:
+```
+oasisctl list permissions
+```
+This will output a list of permissions you can use for the `permissions` field when creating an `oasis_iam_role` resource.
 
 To remove the resources created run:
 ```
