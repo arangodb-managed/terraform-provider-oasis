@@ -23,10 +23,12 @@ package pkg
 import (
 	"context"
 	"fmt"
-	common "github.com/arangodb-managed/apis/common/v1"
-	network "github.com/arangodb-managed/apis/network/v1"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	common "github.com/arangodb-managed/apis/common/v1"
+	network "github.com/arangodb-managed/apis/network/v1"
 )
 
 const (
