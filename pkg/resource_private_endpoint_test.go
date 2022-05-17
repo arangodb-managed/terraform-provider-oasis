@@ -94,7 +94,7 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 		DeploymentId:      deploymentId,
 		AlternateDnsNames: []string{"test.example.com"},
 		Aks: &network.PrivateEndpointService_Aks{
-			ClientSubscriptionIds: []string{"test"},
+			ClientSubscriptionIds: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
 		},
 	}
 
@@ -105,7 +105,7 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 		privateEndpointDNSNamesFieldName:    []string{"test.example.com"},
 		privateEndpointAKSFieldName: []interface{}{
 			map[string]interface{}{
-				privateEndpointAKSClientSubscriptionIdsFieldName: []string{"test"},
+				privateEndpointAKSClientSubscriptionIdsFieldName: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
 			},
 		},
 	}
@@ -123,7 +123,7 @@ func TestExpandPrivateEndpoint(t *testing.T) {
 		privateEndpointDeploymentFieldName:  deploymentId,
 		privateEndpointAKSFieldName: []interface{}{
 			map[string]interface{}{
-				privateEndpointAKSClientSubscriptionIdsFieldName: []interface{}{"test"},
+				privateEndpointAKSClientSubscriptionIdsFieldName: []interface{}{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
 			},
 		},
 	}
@@ -132,7 +132,7 @@ func TestExpandPrivateEndpoint(t *testing.T) {
 		Description:  "test-description",
 		DeploymentId: deploymentId,
 		Aks: &network.PrivateEndpointService_Aks{
-			ClientSubscriptionIds: []string{"test"},
+			ClientSubscriptionIds: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
 		},
 	}
 
