@@ -51,4 +51,7 @@ resource "oasis_private_endpoint" "my_private_endpoint" {
   description                 = "Terraform generated private endpoint"
   deployment                  = oasis_deployment.my_oneshard_deployment.id
   dns_names                   = ["test.example.com", "test2.example.com"]
+  aks {
+    az_client_subscription_ids	= ["291bba3f-e0a5-47bc-a099-3bdcb2a50a05"]
+  }
 }
