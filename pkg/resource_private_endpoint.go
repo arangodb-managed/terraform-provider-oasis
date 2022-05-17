@@ -23,7 +23,6 @@ package pkg
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -33,11 +32,14 @@ import (
 
 const (
 	// Private Endpoint field names
-	privateEndpointNameFieldName                    = "name"
-	privateEndpointDescriptionFieldName             = "description"
-	privateEndpointDeploymentFieldName              = "deployment"
-	privateEndpointDNSNamesFieldName                = "dns_names"
-	privateEndpointAzClientSubscriptionIdsFieldName = "az_client_subscription_ids"
+	privateEndpointNameFieldName        = "name"
+	privateEndpointDescriptionFieldName = "description"
+	privateEndpointDeploymentFieldName  = "deployment"
+	privateEndpointDNSNamesFieldName    = "dns_names"
+
+	// AKS field names
+	privateEndpointAKSFieldName                      = "aks"
+	privateEndpointAKSClientSubscriptionIdsFieldName = "az_client_subscription_ids"
 )
 
 // resourcePrivateEndpoint defines a Private Endpoint Oasis resource.
@@ -66,11 +68,23 @@ func resourcePrivateEndpoint() *schema.Resource {
 				MinItems: 1,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			privateEndpointAzClientSubscriptionIdsFieldName: {
+			privateEndpointAKSFieldName: {
 				Type:     schema.TypeList,
 				Optional: true,
 				MinItems: 1,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return new == ""
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						privateEndpointAKSClientSubscriptionIdsFieldName: {
+							Type:     schema.TypeList,
+							Optional: true,
+							MinItems: 1,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -104,11 +118,20 @@ func resourcePrivateEndpointRead(ctx context.Context, d *schema.ResourceData, m 
 // flattenPrivateEndpointResource will take a Private Endpoint object and turn it into a flat map for terraform digestion.
 func flattenPrivateEndpointResource(privateEndpoint *network.PrivateEndpointService) map[string]interface{} {
 	return map[string]interface{}{
-		privateEndpointNameFieldName:                    privateEndpoint.GetName(),
-		privateEndpointDescriptionFieldName:             privateEndpoint.GetDescription(),
-		privateEndpointDeploymentFieldName:              privateEndpoint.GetDeploymentId(),
-		privateEndpointDNSNamesFieldName:                privateEndpoint.GetAlternateDnsNames(),
-		privateEndpointAzClientSubscriptionIdsFieldName: privateEndpoint.GetAks().GetClientSubscriptionIds(),
+		privateEndpointNameFieldName:        privateEndpoint.GetName(),
+		privateEndpointDescriptionFieldName: privateEndpoint.GetDescription(),
+		privateEndpointDeploymentFieldName:  privateEndpoint.GetDeploymentId(),
+		privateEndpointDNSNamesFieldName:    privateEndpoint.GetAlternateDnsNames(),
+		privateEndpointAKSFieldName:         flattenAKSResource(privateEndpoint.GetAks()),
+	}
+}
+
+// flattenAKSResource will take an AKS Resource part of a Private Endpoint and create a sub map for terraform schema.
+func flattenAKSResource(privateEndpointAKS *network.PrivateEndpointService_Aks) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			privateEndpointAKSClientSubscriptionIdsFieldName: privateEndpointAKS.GetClientSubscriptionIds(),
+		},
 	}
 }
 
@@ -180,14 +203,34 @@ func expandPrivateEndpointResource(d *schema.ResourceData) (*network.PrivateEndp
 		}
 		ret.AlternateDnsNames = dnsNames
 	}
-	if v, ok := d.GetOk(privateEndpointAzClientSubscriptionIdsFieldName); ok {
-		subscriptionIds, err := expandPrivateEndpointStringList(v.([]interface{}))
+	if v, ok := d.GetOk(privateEndpointAKSFieldName); ok {
+		subscriptionIds, err := expandAKSResource(v.([]interface{}))
 		if err != nil {
 			return nil, err
 		}
-		ret.Aks.ClientSubscriptionIds = subscriptionIds
+		ret.Aks = subscriptionIds
 	}
 	return ret, nil
+}
+
+// expandAKSResource gathers AKS Resource data from the terraform store
+func expandAKSResource(s []interface{}) (aksResource *network.PrivateEndpointService_Aks, err error) {
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if subscriptionIds, ok := item[privateEndpointAKSClientSubscriptionIdsFieldName]; ok {
+			subscriptionIds, ok := subscriptionIds.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("failed to parse field %s", privateEndpointAKSClientSubscriptionIdsFieldName)
+			}
+			if aksResource == nil {
+				aksResource = &network.PrivateEndpointService_Aks{}
+			}
+			for _, addr := range subscriptionIds {
+				aksResource.ClientSubscriptionIds = append(aksResource.ClientSubscriptionIds, addr.(string))
+			}
+		}
+	}
+	return
 }
 
 // resourcePrivateEndpointDelete will delete the Terraform PrivateEndpoint resource
@@ -225,12 +268,12 @@ func resourcePrivateEndpointUpdate(ctx context.Context, d *schema.ResourceData, 
 		}
 		privateEndpoint.AlternateDnsNames = dnsNames
 	}
-	if d.HasChange(privateEndpointAzClientSubscriptionIdsFieldName) {
-		subscriptionIds, err := expandPrivateEndpointStringList(d.Get(privateEndpointAzClientSubscriptionIdsFieldName).([]interface{}))
+	if d.HasChange(privateEndpointAKSFieldName) {
+		aksResource, err := expandAKSResource(d.Get(privateEndpointAKSClientSubscriptionIdsFieldName).([]interface{}))
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		privateEndpoint.Aks.ClientSubscriptionIds = subscriptionIds
+		privateEndpoint.Aks = aksResource
 	}
 
 	_, err = nwc.UpdatePrivateEndpointService(client.ctxWithToken, privateEndpoint)
