@@ -94,16 +94,20 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 		DeploymentId:      deploymentId,
 		AlternateDnsNames: []string{"test.example.com"},
 		Aks: &network.PrivateEndpointService_Aks{
-			ClientSubscriptionIds: []string{"sample"},
+			ClientSubscriptionIds: []string{"test"},
 		},
 	}
 
 	expected := map[string]interface{}{
-		privateEndpointNameFieldName:                    "test-private-endpoint",
-		privateEndpointDescriptionFieldName:             "test-description",
-		privateEndpointDeploymentFieldName:              deploymentId,
-		privateEndpointDNSNamesFieldName:                []string{"test.example.com"},
-		privateEndpointAzClientSubscriptionIdsFieldName: []string{"sample"},
+		privateEndpointNameFieldName:        "test-private-endpoint",
+		privateEndpointDescriptionFieldName: "test-description",
+		privateEndpointDeploymentFieldName:  deploymentId,
+		privateEndpointDNSNamesFieldName:    []string{"test.example.com"},
+		privateEndpointAKSFieldName: []interface{}{
+			map[string]interface{}{
+				privateEndpointAKSClientSubscriptionIdsFieldName: []string{"test"},
+			},
+		},
 	}
 
 	flattened := flattenPrivateEndpointResource(privateEndpoint)
@@ -117,11 +121,19 @@ func TestExpandPrivateEndpoint(t *testing.T) {
 		privateEndpointNameFieldName:        "test-private-endpoint",
 		privateEndpointDescriptionFieldName: "test-description",
 		privateEndpointDeploymentFieldName:  deploymentId,
+		privateEndpointAKSFieldName: []interface{}{
+			map[string]interface{}{
+				privateEndpointAKSClientSubscriptionIdsFieldName: []interface{}{"test"},
+			},
+		},
 	}
 	expected := &network.PrivateEndpointService{
 		Name:         "test-private-endpoint",
 		Description:  "test-description",
 		DeploymentId: deploymentId,
+		Aks: &network.PrivateEndpointService_Aks{
+			ClientSubscriptionIds: []string{"test"},
+		},
 	}
 
 	s := resourcePrivateEndpoint().Schema
@@ -157,10 +169,13 @@ func testPrivateEndpointConfig(projID, name string) string {
   }
 
 resource "oasis_private_endpoint" "oasis_private_endpoint_test" {
-  name                        = "%s"
-  description                 = "Terraform generated private endpoint"
-  deployment                  = oasis_deployment.my_oneshard_deployment.id
-  dns_names                   = ["test.example.com", "test2.example.com"]
+  name                        	= "%s"
+  description                 	= "Terraform generated private endpoint"
+  deployment                  	= oasis_deployment.my_oneshard_deployment.id
+  dns_names                   	= ["test.example.com", "test2.example.com"]
+  aks {
+    az_client_subscription_ids	= ["291bba3f-e0a5-47bc-a099-3bdcb2a50a05"]
+  }
 }
 `, projID, name)
 }
