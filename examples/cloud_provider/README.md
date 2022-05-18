@@ -18,7 +18,7 @@ terraform apply
 ```
 
 Example output: 
-```hcl
+```
 datasets = {
   "organization" = "_support"
   "providers" = tolist([
