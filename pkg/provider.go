@@ -88,6 +88,7 @@ func Provider() *schema.Provider {
 			"oasis_example_dataset_installations": dataSourceOasisExampleDatasetInstallation(),
 			"oasis_example_datasets":              dataSourceOasisExampleDataset(),
 			"oasis_backup":                        dataSourceOasisBackup(),
+			"oasis_cloud_provider":                dataSourceOasisCloudProvider(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
