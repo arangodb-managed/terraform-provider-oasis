@@ -21,9 +21,7 @@
 package pkg
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"testing"
 )
@@ -31,28 +29,30 @@ import (
 func TestAccOasisCloudProviderBasic(t *testing.T) {
 	rxPosNum := regexp.MustCompile("^[1-9][0-9]*$")
 
-	orgID, err := FetchOrganizationID()
-	require.NoError(t, err)
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOasisCloudProviderConfigBasic(orgID),
+				Config: testAccOasisCloudProviderConfigBasic(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("data.oasis_cloud_provider.test_oasis_cloud_providers", "providers.#", rxPosNum),
-					resource.TestCheckResourceAttrSet("data.oasis_cloud_provider.test_oasis_cloud_providers", "providers.0"),
+					resource.TestCheckResourceAttrSet("data.oasis_cloud_provider.test_oasis_cloud_providers", "providers.0.id"),
 				),
 			},
 		},
 	})
 }
 
-func testAccOasisCloudProviderConfigBasic(organizationId string) string {
-	return fmt.Sprintf(`
+func testAccOasisCloudProviderConfigBasic() string {
+	return `
+resource "oasis_organization" "test_organization" {
+  name        = "test"
+  description = "A test Oasis organization from Terraform Provider"
+}
+
 data "oasis_cloud_provider" "test_oasis_cloud_providers" {
 	organization = "%s"
 }
-`, organizationId)
+`
 }
