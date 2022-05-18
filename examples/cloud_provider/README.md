@@ -2,7 +2,7 @@
 
 This example shows how to use the Terraform Oasis provider to get the list of support cloud providers in Oasis.
 
-## Prerequsites
+## Prerequisites
 
 *This example uses syntax elements specific to Terraform version 0.13+ (tested on Terraform version 1.1.4).
 It will not work out-of-the-box with Terraform 0.12.x and lower (deprecated by Terraform).*
