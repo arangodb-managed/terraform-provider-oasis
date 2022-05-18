@@ -24,10 +24,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	common "github.com/arangodb-managed/apis/common/v1"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	common "github.com/arangodb-managed/apis/common/v1"
 	platform "github.com/arangodb-managed/apis/platform/v1"
 )
 
