@@ -34,6 +34,8 @@ import (
 
 const (
 	// provider data source fields
+	providerIdFieldName           = "id"
+	providerNameFieldName         = "name"
 	providerOrganizationFieldName = "organization"
 	providerProvidersFieldName    = "providers"
 )
@@ -52,8 +54,17 @@ func dataSourceOasisCloudProvider() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of all supported cloud providers in Oasis.",
 				Computed:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						providerIdFieldName: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						providerNameFieldName: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
 				},
 			},
 		},
@@ -75,20 +86,17 @@ func dataSourceOasisCloudProviderRead(ctx context.Context, data *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	providers := make([]string, len(providersRaw.Items))
+	providers := make([]*platform.Provider, len(providersRaw.Items))
 
-	for i, provider := range providersRaw.Items {
-		providers[i] = provider.Name
-	}
-
-	err = data.Set(providerProvidersFieldName, providers)
+	providerItems := flattenCloudProviders(providersRaw.Items)
+	err = data.Set(providerProvidersFieldName, providerItems)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	idsum := sha256.New()
 	for _, v := range providers {
-		_, err := idsum.Write([]byte(v))
+		_, err := idsum.Write([]byte(v.GetId()))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -97,4 +105,24 @@ func dataSourceOasisCloudProviderRead(ctx context.Context, data *schema.Resource
 	data.SetId(id)
 
 	return nil
+}
+
+// flattenCloudProviders takes result of datasets and converts them into a Terraform consumable format.
+func flattenCloudProviders(providers []*platform.Provider) []interface{} {
+	if providers != nil {
+		flattened := make([]interface{}, len(providers))
+
+		for i, providerItem := range providers {
+			platformSubItems := make(map[string]interface{})
+
+			platformSubItems["id"] = providerItem.GetId()
+			platformSubItems["name"] = providerItem.GetName()
+
+			flattened[i] = platformSubItems
+		}
+
+		return flattened
+	}
+
+	return make([]interface{}, 0)
 }
