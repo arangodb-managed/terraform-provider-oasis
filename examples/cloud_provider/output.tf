@@ -1,4 +1,4 @@
-// Load in Oasis terms and conditions
+// Load in Oasis Cloud Providers
 data "oasis_cloud_provider" "test_oasis_cloud_providers" {
   organization = "" // put your organization id here
 }
