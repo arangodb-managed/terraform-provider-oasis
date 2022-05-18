@@ -50,7 +50,6 @@ func TestAccOasisCloudProviderBasic(t *testing.T) {
 }
 
 func testAccOasisCloudProviderConfigBasic(organizationId string) string {
-	fmt.Println("org id", organizationId)
 	return fmt.Sprintf(`
 data "oasis_cloud_provider" "test_oasis_cloud_providers" {
 	organization = "%s"

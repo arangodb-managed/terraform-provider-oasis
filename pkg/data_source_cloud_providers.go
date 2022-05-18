@@ -76,8 +76,6 @@ func dataSourceOasisCloudProviderRead(ctx context.Context, data *schema.Resource
 
 	providers := make([]string, len(providersRaw.Items))
 
-	fmt.Println("prov and len", providers, len(providers))
-
 	for i, provider := range providersRaw.Items {
 		providers[i] = provider.Name
 	}
