@@ -52,7 +52,7 @@ resource "oasis_organization" "test_organization" {
 }
 
 data "oasis_cloud_provider" "test_oasis_cloud_providers" {
-	organization = "%s"
+	organization = oasis_organization.test_organization.id
 }
 `
 }
