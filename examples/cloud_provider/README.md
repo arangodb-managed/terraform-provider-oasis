@@ -17,6 +17,27 @@ terraform plan
 terraform apply
 ```
 
+Example output: 
+```hcl
+datasets = {
+  "organization" = "_support"
+  "providers" = tolist([
+    {
+      "id" = "aks"
+      "name" = "Microsoft Azure"
+    },
+    {
+      "id" = "aws"
+      "name" = "Amazon Web Services"
+    },
+    {
+      "id" = "gcp"
+      "name" = "Google Compute Platform"
+    },
+  ])
+}
+```
+
 To remove the resources created run:
 ```
 terraform destroy
