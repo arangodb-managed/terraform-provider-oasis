@@ -15,7 +15,7 @@ provider "oasis" {
 
 // Terraform created organization
 resource "oasis_auditlog" "oasis_test_auditlog" {
-  name        = "Terraform Oasis Organization"
-  description = "A test Oasis organization from Terraform Provider"
+  name        = "Terraform Oasis AuditLog"
+  description = "A test Oasis auditlog from Terraform Provider"
   organization = "" // organization id
 }
