@@ -26,7 +26,7 @@ import (
 	"testing"
 )
 
-func TestAccOasisCloudProviderBasic(t *testing.T) {
+func TestAccOasisRegionDataSourceBasic(t *testing.T) {
 	rxPosNum := regexp.MustCompile("^[1-9][0-9]*$")
 
 	resource.Test(t, resource.TestCase{
@@ -34,25 +34,29 @@ func TestAccOasisCloudProviderBasic(t *testing.T) {
 		ProviderFactories: testProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOasisCloudProviderConfigBasic(),
+				Config: testAccOasisRegionDataSourceConfigBasic(),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestMatchResourceAttr("data.oasis_cloud_provider.test_oasis_cloud_providers", "providers.#", rxPosNum),
-					resource.TestCheckResourceAttrSet("data.oasis_cloud_provider.test_oasis_cloud_providers", "providers.0.id"),
+					resource.TestMatchResourceAttr("data.oasis_region.test_oasis_regions", "regions.#", rxPosNum),
+					resource.TestCheckResourceAttrSet("data.oasis_region.test_oasis_regions", "regions.0.id"),
+					resource.TestCheckResourceAttrSet("data.oasis_region.test_oasis_regions", "regions.0.available"),
+					resource.TestCheckResourceAttrSet("data.oasis_region.test_oasis_regions", "regions.0.location"),
+					resource.TestCheckResourceAttrSet("data.oasis_region.test_oasis_regions", "regions.0.provider_id"),
 				),
 			},
 		},
 	})
 }
 
-func testAccOasisCloudProviderConfigBasic() string {
+func testAccOasisRegionDataSourceConfigBasic() string {
 	return `
 resource "oasis_organization" "test_organization" {
   name        = "test"
   description = "A test Oasis organization from Terraform Provider"
 }
 
-data "oasis_cloud_provider" "test_oasis_cloud_providers" {
+data "oasis_region" "test_oasis_regions" {
 	organization = oasis_organization.test_organization.id
+	provider_id  = "aks"
 }
 `
 }
