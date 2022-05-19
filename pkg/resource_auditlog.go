@@ -66,7 +66,7 @@ func resourceAuditLog() *schema.Resource {
 	}
 }
 
-// resourceOrganizationRead will gather information from the Terraform store for Oasis Audit Log resource and display it accordingly.
+// resourceAuditLogRead will gather information from the Terraform store for Oasis Audit Log resource and display it accordingly.
 func resourceAuditLogRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
