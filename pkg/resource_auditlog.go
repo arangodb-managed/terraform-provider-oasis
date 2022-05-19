@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	// Organization field names
+	// Audit Log field names
 	auditLogNameFieldName         = "name"
 	auditLogDescriptionFieldName  = "description"
 	auditLogOrganizationFieldName = "organization"
