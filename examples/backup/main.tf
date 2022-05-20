@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 0.13.0"
   required_providers {
     oasis = {
-      source = "arangodb.com/managed/oasis"
+      source  = "arangodb.com/managed/oasis"
       version = ">=1.5.1"
     }
   }
@@ -23,8 +23,8 @@ resource "oasis_project" "oasis_test_project" {
 // Example of a oneshard deployment
 resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
-  project = oasis_project.oasis_test_project.id // Project id where deployment will be created
-  name = "oasis_test_dep_tf"
+  project                       = oasis_project.oasis_test_project.id // Project id where deployment will be created
+  name                          = "oasis_test_dep_tf"
   location {
     region = "gcp-europe-west4"
   }
@@ -32,8 +32,8 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     db_version = "3.8.6"
   }
   configuration {
-    model = "oneshard"
-    node_size_id = "c4-a8"
+    model          = "oneshard"
+    node_size_id   = "c4-a8"
     node_disk_size = 20
   }
   notification_settings {
@@ -46,9 +46,9 @@ resource "oasis_deployment" "my_oneshard_deployment" {
 // Oasis backup
 // This resources uses the computed ID of the deployment created above.
 resource "oasis_backup" "my_backup" {
-  name = "test tf backup"
-  description = "test backup description from terraform"
-  deployment_id = oasis_deployment.my_oneshard_deployment.id
-  upload = true
+  name            = "test tf backup"
+  description     = "test backup description from terraform"
+  deployment_id   = oasis_deployment.my_oneshard_deployment.id
+  upload          = true
   auto_deleted_at = 3 // auto delete after 3 days
 }

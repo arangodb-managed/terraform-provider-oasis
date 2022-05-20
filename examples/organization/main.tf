@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 0.13.0"
   required_providers {
     oasis = {
-      source = "arangodb.com/managed/oasis"
+      source  = "arangodb.com/managed/oasis"
       version = ">=1.5.1"
     }
   }
