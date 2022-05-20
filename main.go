@@ -31,6 +31,9 @@ import (
 // Examples folder formatting
 //go:generate terraform fmt -recursive ./examples/
 
+// Terraform plugin tool for documentation generation
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: func() *schema.Provider {
