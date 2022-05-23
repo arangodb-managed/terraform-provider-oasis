@@ -22,6 +22,7 @@ package pkg
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -194,7 +195,9 @@ func resourceAuditLogUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	if d.HasChange(auditLogDescriptionFieldName) {
 		auditLog.Description = d.Get(auditLogDescriptionFieldName).(string)
 	}
-
+	if d.HasChange(auditLogOrganizationFieldName) {
+		return diag.FromErr(errors.New("organization id cannot be changed"))
+	}
 	if d.HasChange(auditLogIsDefaultFieldName) {
 		isDefaultAuditLog := d.Get(auditLogIsDefaultFieldName).(bool)
 		if auditLog.GetIsDefault() != isDefaultAuditLog {
