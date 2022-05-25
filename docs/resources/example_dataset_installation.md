@@ -17,14 +17,14 @@ Oasis Example Dataset Installation Resource
 
 ### Required
 
-- `deployment_id` (String)
-- `example_dataset_id` (String)
+- `deployment_id` (String) Oasis Example Dataset Resource Deployment ID field
+- `example_dataset_id` (String) Oasis Example Dataset Resource Example Dataset ID field
 
 ### Read-Only
 
-- `created_at` (String)
+- `created_at` (String) Oasis Example Dataset Resource Example Dataset Created At field
 - `id` (String) The ID of this resource.
-- `status` (List of Object) (see [below for nested schema](#nestedatt--status))
+- `status` (List of Object) Oasis Example Dataset Resource Example Dataset Status field (see [below for nested schema](#nestedatt--status))
 
 <a id="nestedatt--status"></a>
 ### Nested Schema for `status`
