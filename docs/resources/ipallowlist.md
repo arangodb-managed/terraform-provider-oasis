@@ -3,12 +3,12 @@
 page_title: "oasis_ipallowlist Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis IP Allowlist Resource
 ---
 
 # oasis_ipallowlist (Resource)
 
-
+Oasis IP Allowlist Resource
 
 
 
@@ -17,20 +17,20 @@ description: |-
 
 ### Required
 
-- `cidr_ranges` (List of String)
-- `name` (String)
+- `cidr_ranges` (List of String) IP Allowlist Resource IP Allowlist IP CIDR Range field
+- `name` (String) IP Allowlist Resource IP Allowlist Name field
 
 ### Optional
 
-- `description` (String)
-- `locked` (Boolean)
-- `project` (String)
-- `remote_inspection_allowed` (Boolean)
+- `description` (String) IP Allowlist Resource IP Allowlist Description field
+- `locked` (Boolean) IP Allowlist Resource IP Allowlist Locked field
+- `project` (String) IP Allowlist Resource IP Allowlist Project field
+- `remote_inspection_allowed` (Boolean) IP Allowlist Resource IP Allowlist Inspection Allowed field
 
 ### Read-Only
 
-- `created_at` (String)
+- `created_at` (String) IP Allowlist Resource IP Allowlist Created At field
 - `id` (String) The ID of this resource.
-- `is_deleted` (Boolean)
+- `is_deleted` (Boolean) IP Allowlist Resource IP Allowlist Is Deleted field
 
 
