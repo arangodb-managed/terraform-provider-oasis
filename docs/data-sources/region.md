@@ -17,8 +17,8 @@ Oasis Cloud Provider Regions Data Source
 
 ### Required
 
-- `organization` (String) Regions Data Source Organization ID
-- `provider_id` (String) Regions Data Source Provider ID
+- `organization` (String) Regions Data Source Organization ID field
+- `provider_id` (String) Regions Data Source Provider ID field
 
 ### Read-Only
 

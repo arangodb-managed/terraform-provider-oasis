@@ -17,16 +17,16 @@ Oasis Project Data Source
 
 ### Required
 
-- `id` (String) Project Data Source Project ID
+- `id` (String) Project Data Source Project ID field
 
 ### Optional
 
-- `description` (String) Project Data Source Project Description
-- `name` (String) Project Data Source Project Name
+- `description` (String) Project Data Source Project Description field
+- `name` (String) Project Data Source Project Name field
 
 ### Read-Only
 
-- `created_at` (String) Project Data Source Project Created At time
-- `url` (String) Project Data Source Project URL
+- `created_at` (String) Project Data Source Project Created At field
+- `url` (String) Project Data Source Project URL field
 
 

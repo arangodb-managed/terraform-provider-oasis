@@ -17,12 +17,12 @@ Terms and Conditions Data Source
 
 ### Optional
 
-- `id` (String) Terms and Conditions Data Source ID
-- `organization` (String) Terms and Conditions Data Source Organization
+- `id` (String) Terms and Conditions Data Source ID field
+- `organization` (String) Terms and Conditions Data Source Organization field
 
 ### Read-Only
 
-- `content` (String) Terms and Conditions Data Source Content
-- `created_at` (String) Terms and Conditions Data Source Created At time
+- `content` (String) Terms and Conditions Data Source Content field
+- `created_at` (String) Terms and Conditions Data Source Created At field
 
 
