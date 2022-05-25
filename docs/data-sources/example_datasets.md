@@ -17,7 +17,7 @@ description: |-
 
 ### Optional
 
-- `organization` (String)
+- `organization` (String) Example Data Set Data Source Organization ID
 
 ### Read-Only
 
