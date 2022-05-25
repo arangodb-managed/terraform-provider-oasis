@@ -3,12 +3,12 @@
 page_title: "oasis_iam_group Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis IAM Group Resource
 ---
 
 # oasis_iam_group (Resource)
 
-
+Oasis IAM Group Resource
 
 
 
@@ -17,12 +17,12 @@ description: |-
 
 ### Required
 
-- `name` (String)
-- `organization` (String)
+- `name` (String) IAM Group Resource IAM Group Name
+- `organization` (String) IAM Group Resource IAM Group Organization ID
 
 ### Optional
 
-- `description` (String)
+- `description` (String) IAM Group Resource IAM Group Description
 
 ### Read-Only
 
