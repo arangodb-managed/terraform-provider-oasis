@@ -45,43 +45,51 @@ const (
 // resourcePrivateEndpoint defines a Private Endpoint Oasis resource.
 func resourcePrivateEndpoint() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Private Endpoint Resource",
+
 		CreateContext: resourcePrivateEndpointCreate,
 		ReadContext:   resourcePrivateEndpointRead,
 		UpdateContext: resourcePrivateEndpointUpdate,
 		DeleteContext: resourcePrivateEndpointDelete,
 		Schema: map[string]*schema.Schema{
 			privateEndpointNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Private Endpoint Resource Private Endpoint Name field",
+				Required:    true,
 			},
 			privateEndpointDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Private Endpoint Resource Private Endpoint Description field",
+				Optional:    true,
 			},
 			privateEndpointDeploymentFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Private Endpoint Resource Private Endpoint Deployment ID field",
+				Required:    true,
 			},
 			privateEndpointDNSNamesFieldName: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MinItems: 1,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeList,
+				Description: "Private Endpoint Resource Private Endpoint DNS Names field (list of dns names)",
+				Optional:    true,
+				MinItems:    1,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			privateEndpointAKSFieldName: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MinItems: 1,
+				Type:        schema.TypeList,
+				Description: "Private Endpoint Resource Private Endpoint AKS field",
+				Optional:    true,
+				MinItems:    1,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return new == ""
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						privateEndpointAKSClientSubscriptionIdsFieldName: {
-							Type:     schema.TypeList,
-							Optional: true,
-							MinItems: 1,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Type:        schema.TypeList,
+							Description: "Private Endpoint Resource Private Endpoint AKS Subscription IDS field (list of subscription ids)",
+							Optional:    true,
+							MinItems:    1,
+							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
