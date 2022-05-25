@@ -94,40 +94,48 @@ func resourceBackupPolicy() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			backupPolicyNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Backup Policy Resource Backup Policy Name field",
+				Required:    true,
 			},
 			backupPolicyDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup Policy Resource Backup Policy Description field",
+				Optional:    true,
 			},
 			backupPolicyIsPausedFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Backup Policy Resource Backup Policy Is Paused condition field",
+				Optional:    true,
 			},
 			backupPolicyUploadFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Backup Policy Resource Backup Policy Upload condition field",
+				Optional:    true,
 			},
 			backupPolicyDeploymentIDFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Backup Policy Resource Backup Policy Deployment ID condition field",
+				Required:    true,
 			},
 			backupPolicyRetentionPeriodFieldName: {
-				Type: schema.TypeInt,
+				Type:        schema.TypeInt,
+				Description: "Backup Policy Resource Backup Policy Retention Period field",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return new == "0"
 				},
 				Optional: true,
 			},
 			backupPolictEmailNotificationFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Backup Policy Resource Backup Policy Email Notification field",
+				Required:    true,
 			},
 			backupPolicyScheduleFieldName: {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Description: "Backup Policy Resource Backup Policy Schedule field",
+				Required:    true,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						backupPolicyScheduleTypeFieldName: {
@@ -265,8 +273,9 @@ func resourceBackupPolicy() *schema.Resource {
 				},
 			},
 			backupPolicyLockedFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Backup Policy Resource Backup Policy Locked condition field",
+				Optional:    true,
 			},
 		},
 	}
