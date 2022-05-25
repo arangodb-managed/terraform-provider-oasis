@@ -17,18 +17,18 @@ description: |-
 
 ### Required
 
-- `deployment_id` (String)
-- `email_notification` (String)
-- `name` (String)
-- `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
+- `deployment_id` (String) Backup Policy Resource Backup Policy Deployment ID condition field
+- `email_notification` (String) Backup Policy Resource Backup Policy Email Notification field
+- `name` (String) Backup Policy Resource Backup Policy Name field
+- `schedule` (Block List, Min: 1, Max: 1) Backup Policy Resource Backup Policy Schedule field (see [below for nested schema](#nestedblock--schedule))
 
 ### Optional
 
-- `description` (String)
-- `is_paused` (Boolean)
-- `locked` (Boolean)
-- `retention_period_hour` (Number)
-- `upload` (Boolean)
+- `description` (String) Backup Policy Resource Backup Policy Description field
+- `is_paused` (Boolean) Backup Policy Resource Backup Policy Is Paused condition field
+- `locked` (Boolean) Backup Policy Resource Backup Policy Locked condition field
+- `retention_period_hour` (Number) Backup Policy Resource Backup Policy Retention Period field
+- `upload` (Boolean) Backup Policy Resource Backup Policy Upload condition field
 
 ### Read-Only
 
