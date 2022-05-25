@@ -3,12 +3,12 @@
 page_title: "oasis_private_endpoint Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Private Endpoint Resource
 ---
 
 # oasis_private_endpoint (Resource)
 
-
+Oasis Private Endpoint Resource
 
 
 
@@ -17,14 +17,14 @@ description: |-
 
 ### Required
 
-- `deployment` (String)
-- `name` (String)
+- `deployment` (String) Private Endpoint Resource Private Endpoint Deployment ID field
+- `name` (String) Private Endpoint Resource Private Endpoint Name field
 
 ### Optional
 
-- `aks` (Block List) (see [below for nested schema](#nestedblock--aks))
-- `description` (String)
-- `dns_names` (List of String)
+- `aks` (Block List) Private Endpoint Resource Private Endpoint AKS field (see [below for nested schema](#nestedblock--aks))
+- `description` (String) Private Endpoint Resource Private Endpoint Description field
+- `dns_names` (List of String) Private Endpoint Resource Private Endpoint DNS Names field (list of dns names)
 
 ### Read-Only
 
@@ -35,6 +35,6 @@ description: |-
 
 Optional:
 
-- `az_client_subscription_ids` (List of String)
+- `az_client_subscription_ids` (List of String) Private Endpoint Resource Private Endpoint AKS Subscription IDS field (list of subscription ids)
 
 
