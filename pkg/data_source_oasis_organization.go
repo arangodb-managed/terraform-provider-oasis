@@ -49,6 +49,8 @@ const (
 // dataSourceOasisOrganization defines an Organization datasource terraform type.
 func dataSourceOasisOrganization() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Organization Data Source",
+
 		ReadContext: dataSourceOasisOrganizationRead,
 
 		Schema: map[string]*schema.Schema{
