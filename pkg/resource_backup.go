@@ -57,39 +57,39 @@ func resourceBackup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			backupNameFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Name",
+				Description: "Oasis Backup Resource Backup Name field",
 				Required:    true,
 			},
 			backupDescriptionFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Description",
+				Description: "Oasis Backup Resource Backup Description field",
 				Optional:    true,
 			},
 			backupUploadFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Oasis Backup Resource Backup Upload condition",
+				Description: "Oasis Backup Resource Backup Upload field",
 				Optional:    true,
 				Default:     false,
 			},
 			backupDeploymentIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Deployment ID",
+				Description: "Oasis Backup Resource Backup Deployment ID field",
 				Required:    true,
 			},
 			backupURLFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup URL",
+				Description: "Oasis Backup Resource Backup URL field",
 				Computed:    true,
 			},
 			backupPolicyIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Policy ID",
+				Description: "Oasis Backup Resource Backup Policy ID field",
 				Optional:    true,
 			},
 			backupAutoDeleteAtFieldName: {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Oasis Backup Resource Backup Auto Delete At time",
+				Description: "Oasis Backup Resource Backup Auto Delete At field",
 				ValidateFunc: func(v interface{}, k string) ([]string, []error) {
 					days := v.(int)
 					var errs []error

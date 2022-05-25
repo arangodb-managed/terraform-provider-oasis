@@ -105,17 +105,17 @@ func resourceBackupPolicy() *schema.Resource {
 			},
 			backupPolicyIsPausedFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Backup Policy Resource Backup Policy Is Paused condition field",
+				Description: "Backup Policy Resource Backup Policy Is Paused field",
 				Optional:    true,
 			},
 			backupPolicyUploadFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Backup Policy Resource Backup Policy Upload condition field",
+				Description: "Backup Policy Resource Backup Policy Upload field",
 				Optional:    true,
 			},
 			backupPolicyDeploymentIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Backup Policy Resource Backup Policy Deployment ID condition field",
+				Description: "Backup Policy Resource Backup Policy Deployment ID field",
 				Required:    true,
 			},
 			backupPolicyRetentionPeriodFieldName: {
@@ -274,7 +274,7 @@ func resourceBackupPolicy() *schema.Resource {
 			},
 			backupPolicyLockedFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Backup Policy Resource Backup Policy Locked condition field",
+				Description: "Backup Policy Resource Backup Policy Locked field",
 				Optional:    true,
 			},
 		},

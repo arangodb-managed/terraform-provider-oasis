@@ -57,53 +57,53 @@ func resourceCertificate() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			nameFieldName: {
 				Type:        schema.TypeString,
-				Description: "CA Certificate Resource Certificate Name",
+				Description: "CA Certificate Resource Certificate Name field",
 				Required:    true,
 			},
 
 			projectFieldName: { // If set here, overrides project in provider
 				Type:        schema.TypeString,
-				Description: "CA Certificate Resource Project Name",
+				Description: "CA Certificate Resource Project Name field",
 				Optional:    true,
 			},
 
 			descriptionFieldName: {
 				Type:        schema.TypeString,
-				Description: "CA Certificate Resource Certificate Description",
+				Description: "CA Certificate Resource Certificate Description field",
 				Optional:    true,
 			},
 
 			lifetimeFieldName: {
 				Type:        schema.TypeInt,
-				Description: "CA Certificate Resource Certificate Lifetime",
+				Description: "CA Certificate Resource Certificate Lifetime field",
 				Optional:    true,
 			},
 
 			useWellKnownCertificateFieldName: {
 				Type:        schema.TypeBool,
-				Description: "CA Certificate Resource Use Well Known Certificate condition",
+				Description: "CA Certificate Resource Use Well Known Certificate field",
 				Optional:    true,
 			},
 
 			isDefaultFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Ca Certificate Resource Is Default Certificate condition",
+				Description: "Ca Certificate Resource Is Default Certificate field",
 				Computed:    true,
 			},
 
 			createdAtFieldName: {
 				Type:        schema.TypeString,
-				Description: "Ca Certificate Resource Certificate Created At time",
+				Description: "Ca Certificate Resource Certificate Created At field",
 				Computed:    true,
 			},
 			expiresAtFieldName: {
 				Type:        schema.TypeString,
-				Description: "Ca Certificate Resource Certificate Expires At time",
+				Description: "Ca Certificate Resource Certificate Expires At field",
 				Computed:    true,
 			},
 			lockedFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Ca Certificate Resource Locked Certificate condition",
+				Description: "Ca Certificate Resource Locked Certificate field",
 				Optional:    true,
 			},
 		},

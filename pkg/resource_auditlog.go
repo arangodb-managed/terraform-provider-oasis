@@ -51,22 +51,22 @@ func resourceAuditLog() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			auditLogNameFieldName: {
 				Type:        schema.TypeString,
-				Description: "Audit Log Resource Audit Log Name",
+				Description: "Audit Log Resource Audit Log Name field",
 				Required:    true,
 			},
 			auditLogDescriptionFieldName: {
 				Type:        schema.TypeString,
-				Description: "Audit Log Resource Audit Log Description",
+				Description: "Audit Log Resource Audit Log Description field",
 				Optional:    true,
 			},
 			auditLogOrganizationFieldName: {
 				Type:        schema.TypeString,
-				Description: "Audit Log Resource Audit Log Organization ID",
+				Description: "Audit Log Resource Organization ID field",
 				Optional:    true,
 			},
 			auditLogIsDefaultFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Audit Log Resource Audit Log Is Default condition",
+				Description: "Audit Log Resource Audit Log Is Default field",
 				Optional:    true,
 			},
 		},
