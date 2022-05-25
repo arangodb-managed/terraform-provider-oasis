@@ -42,28 +42,34 @@ const (
 // dataSourceOasisProject defines a Project datasource terraform type.
 func dataSourceOasisProject() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Project Data Source",
 		ReadContext: dataSourceOasisProjectRead,
 
 		Schema: map[string]*schema.Schema{
 			projIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Project Data Source Project ID",
+				Required:    true,
 			},
 			projNameFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Project Data Source Project Name",
+				Optional:    true,
 			},
 			projDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Project Data Source Project Description",
+				Optional:    true,
 			},
 			projUrlFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Project Data Source Project URL",
+				Computed:    true,
 			},
 			projCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Project Data Source Project Created At time",
+				Computed:    true,
 			},
 		},
 	}
