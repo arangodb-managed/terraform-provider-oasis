@@ -51,12 +51,12 @@ func dataSourceOasisRegion() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			regionOrganizationFieldName: {
 				Type:        schema.TypeString,
-				Description: "Regions Data Source Organization ID",
+				Description: "Regions Data Source Organization ID field",
 				Required:    true,
 			},
 			regionProviderIdFieldName: {
 				Type:        schema.TypeString,
-				Description: "Regions Data Source Provider ID",
+				Description: "Regions Data Source Provider ID field",
 				Required:    true,
 			},
 			regionRegionsFieldName: {
@@ -67,22 +67,22 @@ func dataSourceOasisRegion() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						regionIdFieldName: {
 							Type:        schema.TypeString,
-							Description: "Regions Data Source Region ID",
+							Description: "Regions Data Source Region ID field",
 							Computed:    true,
 						},
 						regionProviderIdFieldName: {
 							Type:        schema.TypeString,
-							Description: "Regions Data Source Region Provider ID",
+							Description: "Regions Data Source Region Provider ID field",
 							Computed:    true,
 						},
 						regionLocationFieldName: {
 							Type:        schema.TypeString,
-							Description: "Regions Data Source Region Location",
+							Description: "Regions Data Source Region Location field",
 							Computed:    true,
 						},
 						regionAvailableFieldName: {
 							Type:        schema.TypeBool,
-							Description: "Regions Data Source Region Available condition",
+							Description: "Regions Data Source Region Available field",
 							Computed:    true,
 						},
 					},
