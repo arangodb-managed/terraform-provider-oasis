@@ -3,12 +3,12 @@
 page_title: "oasis_backup Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Backup Resource
 ---
 
 # oasis_backup (Resource)
 
-
+Oasis Backup Resource
 
 
 
@@ -17,19 +17,19 @@ description: |-
 
 ### Required
 
-- `deployment_id` (String)
-- `name` (String)
+- `deployment_id` (String) Oasis Backup Resource Backup Deployment ID
+- `name` (String) Oasis Backup Resource Backup Name
 
 ### Optional
 
-- `auto_deleted_at` (Number)
-- `backup_policy_id` (String)
-- `description` (String)
-- `upload` (Boolean)
+- `auto_deleted_at` (Number) Oasis Backup Resource Backup Auto Delete At time
+- `backup_policy_id` (String) Oasis Backup Resource Backup Policy ID
+- `description` (String) Oasis Backup Resource Backup Description
+- `upload` (Boolean) Oasis Backup Resource Backup Upload condition
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `url` (String)
+- `url` (String) Oasis Backup Resource Backup URL
 
 
