@@ -42,28 +42,34 @@ const (
 // resourceIAMRole defines an IAM Role Oasis resource.
 func resourceIAMRole() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis IAM Role Resource",
+
 		CreateContext: resourceIAMRoleCreate,
 		ReadContext:   resourceIAMRoleRead,
 		UpdateContext: resourceIAMRoleUpdate,
 		DeleteContext: resourceIAMRoleDelete,
 		Schema: map[string]*schema.Schema{
 			iamRoleNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "IAM Role Resource IAM Role Name field",
+				Required:    true,
 			},
 			iamRoleDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "IAM Role Resource IAM Role Description field",
+				Optional:    true,
 			},
 			iamRoleOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "IAM Role Resource IAM Role Organization ID field",
+				Required:    true,
 			},
 			iamRolePermissionsFieldName: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MinItems: 1,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeList,
+				Description: "IAM Role Resource IAM Role Permissions field (list of permissions)",
+				Optional:    true,
+				MinItems:    1,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
