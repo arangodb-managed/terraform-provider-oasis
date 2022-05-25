@@ -48,7 +48,7 @@ func dataSourceOasisCloudProvider() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			providerOrganizationFieldName: {
 				Type:        schema.TypeString,
-				Description: "Cloud Provider Data Source Organization ID",
+				Description: "Cloud Provider Data Source Organization ID field",
 				Required:    true,
 			},
 			providerProvidersFieldName: {
@@ -59,12 +59,12 @@ func dataSourceOasisCloudProvider() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						providerIdFieldName: {
 							Type:        schema.TypeString,
-							Description: "Cloud Provider ID",
+							Description: "Cloud Provider ID field",
 							Computed:    true,
 						},
 						providerNameFieldName: {
 							Type:        schema.TypeString,
-							Description: "Cloud Provider Name",
+							Description: "Cloud Provider Name field",
 							Computed:    true,
 						},
 					},

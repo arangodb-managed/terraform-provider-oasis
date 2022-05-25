@@ -48,7 +48,7 @@ func dataSourceOasisExampleDataset() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			exampleOrganizationIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Example Data Set Data Source Organization ID",
+				Description: "Example Data Set Data Source Organization ID field",
 				Optional:    true,
 			},
 			exampleExampleDatasetsFieldName: {
@@ -58,27 +58,27 @@ func dataSourceOasisExampleDataset() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						exampleExampleDatasetsIDFieldName: {
 							Type:        schema.TypeString,
-							Description: "Example Data Set ID",
+							Description: "Example Data Set Data Source ID field",
 							Computed:    true,
 						},
 						exampleExampleDatasetsNameFieldName: {
 							Type:        schema.TypeString,
-							Description: "Example Data Set Name",
+							Description: "Example Data Set Data Source Name field",
 							Computed:    true,
 						},
 						exampleExampleDatasetsDescriptionFieldName: {
 							Type:        schema.TypeString,
-							Description: "Example Data Set Description",
+							Description: "Example Data Set Data Source Description field",
 							Computed:    true,
 						},
 						exampleExampleDatasetsCreatedAtFieldName: {
 							Type:        schema.TypeString,
-							Description: "Example Data Set Created At time",
+							Description: "Example Data Set Data Source Created At field",
 							Computed:    true,
 						},
 						exampleExampleDatasetsGuideFieldName: {
 							Type:        schema.TypeString,
-							Description: "Example Data Set Guide",
+							Description: "Example Data Set Data Source Guide field",
 							Computed:    true,
 						},
 					},

@@ -52,7 +52,7 @@ func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			installationDeploymentIdFieldName: {
 				Type:        schema.TypeString,
-				Description: "Example Dataset Data Source Deployment ID",
+				Description: "Example Dataset Data Source Deployment ID field",
 				Required:    true,
 			},
 			installationItemsFieldName: {
@@ -62,12 +62,12 @@ func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						installationExampleDatasetIdFieldName: {
 							Type:        schema.TypeString,
-							Description: "Example Dataset ID",
+							Description: "Example Dataset Data Source ID field",
 							Computed:    true,
 						},
 						installationCreatedAtFieldName: {
 							Type:        schema.TypeString,
-							Description: "Example Dataset Created At time",
+							Description: "Example Dataset Data Source Created At field",
 							Computed:    true,
 						},
 						installationStatusFieldName: {
@@ -77,22 +77,22 @@ func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									installationStatusDatabaseNameFieldName: {
 										Type:        schema.TypeString,
-										Description: "Example Dataset Installation Database",
+										Description: "Example Dataset Installation Database field",
 										Computed:    true,
 									},
 									installationStatusStateFieldName: {
 										Type:        schema.TypeString,
-										Description: "Example Dataset Installation State",
+										Description: "Example Dataset Installation State field",
 										Computed:    true,
 									},
 									installationStatusIsAvailableFieldName: {
 										Type:        schema.TypeBool,
-										Description: "Example Dataset Installation Available state",
+										Description: "Example Dataset Installation IsAvailable field",
 										Computed:    true,
 									},
 									installationStatusIsFailedFieldName: {
 										Type:        schema.TypeBool,
-										Description: "Example Dataset Installation Failed state",
+										Description: "Example Dataset Installation Failed field",
 										Computed:    true,
 									},
 								},
