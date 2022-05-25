@@ -52,39 +52,47 @@ func resourceExampleDatasetInstallation() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			datasetDeploymentIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Example Dataset Resource Deployment ID field",
+				Required:    true,
+				ForceNew:    true,
 			},
 			datasetExampleDatasetIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Example Dataset Resource Example Dataset ID field",
+				Required:    true,
+				ForceNew:    true,
 			},
 			datasetCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Example Dataset Resource Example Dataset Created At field",
+				Computed:    true,
 			},
 			datasetStatusFieldName: {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Description: "Oasis Example Dataset Resource Example Dataset Status field",
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						datasetStatusDatabaseNameFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Oasis Example Dataset Resource Example Dataset Status Database field",
+							Computed:    true,
 						},
 						datasetStatusStateFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Oasis Example Dataset Resource Example Dataset Status State field",
+							Computed:    true,
 						},
 						datasetStatusIsAvailableFieldName: {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Description: "Oasis Example Dataset Resource Example Dataset Status Is Available field",
+							Computed:    true,
 						},
 						datasetStatusIsFailedFieldName: {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Description: "Oasis Example Dataset Resource Example Dataset Status Is Failed field",
+							Computed:    true,
 						},
 					},
 				},
