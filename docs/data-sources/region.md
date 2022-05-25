@@ -3,12 +3,12 @@
 page_title: "oasis_region Data Source - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Cloud Provider Regions Data Source
 ---
 
 # oasis_region (Data Source)
 
-
+Oasis Cloud Provider Regions Data Source
 
 
 
@@ -17,8 +17,8 @@ description: |-
 
 ### Required
 
-- `organization` (String)
-- `provider_id` (String)
+- `organization` (String) Regions Data Source Organization ID
+- `provider_id` (String) Regions Data Source Provider ID
 
 ### Read-Only
 
