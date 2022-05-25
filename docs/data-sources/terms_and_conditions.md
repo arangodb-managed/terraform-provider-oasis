@@ -3,12 +3,12 @@
 page_title: "oasis_terms_and_conditions Data Source - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Terms and Conditions Data Source
 ---
 
 # oasis_terms_and_conditions (Data Source)
 
-
+Terms and Conditions Data Source
 
 
 
@@ -17,12 +17,12 @@ description: |-
 
 ### Optional
 
-- `id` (String) If this field is omitted the current terms and conditions is fetched.
-- `organization` (String)
+- `id` (String) Terms and Conditions Data Source ID
+- `organization` (String) Terms and Conditions Data Source Organization
 
 ### Read-Only
 
-- `content` (String)
-- `created_at` (String)
+- `content` (String) Terms and Conditions Data Source Content
+- `created_at` (String) Terms and Conditions Data Source Created At time
 
 
