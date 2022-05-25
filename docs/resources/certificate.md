@@ -3,12 +3,12 @@
 page_title: "oasis_certificate Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis CA Certificate Resource
 ---
 
 # oasis_certificate (Resource)
 
-
+Oasis CA Certificate Resource
 
 
 
@@ -17,21 +17,21 @@ description: |-
 
 ### Required
 
-- `name` (String)
+- `name` (String) CA Certificate Resource Certificate Name
 
 ### Optional
 
-- `description` (String)
-- `lifetime` (Number)
-- `locked` (Boolean)
-- `project` (String)
-- `use_well_known_certificate` (Boolean)
+- `description` (String) CA Certificate Resource Certificate Description
+- `lifetime` (Number) CA Certificate Resource Certificate Lifetime
+- `locked` (Boolean) Ca Certificate Resource Locked Certificate condition
+- `project` (String) CA Certificate Resource Project Name
+- `use_well_known_certificate` (Boolean) CA Certificate Resource Use Well Known Certificate condition
 
 ### Read-Only
 
-- `created_at` (String)
-- `expires_at` (String)
+- `created_at` (String) Ca Certificate Resource Certificate Created At time
+- `expires_at` (String) Ca Certificate Resource Certificate Expires At time
 - `id` (String) The ID of this resource.
-- `is_default` (Boolean)
+- `is_default` (Boolean) Ca Certificate Resource Is Default Certificate condition
 
 
