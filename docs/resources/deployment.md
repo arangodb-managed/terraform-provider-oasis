@@ -3,12 +3,12 @@
 page_title: "oasis_deployment Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Deployment Resource
 ---
 
 # oasis_deployment (Resource)
 
-
+Oasis Deployment Resource
 
 
 
@@ -17,21 +17,21 @@ description: |-
 
 ### Required
 
-- `configuration` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--configuration))
-- `location` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--location))
-- `name` (String)
-- `terms_and_conditions_accepted` (Boolean)
+- `configuration` (Block List, Min: 1, Max: 1) Deployment Resource Deployment Configuration field (see [below for nested schema](#nestedblock--configuration))
+- `location` (Block List, Min: 1, Max: 1) Deployment Resource Deployment Location field (see [below for nested schema](#nestedblock--location))
+- `name` (String) Deployment Resource Deployment Name field
+- `terms_and_conditions_accepted` (Boolean) Deployment Resource Deployment Terms and Conditions Accepted field
 
 ### Optional
 
-- `description` (String)
-- `disable_scheduled_root_password_rotation` (Boolean)
-- `disk_performance` (String)
-- `locked` (Boolean)
-- `notification_settings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--notification_settings))
-- `project` (String)
-- `security` (Block List, Max: 1) (see [below for nested schema](#nestedblock--security))
-- `version` (Block List, Max: 1) (see [below for nested schema](#nestedblock--version))
+- `description` (String) Deployment Resource Deployment Description field
+- `disable_scheduled_root_password_rotation` (Boolean) Deployment Resource Deployment Scheduled Root Password Rotation field
+- `disk_performance` (String) Deployment Resource Deployment Disk Performance field
+- `locked` (Boolean) Deployment Resource Deployment Locked field
+- `notification_settings` (Block List, Max: 1) Deployment Resource Deployment Notification Configuration field (see [below for nested schema](#nestedblock--notification_settings))
+- `project` (String) Deployment Resource Deployment Project field
+- `security` (Block List, Max: 1) Deployment Resource Deployment Security field (see [below for nested schema](#nestedblock--security))
+- `version` (Block List, Max: 1) Deployment Resource Deployment Version field (see [below for nested schema](#nestedblock--version))
 
 ### Read-Only
 
@@ -42,14 +42,14 @@ description: |-
 
 Required:
 
-- `model` (String)
+- `model` (String) Deployment Resource Deployment Configuration Name field
 
 Optional:
 
-- `maximum_node_disk_size` (Number)
-- `node_count` (Number)
-- `node_disk_size` (Number)
-- `node_size_id` (String)
+- `maximum_node_disk_size` (Number) Deployment Resource Deployment Configuration Maximum Node Disk Size field
+- `node_count` (Number) Deployment Resource Deployment Configuration Node Count field
+- `node_disk_size` (Number) Deployment Resource Deployment Configuration Node Disk Size field
+- `node_size_id` (String) Deployment Resource Deployment Configuration Node Size field
 
 
 <a id="nestedblock--location"></a>
@@ -57,7 +57,7 @@ Optional:
 
 Required:
 
-- `region` (String)
+- `region` (String) Deployment Resource Deployment Location Region field
 
 
 <a id="nestedblock--notification_settings"></a>
@@ -65,7 +65,7 @@ Required:
 
 Optional:
 
-- `email_addresses` (List of String)
+- `email_addresses` (List of String) Deployment Resource Deployment Notification Configuration Email Addresses field
 
 
 <a id="nestedblock--security"></a>
@@ -73,9 +73,9 @@ Optional:
 
 Optional:
 
-- `ca_certificate` (String)
-- `disable_foxx_authentication` (Boolean)
-- `ip_allowlist` (String)
+- `ca_certificate` (String) Deployment Resource Deployment Security CA Certificate field
+- `disable_foxx_authentication` (Boolean) Deployment Resource Deployment Security DisableFoxxAuthentication field
+- `ip_allowlist` (String) Deployment Resource Deployment Security IP Allowlist field
 
 
 <a id="nestedblock--version"></a>
