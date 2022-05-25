@@ -44,6 +44,8 @@ var (
 // resourceExampleDatasetInstallation defines an Example Dataset Installation resource.
 func resourceExampleDatasetInstallation() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Example Dataset Installation Resource",
+
 		CreateContext: resourceExampleDatasetInstallationCreate,
 		ReadContext:   resourceExampleDatasetInstallationRead,
 		DeleteContext: resourceExampleDatasetInstallationDelete,
