@@ -17,18 +17,18 @@ description: |-
 
 ### Required
 
-- `id` (String) Backup data source ID
+- `id` (String) Backup Data Source ID field
 
 ### Optional
 
-- `backup_policy_id` (String) Backup data source Policy ID
-- `deployment_id` (String) Backup data source Deployment ID
-- `description` (String) Backup data source description
-- `name` (String) Backup data source name
-- `url` (String) Backup data source URL
+- `backup_policy_id` (String) Backup Data Source Policy ID field
+- `deployment_id` (String) Backup Sata Source Deployment ID field
+- `description` (String) Backup Data Source Description field
+- `name` (String) Backup Data Source Name field
+- `url` (String) Backup Data Source URL field
 
 ### Read-Only
 
-- `created_at` (String) Backup data source Created At time
+- `created_at` (String) Backup Sata Source Created At field
 
 

@@ -17,7 +17,7 @@ description: |-
 
 ### Required
 
-- `organization` (String) Cloud Provider Data Source Organization ID
+- `organization` (String) Cloud Provider Data Source Organization ID field
 
 ### Read-Only
 

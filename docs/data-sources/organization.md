@@ -17,19 +17,19 @@ Oasis Organization Data Source
 
 ### Required
 
-- `id` (String) Organization Data Source Organization ID
+- `id` (String) Organization Data Source Organization ID field
 
 ### Optional
 
-- `description` (String) Organization Data Source Organization Description
-- `name` (String) Organization Data Source Organization Name
+- `description` (String) Organization Data Source Organization Description field
+- `name` (String) Organization Data Source Organization Name field
 
 ### Read-Only
 
-- `created_at` (String) Organization Data Source Organization Created At time
-- `is_deleted` (Boolean) Organization Data Source Organization is deleted condition
-- `tier` (Set of Object) Organization Data Source Organization Tier (see [below for nested schema](#nestedatt--tier))
-- `url` (String) Organization Data Source Organization URL
+- `created_at` (String) Organization Data Source Organization Created At field
+- `is_deleted` (Boolean) Organization Data Source Organization is deleted field
+- `tier` (Set of Object) Organization Data Source Organization Tier field (see [below for nested schema](#nestedatt--tier))
+- `url` (String) Organization Data Source Organization URL field
 
 <a id="nestedatt--tier"></a>
 ### Nested Schema for `tier`

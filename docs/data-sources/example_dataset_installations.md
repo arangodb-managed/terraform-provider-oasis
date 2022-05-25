@@ -17,7 +17,7 @@ Example DataSet Installation Data Source
 
 ### Required
 
-- `deployment_id` (String) Example Dataset Data Source Deployment ID
+- `deployment_id` (String) Example Dataset Data Source Deployment ID field
 
 ### Read-Only
 
