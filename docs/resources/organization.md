@@ -3,12 +3,12 @@
 page_title: "oasis_organization Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Organization Resource
 ---
 
 # oasis_organization (Resource)
 
-
+Oasis Organization Resource
 
 
 
@@ -17,12 +17,12 @@ description: |-
 
 ### Required
 
-- `name` (String)
+- `name` (String) Organization Resource Organization Name field
 
 ### Optional
 
-- `description` (String)
-- `locked` (Boolean)
+- `description` (String) Organization Resource Organization Description field
+- `locked` (Boolean) Organization Resource Organization Lock field
 
 ### Read-Only
 
