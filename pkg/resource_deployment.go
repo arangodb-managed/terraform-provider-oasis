@@ -62,6 +62,8 @@ const (
 
 func resourceDeployment() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Deployment Resource",
+
 		CreateContext: resourceDeploymentCreate,
 		ReadContext:   resourceDeploymentRead,
 		UpdateContext: resourceDeploymentUpdate,
@@ -69,42 +71,49 @@ func resourceDeployment() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			deplTAndCAcceptedFieldName: {
-				Type:     schema.TypeBool,
-				Required: true,
+				Type:        schema.TypeBool,
+				Description: "Deployment Resource Deployment Terms and Conditions Accepted field",
+				Required:    true,
 			},
 			deplProjectFieldName: { // If set here, overrides project in provider
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Deployment Resource Deployment Project field",
+				Optional:    true,
 			},
 
 			deplNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Deployment Resource Deployment Name field",
+				Required:    true,
 			},
 
 			deplDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Deployment Resource Deployment Description field",
+				Optional:    true,
 			},
 
 			deplLocationFieldName: {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Description: "Deployment Resource Deployment Location field",
+				Required:    true,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplLocationRegionFieldName: {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Description: "Deployment Resource Deployment Location Region field",
+							Required:    true,
 						},
 					},
 				},
 			},
 
 			deplVersionFieldName: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Description: "Deployment Resource Deployment Version field",
+				Optional:    true,
+				MaxItems:    1,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return old == "1" && new == "0"
 				},
@@ -122,68 +131,78 @@ func resourceDeployment() *schema.Resource {
 			},
 
 			deplSecurityFieldName: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Description: "Deployment Resource Deployment Security field",
+				Optional:    true,
+				MaxItems:    1,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return old == "1" && new == "0"
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplSecurityCaCertificateFieldName: {
-							Type:     schema.TypeString,
-							Optional: true, // If not set, uses default certificate from project
+							Type:        schema.TypeString,
+							Description: "Deployment Resource Deployment Security CA Certificate field",
+							Optional:    true, // If not set, uses default certificate from project
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == ""
 							},
 						},
 						deplSecurityIpAllowlistFieldName: {
-							Type:     schema.TypeString,
-							Optional: true, // If not set, no allowlist is configured
+							Type:        schema.TypeString,
+							Description: "Deployment Resource Deployment Security IP Allowlist field",
+							Optional:    true, // If not set, no allowlist is configured
 						},
 						deplSecurityDisableFoxxAuthenticationFieldName: {
-							Type:     schema.TypeBool,
-							Optional: true, // If not set, defaults to enabling foxx authentication
-							Default:  false,
+							Type:        schema.TypeBool,
+							Description: "Deployment Resource Deployment Security DisableFoxxAuthentication field",
+							Optional:    true, // If not set, defaults to enabling foxx authentication
+							Default:     false,
 						},
 					},
 				},
 			},
 
 			deplConfigurationFieldName: {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Description: "Deployment Resource Deployment Configuration field",
+				Required:    true,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplConfigurationModelFieldName: {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Description: "Deployment Resource Deployment Configuration Name field",
+							Required:    true,
 						},
 						deplConfigurationNodeSizeIdFieldName: {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Description: "Deployment Resource Deployment Configuration Node Size field",
+							Optional:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == ""
 							},
 						},
 						deplConfigurationNodeCountFieldName: {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:        schema.TypeInt,
+							Description: "Deployment Resource Deployment Configuration Node Count field",
+							Optional:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == "0"
 							},
 						},
 						deplConfigurationNodeDiskSizeFieldName: {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:        schema.TypeInt,
+							Description: "Deployment Resource Deployment Configuration Node Disk Size field",
+							Optional:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == "0"
 							},
 						},
 						deplConfigurationMaximumNodeDiskSizeFieldName: {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:        schema.TypeInt,
+							Description: "Deployment Resource Deployment Configuration Maximum Node Disk Size field",
+							Optional:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == ""
 							},
@@ -192,17 +211,19 @@ func resourceDeployment() *schema.Resource {
 				},
 			},
 			deplNotificationConfigurationFieldName: {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Description: "Deployment Resource Deployment Notification Configuration field",
+				Optional:    true,
+				MaxItems:    1,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return new == ""
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						deplNotificationConfigurationEmailAddressesFieldName: {
-							Type:     schema.TypeList,
-							Optional: true,
+							Type:        schema.TypeList,
+							Description: "Deployment Resource Deployment Notification Configuration Email Addresses field",
+							Optional:    true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -212,18 +233,21 @@ func resourceDeployment() *schema.Resource {
 			},
 
 			deplDiskPerformanceFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Deployment Resource Deployment Disk Performance field",
+				Optional:    true,
 			},
 
 			deplDisableScheduledRootPasswordRotationFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Deployment Resource Deployment Scheduled Root Password Rotation field",
+				Optional:    true,
 			},
 
 			deplLockedFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Deployment Resource Deployment Locked field",
+				Optional:    true,
 			},
 		},
 	}
