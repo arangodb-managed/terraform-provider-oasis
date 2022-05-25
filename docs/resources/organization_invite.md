@@ -3,12 +3,12 @@
 page_title: "oasis_organization_invite Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Organization Invite Resource
 ---
 
 # oasis_organization_invite (Resource)
 
-
+Oasis Organization Invite Resource
 
 
 
@@ -17,8 +17,8 @@ description: |-
 
 ### Required
 
-- `email` (String)
-- `organization` (String)
+- `email` (String) Organization Invite Resource Email field
+- `organization` (String) Organization Invite Resource Organization ID field
 
 ### Read-Only
 
