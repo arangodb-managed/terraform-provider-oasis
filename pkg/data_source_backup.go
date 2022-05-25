@@ -48,32 +48,39 @@ func dataSourceOasisBackup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			backupDataSourceIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Backup data source ID",
+				Required:    true,
 			},
 			backupDataSourceNameFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup data source name",
+				Optional:    true,
 			},
 			backupDataSourceDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup data source description",
+				Optional:    true,
 			},
 			backupDataSourceURLFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup data source URL",
+				Optional:    true,
 			},
 			backupDataSourcePolicyIDFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup data source Policy ID",
+				Optional:    true,
 			},
 			backupDataSourceDeploymentIDFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup data source Deployment ID",
+				Optional:    true,
 			},
 			backupDataSourceCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Backup data source Created At time",
+				Computed:    true,
 			},
 		},
 	}
