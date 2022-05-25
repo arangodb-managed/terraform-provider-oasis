@@ -48,27 +48,27 @@ func dataSourceOasisProject() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			projIdFieldName: {
 				Type:        schema.TypeString,
-				Description: "Project Data Source Project ID",
+				Description: "Project Data Source Project ID field",
 				Required:    true,
 			},
 			projNameFieldName: {
 				Type:        schema.TypeString,
-				Description: "Project Data Source Project Name",
+				Description: "Project Data Source Project Name field",
 				Optional:    true,
 			},
 			projDescriptionFieldName: {
 				Type:        schema.TypeString,
-				Description: "Project Data Source Project Description",
+				Description: "Project Data Source Project Description field",
 				Optional:    true,
 			},
 			projUrlFieldName: {
 				Type:        schema.TypeString,
-				Description: "Project Data Source Project URL",
+				Description: "Project Data Source Project URL field",
 				Computed:    true,
 			},
 			projCreatedAtFieldName: {
 				Type:        schema.TypeString,
-				Description: "Project Data Source Project Created At time",
+				Description: "Project Data Source Project Created At field",
 				Computed:    true,
 			},
 		},

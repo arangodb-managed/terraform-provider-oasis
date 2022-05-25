@@ -47,22 +47,22 @@ func dataSourceTermsAndConditions() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			tcIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Terms and Conditions Data Source ID",
+				Description: "Terms and Conditions Data Source ID field",
 				Optional:    true,
 			},
 			tcContentFieldName: {
 				Type:        schema.TypeString,
-				Description: "Terms and Conditions Data Source Content",
+				Description: "Terms and Conditions Data Source Content field",
 				Computed:    true,
 			},
 			tcCreatedAtFieldName: {
 				Type:        schema.TypeString,
-				Description: "Terms and Conditions Data Source Created At time",
+				Description: "Terms and Conditions Data Source Created At field",
 				Computed:    true,
 			},
 			tcOrganizationFieldName: {
 				Type:        schema.TypeString,
-				Description: "Terms and Conditions Data Source Organization",
+				Description: "Terms and Conditions Data Source Organization field",
 				Optional:    true, // if given, overwrites the plugin level organization
 			},
 		},
