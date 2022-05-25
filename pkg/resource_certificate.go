@@ -48,6 +48,7 @@ const (
 // resourceCertificate defines the Certificate terraform resource Schema.
 func resourceCertificate() *schema.Resource {
 	return &schema.Resource{
+		Description:   "Oasis CA Certificate Resource",
 		CreateContext: resourceCertificateCreate,
 		ReadContext:   resourceCertificateRead,
 		UpdateContext: resourceCertificateUpdate,
@@ -55,46 +56,55 @@ func resourceCertificate() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			nameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "CA Certificate Resource Certificate Name",
+				Required:    true,
 			},
 
 			projectFieldName: { // If set here, overrides project in provider
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "CA Certificate Resource Project Name",
+				Optional:    true,
 			},
 
 			descriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "CA Certificate Resource Certificate Description",
+				Optional:    true,
 			},
 
 			lifetimeFieldName: {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:        schema.TypeInt,
+				Description: "CA Certificate Resource Certificate Lifetime",
+				Optional:    true,
 			},
 
 			useWellKnownCertificateFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "CA Certificate Resource Use Well Known Certificate condition",
+				Optional:    true,
 			},
 
 			isDefaultFieldName: {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Description: "Ca Certificate Resource Is Default Certificate condition",
+				Computed:    true,
 			},
 
 			createdAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Ca Certificate Resource Certificate Created At time",
+				Computed:    true,
 			},
 			expiresAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Ca Certificate Resource Certificate Expires At time",
+				Computed:    true,
 			},
 			lockedFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Ca Certificate Resource Locked Certificate condition",
+				Optional:    true,
 			},
 		},
 	}
