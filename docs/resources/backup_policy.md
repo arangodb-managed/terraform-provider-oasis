@@ -17,7 +17,7 @@ description: |-
 
 ### Required
 
-- `deployment_id` (String) Backup Policy Resource Backup Policy Deployment ID condition field
+- `deployment_id` (String) Backup Policy Resource Backup Policy Deployment ID field
 - `email_notification` (String) Backup Policy Resource Backup Policy Email Notification field
 - `name` (String) Backup Policy Resource Backup Policy Name field
 - `schedule` (Block List, Min: 1, Max: 1) Backup Policy Resource Backup Policy Schedule field (see [below for nested schema](#nestedblock--schedule))
@@ -25,10 +25,10 @@ description: |-
 ### Optional
 
 - `description` (String) Backup Policy Resource Backup Policy Description field
-- `is_paused` (Boolean) Backup Policy Resource Backup Policy Is Paused condition field
-- `locked` (Boolean) Backup Policy Resource Backup Policy Locked condition field
+- `is_paused` (Boolean) Backup Policy Resource Backup Policy Is Paused field
+- `locked` (Boolean) Backup Policy Resource Backup Policy Locked field
 - `retention_period_hour` (Number) Backup Policy Resource Backup Policy Retention Period field
-- `upload` (Boolean) Backup Policy Resource Backup Policy Upload condition field
+- `upload` (Boolean) Backup Policy Resource Backup Policy Upload field
 
 ### Read-Only
 

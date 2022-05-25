@@ -17,19 +17,19 @@ Oasis Backup Resource
 
 ### Required
 
-- `deployment_id` (String) Oasis Backup Resource Backup Deployment ID
-- `name` (String) Oasis Backup Resource Backup Name
+- `deployment_id` (String) Oasis Backup Resource Backup Deployment ID field
+- `name` (String) Oasis Backup Resource Backup Name field
 
 ### Optional
 
-- `auto_deleted_at` (Number) Oasis Backup Resource Backup Auto Delete At time
-- `backup_policy_id` (String) Oasis Backup Resource Backup Policy ID
-- `description` (String) Oasis Backup Resource Backup Description
-- `upload` (Boolean) Oasis Backup Resource Backup Upload condition
+- `auto_deleted_at` (Number) Oasis Backup Resource Backup Auto Delete At field
+- `backup_policy_id` (String) Oasis Backup Resource Backup Policy ID field
+- `description` (String) Oasis Backup Resource Backup Description field
+- `upload` (Boolean) Oasis Backup Resource Backup Upload field
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `url` (String) Oasis Backup Resource Backup URL
+- `url` (String) Oasis Backup Resource Backup URL field
 
 

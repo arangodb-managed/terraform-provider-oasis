@@ -17,21 +17,21 @@ Oasis CA Certificate Resource
 
 ### Required
 
-- `name` (String) CA Certificate Resource Certificate Name
+- `name` (String) CA Certificate Resource Certificate Name field
 
 ### Optional
 
-- `description` (String) CA Certificate Resource Certificate Description
-- `lifetime` (Number) CA Certificate Resource Certificate Lifetime
-- `locked` (Boolean) Ca Certificate Resource Locked Certificate condition
-- `project` (String) CA Certificate Resource Project Name
-- `use_well_known_certificate` (Boolean) CA Certificate Resource Use Well Known Certificate condition
+- `description` (String) CA Certificate Resource Certificate Description field
+- `lifetime` (Number) CA Certificate Resource Certificate Lifetime field
+- `locked` (Boolean) Ca Certificate Resource Locked Certificate field
+- `project` (String) CA Certificate Resource Project Name field
+- `use_well_known_certificate` (Boolean) CA Certificate Resource Use Well Known Certificate field
 
 ### Read-Only
 
-- `created_at` (String) Ca Certificate Resource Certificate Created At time
-- `expires_at` (String) Ca Certificate Resource Certificate Expires At time
+- `created_at` (String) Ca Certificate Resource Certificate Created At field
+- `expires_at` (String) Ca Certificate Resource Certificate Expires At field
 - `id` (String) The ID of this resource.
-- `is_default` (Boolean) Ca Certificate Resource Is Default Certificate condition
+- `is_default` (Boolean) Ca Certificate Resource Is Default Certificate field
 
 

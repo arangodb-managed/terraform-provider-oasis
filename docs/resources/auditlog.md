@@ -17,13 +17,13 @@ Oasis Audit Log Resource
 
 ### Required
 
-- `name` (String) Audit Log Resource Audit Log Name
+- `name` (String) Audit Log Resource Audit Log Name field
 
 ### Optional
 
-- `description` (String) Audit Log Resource Audit Log Description
-- `is_default` (Boolean) Audit Log Resource Audit Log Is Default condition
-- `organization` (String) Audit Log Resource Audit Log Organization ID
+- `description` (String) Audit Log Resource Audit Log Description field
+- `is_default` (Boolean) Audit Log Resource Audit Log Is Default field
+- `organization` (String) Audit Log Resource Organization ID field
 
 ### Read-Only
 
