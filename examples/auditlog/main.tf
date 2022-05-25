@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 0.13.0"
   required_providers {
     oasis = {
-      source = "arangodb.com/managed/oasis"
+      source  = "arangodb.com/managed/oasis"
       version = ">=1.5.1"
     }
   }
@@ -15,7 +15,7 @@ provider "oasis" {
 
 // Terraform created auditlog
 resource "oasis_auditlog" "oasis_test_auditlog" {
-  name        = "Terraform Oasis AuditLog"
-  description = "A test Oasis auditlog from Terraform Provider"
+  name         = "Terraform Oasis AuditLog"
+  description  = "A test Oasis auditlog from Terraform Provider"
   organization = "" // organization id
 }
