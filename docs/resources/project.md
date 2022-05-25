@@ -3,12 +3,12 @@
 page_title: "oasis_project Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Project Resource
 ---
 
 # oasis_project (Resource)
 
-
+Oasis Project Resource
 
 
 
@@ -17,18 +17,18 @@ description: |-
 
 ### Required
 
-- `name` (String)
+- `name` (String) Project Resource Project Name field
 
 ### Optional
 
-- `description` (String)
-- `locked` (Boolean)
-- `organization` (String)
+- `description` (String) Project Resource Project Description field
+- `locked` (Boolean) Project Resource Project Locked field
+- `organization` (String) Project Resource Organization ID field
 
 ### Read-Only
 
-- `created_at` (String)
+- `created_at` (String) Project Resource Project Created At field
 - `id` (String) The ID of this resource.
-- `is_deleted` (Boolean)
+- `is_deleted` (Boolean) Project Resource Project IsDeleted field
 
 
