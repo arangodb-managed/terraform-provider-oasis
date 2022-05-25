@@ -3,12 +3,12 @@
 page_title: "oasis_auditlog Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Audit Log Resource
 ---
 
 # oasis_auditlog (Resource)
 
-
+Oasis Audit Log Resource
 
 
 
@@ -17,13 +17,13 @@ description: |-
 
 ### Required
 
-- `name` (String)
+- `name` (String) Audit Log Resource Audit Log Name
 
 ### Optional
 
-- `description` (String)
-- `is_default` (Boolean)
-- `organization` (String)
+- `description` (String) Audit Log Resource Audit Log Description
+- `is_default` (Boolean) Audit Log Resource Audit Log Is Default condition
+- `organization` (String) Audit Log Resource Audit Log Organization ID
 
 ### Read-Only
 
