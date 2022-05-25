@@ -3,12 +3,12 @@
 page_title: "oasis_iam_role Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis IAM Role Resource
 ---
 
 # oasis_iam_role (Resource)
 
-
+Oasis IAM Role Resource
 
 
 
@@ -17,13 +17,13 @@ description: |-
 
 ### Required
 
-- `name` (String)
-- `organization` (String)
+- `name` (String) IAM Role Resource IAM Role Name field
+- `organization` (String) IAM Role Resource IAM Role Organization ID field
 
 ### Optional
 
-- `description` (String)
-- `permissions` (List of String)
+- `description` (String) IAM Role Resource IAM Role Description field
+- `permissions` (List of String) IAM Role Resource IAM Role Permissions field (list of permissions)
 
 ### Read-Only
 
