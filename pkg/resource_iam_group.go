@@ -41,22 +41,27 @@ const (
 // resourceIAMGroup defines an IAM Group Oasis resource.
 func resourceIAMGroup() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis IAM Group Resource",
+
 		CreateContext: resourceIAMGroupCreate,
 		ReadContext:   resourceIAMGroupRead,
 		UpdateContext: resourceIAMGroupUpdate,
 		DeleteContext: resourceIAMGroupDelete,
 		Schema: map[string]*schema.Schema{
 			iamGroupNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "IAM Group Resource IAM Group Name",
+				Required:    true,
 			},
 			iamGroupOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "IAM Group Resource IAM Group Organization ID",
+				Required:    true,
 			},
 			iamGroupDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "IAM Group Resource IAM Group Description",
+				Optional:    true,
 			},
 		},
 	}
