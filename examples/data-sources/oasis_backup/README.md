@@ -1,6 +1,6 @@
 # Example: Backup Data Source
 
-This example shows how to use the Terraform Oasis provider to manage Audit Log Data Source in Oasis.
+This example shows how to use the Terraform Oasis provider to manage Backup Data Source in Oasis.
 
 ## Prerequisites
 
