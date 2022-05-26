@@ -40,21 +40,25 @@ const (
 // resourceOrganizationInvite defines the Organization Invite Terraform resource Schema.
 func resourceOrganizationInvite() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Organization Invite Resource",
+
 		CreateContext: resourceOrganizationInviteCreate,
 		ReadContext:   resourceOrganizationInviteRead,
 		DeleteContext: resourceOrganizationInviteDelete,
 
 		Schema: map[string]*schema.Schema{
 			organizationInviteEmailFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "Organization Invite Resource Email field",
+				Required:    true,
+				ForceNew:    true,
 			},
 
 			organizationInviteOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "Organization Invite Resource Organization ID field",
+				Required:    true,
+				ForceNew:    true,
 			},
 		},
 	}

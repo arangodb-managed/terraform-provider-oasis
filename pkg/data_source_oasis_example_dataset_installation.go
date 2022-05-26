@@ -45,12 +45,15 @@ var (
 // dataSourceOasisExampleDatasetInstallation defines an Example Dataset Installation datasource terraform type.
 func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 	return &schema.Resource{
+		Description: "Example DataSet Installation Data Source",
+
 		ReadContext: dataSourceOasisExampleDatasetInstallationRead,
 
 		Schema: map[string]*schema.Schema{
 			installationDeploymentIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Example Dataset Data Source Deployment ID field",
+				Required:    true,
 			},
 			installationItemsFieldName: {
 				Type:     schema.TypeList,
@@ -58,12 +61,14 @@ func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						installationExampleDatasetIdFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Example Dataset Data Source ID field",
+							Computed:    true,
 						},
 						installationCreatedAtFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Example Dataset Data Source Created At field",
+							Computed:    true,
 						},
 						installationStatusFieldName: {
 							Type:     schema.TypeList,
@@ -71,20 +76,24 @@ func dataSourceOasisExampleDatasetInstallation() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									installationStatusDatabaseNameFieldName: {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:        schema.TypeString,
+										Description: "Example Dataset Installation Database field",
+										Computed:    true,
 									},
 									installationStatusStateFieldName: {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:        schema.TypeString,
+										Description: "Example Dataset Installation State field",
+										Computed:    true,
 									},
 									installationStatusIsAvailableFieldName: {
-										Type:     schema.TypeBool,
-										Computed: true,
+										Type:        schema.TypeBool,
+										Description: "Example Dataset Installation IsAvailable field",
+										Computed:    true,
 									},
 									installationStatusIsFailedFieldName: {
-										Type:     schema.TypeBool,
-										Computed: true,
+										Type:        schema.TypeBool,
+										Description: "Example Dataset Installation Failed field",
+										Computed:    true,
 									},
 								},
 							},

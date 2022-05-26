@@ -49,57 +49,71 @@ const (
 // dataSourceOasisOrganization defines an Organization datasource terraform type.
 func dataSourceOasisOrganization() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Organization Data Source",
+
 		ReadContext: dataSourceOasisOrganizationRead,
 
 		Schema: map[string]*schema.Schema{
 			orgIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Organization Data Source Organization ID field",
+				Required:    true,
 			},
 			orgNameFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Organization Data Source Organization Name field",
+				Optional:    true,
 			},
 			orgDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Organization Data Source Organization Description field",
+				Optional:    true,
 			},
 			orgUrlFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Organization Data Source Organization URL field",
+				Computed:    true,
 			},
 			orgCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Organization Data Source Organization Created At field",
+				Computed:    true,
 			},
 			orgIsDeletedFieldName: {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Description: "Organization Data Source Organization is deleted field",
+				Computed:    true,
 			},
 			tierFieldName: {
-				Type:     schema.TypeSet,
-				Computed: true,
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Description: "Organization Data Source Organization Tier field",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						tierIdFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Organization Data Source Organization Tier ID field",
+							Computed:    true,
 						},
 						tierNameFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Organization Data Source Organization Tier Name field",
+							Computed:    true,
 						},
 						tierHasSupportPlansFieldName: {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Description: "Organization Data Source Organization Tier Has Support Plans field",
+							Computed:    true,
 						},
 						tierHasBackupUploadsFieldName: {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Description: "Organization Data Source Organization Tier Has Backup Uploads field",
+							Computed:    true,
 						},
 						tierRequiresTermsAndConditionsFieldName: {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Description: "Organization Data Source Organization Tier Requires Terms and Conditions field",
+							Computed:    true,
 						},
 					},
 				},

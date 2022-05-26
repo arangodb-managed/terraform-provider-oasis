@@ -49,39 +49,47 @@ const (
 // resourceBackup defines a Backup Oasis resource.
 func resourceBackup() *schema.Resource {
 	return &schema.Resource{
+		Description:   "Oasis Backup Resource",
 		CreateContext: resourceBackupCreate,
 		ReadContext:   resourceBackupRead,
 		UpdateContext: resourceBackupUpdate,
 		DeleteContext: resourceBackupDelete,
 		Schema: map[string]*schema.Schema{
 			backupNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Name field",
+				Required:    true,
 			},
 			backupDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Description field",
+				Optional:    true,
 			},
 			backupUploadFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Description: "Oasis Backup Resource Backup Upload field",
+				Optional:    true,
+				Default:     false,
 			},
 			backupDeploymentIDFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Deployment ID field",
+				Required:    true,
 			},
 			backupURLFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup URL field",
+				Computed:    true,
 			},
 			backupPolicyIDFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Policy ID field",
+				Optional:    true,
 			},
 			backupAutoDeleteAtFieldName: {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Oasis Backup Resource Backup Auto Delete At field",
 				ValidateFunc: func(v interface{}, k string) ([]string, []error) {
 					days := v.(int)
 					var errs []error

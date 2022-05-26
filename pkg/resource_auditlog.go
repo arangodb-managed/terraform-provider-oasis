@@ -43,26 +43,31 @@ const (
 // resourceAuditLog defines an Oasis Audit Log resource.
 func resourceAuditLog() *schema.Resource {
 	return &schema.Resource{
+		Description:   "Oasis Audit Log Resource",
 		CreateContext: resourceAuditLogCreate,
 		ReadContext:   resourceAuditLogRead,
 		UpdateContext: resourceAuditLogUpdate,
 		DeleteContext: resourceAuditLogDelete,
 		Schema: map[string]*schema.Schema{
 			auditLogNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Audit Log Resource Audit Log Name field",
+				Required:    true,
 			},
 			auditLogDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Audit Log Resource Audit Log Description field",
+				Optional:    true,
 			},
 			auditLogOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Audit Log Resource Organization ID field",
+				Optional:    true,
 			},
 			auditLogIsDefaultFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Audit Log Resource Audit Log Is Default field",
+				Optional:    true,
 			},
 		},
 	}

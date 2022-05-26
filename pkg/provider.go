@@ -27,6 +27,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func init() {
+	// Set descriptions to support markdown syntax, this will be used in document generation
+	// and the language server.
+	schema.DescriptionKind = schema.StringMarkdown
+}
+
 // Provider defines an ArangoDB Oasis Terraform provider.
 func Provider() *schema.Provider {
 	return &schema.Provider{

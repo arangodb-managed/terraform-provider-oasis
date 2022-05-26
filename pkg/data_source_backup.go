@@ -44,36 +44,45 @@ const (
 // dataSourceOasisBackup defines a Backup datasource terraform type.
 func dataSourceOasisBackup() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Backup Data Source",
+
 		ReadContext: dataSourceOasisBackupRead,
 
 		Schema: map[string]*schema.Schema{
 			backupDataSourceIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Backup Data Source ID field",
+				Required:    true,
 			},
 			backupDataSourceNameFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup Data Source Name field",
+				Optional:    true,
 			},
 			backupDataSourceDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup Data Source Description field",
+				Optional:    true,
 			},
 			backupDataSourceURLFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup Data Source URL field",
+				Optional:    true,
 			},
 			backupDataSourcePolicyIDFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup Data Source Policy ID field",
+				Optional:    true,
 			},
 			backupDataSourceDeploymentIDFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Backup Sata Source Deployment ID field",
+				Optional:    true,
 			},
 			backupDataSourceCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Backup Sata Source Created At field",
+				Computed:    true,
 			},
 		},
 	}

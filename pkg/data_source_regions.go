@@ -45,16 +45,19 @@ const (
 // dataSourceOasisRegion defines a Cloud Provider Region datasource terraform type.
 func dataSourceOasisRegion() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Cloud Provider Regions Data Source",
 		ReadContext: dataSourceOasisRegionRead,
 
 		Schema: map[string]*schema.Schema{
 			regionOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Regions Data Source Organization ID field",
+				Required:    true,
 			},
 			regionProviderIdFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Regions Data Source Provider ID field",
+				Required:    true,
 			},
 			regionRegionsFieldName: {
 				Type:        schema.TypeList,
@@ -63,20 +66,24 @@ func dataSourceOasisRegion() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						regionIdFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Regions Data Source Region ID field",
+							Computed:    true,
 						},
 						regionProviderIdFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Regions Data Source Region Provider ID field",
+							Computed:    true,
 						},
 						regionLocationFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Regions Data Source Region Location field",
+							Computed:    true,
 						},
 						regionAvailableFieldName: {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Description: "Regions Data Source Region Available field",
+							Computed:    true,
 						},
 					},
 				},

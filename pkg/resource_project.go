@@ -44,6 +44,8 @@ const (
 // resourceProject defines the Project terraform resource Schema.
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Project Resource",
+
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
 		UpdateContext: resourceProjectUpdate,
@@ -51,35 +53,41 @@ func resourceProject() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			projectNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Description: "Project Resource Project Name field",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 
 			projectDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Project Resource Project Description field",
+				Optional:    true,
 			},
 
 			projectOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Optional: true, // overwrites plugin level settings if set
+				Type:        schema.TypeString,
+				Description: "Project Resource Organization ID field",
+				Optional:    true, // overwrites plugin level settings if set
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return new == ""
 				},
 			},
 
 			projectCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Project Resource Project Created At field",
+				Computed:    true,
 			},
 
 			projectIsDeletedFieldName: {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Description: "Project Resource Project IsDeleted field",
+				Computed:    true,
 			},
 			projectLockedFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Project Resource Project Locked field",
+				Optional:    true,
 			},
 		},
 	}

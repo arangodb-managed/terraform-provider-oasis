@@ -41,25 +41,29 @@ const (
 // dataSourceTermsAndConditions defines a T&C datasource terraform type.
 func dataSourceTermsAndConditions() *schema.Resource {
 	return &schema.Resource{
+		Description: "Terms and Conditions Data Source",
 		ReadContext: dataSourceTermsAndConditionsRead,
 
 		Schema: map[string]*schema.Schema{
 			tcIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "If this field is omitted the current terms and conditions is fetched.",
+				Description: "Terms and Conditions Data Source ID field",
 				Optional:    true,
 			},
 			tcContentFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Terms and Conditions Data Source Content field",
+				Computed:    true,
 			},
 			tcCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Terms and Conditions Data Source Created At field",
+				Computed:    true,
 			},
 			tcOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Optional: true, // if given, overwrites the plugin level organization
+				Type:        schema.TypeString,
+				Description: "Terms and Conditions Data Source Organization field",
+				Optional:    true, // if given, overwrites the plugin level organization
 			},
 		},
 	}

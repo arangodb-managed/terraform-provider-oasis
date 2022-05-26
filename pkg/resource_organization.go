@@ -41,22 +41,27 @@ const (
 // resourceOrganization defines an Organization Oasis resource.
 func resourceOrganization() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Organization Resource",
+
 		CreateContext: resourceOrganizationCreate,
 		ReadContext:   resourceOrganizationRead,
 		UpdateContext: resourceOrganizationUpdate,
 		DeleteContext: resourceOrganizationDelete,
 		Schema: map[string]*schema.Schema{
 			organizationNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Organization Resource Organization Name field",
+				Required:    true,
 			},
 			organizationDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Organization Resource Organization Description field",
+				Optional:    true,
 			},
 			organizationLockFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Organization Resource Organization Lock field",
+				Optional:    true,
 			},
 		},
 	}

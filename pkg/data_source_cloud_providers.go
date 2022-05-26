@@ -43,12 +43,15 @@ const (
 // dataSourceOasisCloudProvider defines a Cloud Provider datasource terraform type.
 func dataSourceOasisCloudProvider() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Cloud Providers Data Source",
+
 		ReadContext: dataSourceOasisCloudProviderRead,
 
 		Schema: map[string]*schema.Schema{
 			providerOrganizationFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "Cloud Provider Data Source Organization ID field",
+				Required:    true,
 			},
 			providerProvidersFieldName: {
 				Type:        schema.TypeList,
@@ -57,12 +60,14 @@ func dataSourceOasisCloudProvider() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						providerIdFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Cloud Provider ID field",
+							Computed:    true,
 						},
 						providerNameFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Cloud Provider Name field",
+							Computed:    true,
 						},
 					},
 				},

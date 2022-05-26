@@ -46,6 +46,8 @@ const (
 // resourceIPAllowlist defines the IPAllowlist terraform resource Schema.
 func resourceIPAllowlist() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis IP Allowlist Resource",
+
 		CreateContext: resourceIPAllowlistCreate,
 		ReadContext:   resourceIPAllowlistRead,
 		UpdateContext: resourceIPAllowlistUpdate,
@@ -53,44 +55,52 @@ func resourceIPAllowlist() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			ipNameFieldName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "IP Allowlist Resource IP Allowlist Name field",
+				Required:    true,
 			},
 
 			ipProjectFieldName: { // If set here, overrides project in provider
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "IP Allowlist Resource IP Allowlist Project field",
+				Optional:    true,
 			},
 
 			ipDescriptionFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "IP Allowlist Resource IP Allowlist Description field",
+				Optional:    true,
 			},
 
 			ipCIDRRangeFieldName: {
-				Type:     schema.TypeList,
-				Required: true,
-				MinItems: 1,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeList,
+				Description: "IP Allowlist Resource IP Allowlist IP CIDR Range field",
+				Required:    true,
+				MinItems:    1,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 
 			ipRemoteInspectionAllowedFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "IP Allowlist Resource IP Allowlist Inspection Allowed field",
+				Optional:    true,
 			},
 
 			ipIsDeletedFieldName: {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Description: "IP Allowlist Resource IP Allowlist Is Deleted field",
+				Computed:    true,
 			},
 
 			ipCreatedAtFieldName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "IP Allowlist Resource IP Allowlist Created At field",
+				Computed:    true,
 			},
 			ipLockedFieldName: {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "IP Allowlist Resource IP Allowlist Locked field",
+				Optional:    true,
 			},
 		},
 	}

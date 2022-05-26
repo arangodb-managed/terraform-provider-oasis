@@ -43,12 +43,15 @@ var (
 // dataSourceOasisExampleDataset defines an Example Dataset datasource terraform type.
 func dataSourceOasisExampleDataset() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Example Datasets Data Source",
+
 		ReadContext: dataSourceOasisExampleDatasetRead,
 
 		Schema: map[string]*schema.Schema{
 			exampleOrganizationIDFieldName: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "Example Data Set Data Source Organization ID field",
+				Optional:    true,
 			},
 			exampleExampleDatasetsFieldName: {
 				Type:     schema.TypeList,
@@ -56,24 +59,29 @@ func dataSourceOasisExampleDataset() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						exampleExampleDatasetsIDFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Example Data Set Data Source ID field",
+							Computed:    true,
 						},
 						exampleExampleDatasetsNameFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Example Data Set Data Source Name field",
+							Computed:    true,
 						},
 						exampleExampleDatasetsDescriptionFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Example Data Set Data Source Description field",
+							Computed:    true,
 						},
 						exampleExampleDatasetsCreatedAtFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Example Data Set Data Source Created At field",
+							Computed:    true,
 						},
 						exampleExampleDatasetsGuideFieldName: {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "Example Data Set Data Source Guide field",
+							Computed:    true,
 						},
 					},
 				},
