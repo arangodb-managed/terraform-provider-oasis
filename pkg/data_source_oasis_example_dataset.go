@@ -43,6 +43,8 @@ var (
 // dataSourceOasisExampleDataset defines an Example Dataset datasource terraform type.
 func dataSourceOasisExampleDataset() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Example Datasets Data Source",
+
 		ReadContext: dataSourceOasisExampleDatasetRead,
 
 		Schema: map[string]*schema.Schema{

@@ -3,12 +3,12 @@
 page_title: "oasis_backup_policy Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Backup Policy Resource
 ---
 
 # oasis_backup_policy (Resource)
 
-
+Oasis Backup Policy Resource
 
 ## Example Usage
 

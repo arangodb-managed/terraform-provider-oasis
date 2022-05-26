@@ -79,6 +79,8 @@ const (
 // resourceBackupPolicy defines a BackupPolicy oasis resource.
 func resourceBackupPolicy() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Backup Policy Resource",
+
 		CreateContext: resourceBackupPolicyCreate,
 		ReadContext:   resourceBackupPolicyRead,
 		UpdateContext: resourceBackupPolicyUpdate,

@@ -3,12 +3,12 @@
 page_title: "oasis_cloud_provider Data Source - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Cloud Providers Data Source
 ---
 
 # oasis_cloud_provider (Data Source)
 
-
+Oasis Cloud Providers Data Source
 
 ## Example Usage
 

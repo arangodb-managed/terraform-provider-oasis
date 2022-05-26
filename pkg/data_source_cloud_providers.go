@@ -43,6 +43,8 @@ const (
 // dataSourceOasisCloudProvider defines a Cloud Provider datasource terraform type.
 func dataSourceOasisCloudProvider() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Cloud Providers Data Source",
+
 		ReadContext: dataSourceOasisCloudProviderRead,
 
 		Schema: map[string]*schema.Schema{

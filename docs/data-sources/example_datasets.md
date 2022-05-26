@@ -3,12 +3,12 @@
 page_title: "oasis_example_datasets Data Source - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  
+  Oasis Example Datasets Data Source
 ---
 
 # oasis_example_datasets (Data Source)
 
-
+Oasis Example Datasets Data Source
 
 ## Example Usage
 

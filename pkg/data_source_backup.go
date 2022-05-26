@@ -44,6 +44,8 @@ const (
 // dataSourceOasisBackup defines a Backup datasource terraform type.
 func dataSourceOasisBackup() *schema.Resource {
 	return &schema.Resource{
+		Description: "Oasis Backup Data Source",
+
 		ReadContext: dataSourceOasisBackupRead,
 
 		Schema: map[string]*schema.Schema{
