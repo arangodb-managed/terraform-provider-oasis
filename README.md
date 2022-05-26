@@ -2,6 +2,8 @@
 
 ![ArangoDB Oasis](https://cloud.arangodb.com/assets/logos/arangodb-oasis-logo-whitebg-right.png)
 
+The Terraform Oasis provider is a plugin for Terraform that allows for the full lifecycle management of ArangoDB Cloud resources.
+
 ## Project status: Preview
 
 Note that this provider is currently in preview.
