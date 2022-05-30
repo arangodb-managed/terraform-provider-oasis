@@ -17,27 +17,35 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-//
 
-package main
+package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"testing"
 
-	"github.com/arangodb-managed/terraform-provider-oasis/internal"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Examples folder formatting
-//go:generate terraform fmt -recursive ./examples/
+var (
+	testAccProviders      map[string]*schema.Provider
+	testAccProvider       *schema.Provider
+	testProviderFactories map[string]func() (*schema.Provider, error)
+)
 
-// Terraform plugin tool for documentation generation
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
-
-func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() *schema.Provider {
-			return provider.Provider()
+func init() {
+	testAccProvider = Provider()
+	testAccProviders = map[string]*schema.Provider{
+		"oasis": testAccProvider,
+	}
+	testProviderFactories = map[string]func() (*schema.Provider, error){
+		"oasis": func() (*schema.Provider, error) {
+			return testAccProvider, nil
 		},
-	})
+	}
+}
+
+func TestProvider(t *testing.T) {
+	if err := Provider().InternalValidate(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
 }
