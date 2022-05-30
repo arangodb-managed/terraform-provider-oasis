@@ -17,27 +17,22 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-//
 
-package main
+package internal
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-
-	"github.com/arangodb-managed/terraform-provider-oasis/internal"
+	"fmt"
+	"strings"
+	"sync/atomic"
+	"time"
 )
 
-// Examples folder formatting
-//go:generate terraform fmt -recursive ./examples/
+// counter is keeping track of the generated resources in an atomic way.
+// This will result in unique ids even with multiple terraform calls.
+var counter uint64
 
-// Terraform plugin tool for documentation generation
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
-
-func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() *schema.Provider {
-			return internal.Provider()
-		},
-	})
+func uniqueResourceID(prefix string) string {
+	ts := strings.ReplaceAll(time.Now().Format("200601020405.000000"), ".", "")
+	atomic.AddUint64(&counter, 1)
+	return fmt.Sprintf("%s%s%05d", prefix, ts, counter)
 }
