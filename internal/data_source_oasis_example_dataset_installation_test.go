@@ -19,7 +19,7 @@
 //
 // Author Gergely Brautigam
 //
-package internal
+package provider
 
 import (
 	"testing"

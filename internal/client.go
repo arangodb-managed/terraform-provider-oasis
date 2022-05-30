@@ -22,7 +22,7 @@
 // Author Robert Stam
 //
 
-package internal
+package provider
 
 import (
 	"context"

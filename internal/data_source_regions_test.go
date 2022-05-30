@@ -18,7 +18,7 @@
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
 
-package internal
+package provider
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
