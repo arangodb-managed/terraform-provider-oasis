@@ -8,7 +8,7 @@ description: |-
 
 When using the provider you need to setup `api_key_id` and `api_key_secret`. The two API keys can be generated from Oasis Dashboard. On a logged in view, navigate to [API Keys](https://cloud.arangodb.com/dashboard/user/api-keys)
 
-```terraform
+```hcl
 terraform {
   required_version = ">= 0.13.0"
   required_providers {
@@ -22,8 +22,20 @@ terraform {
 provider "oasis" {
   api_key_id     = "" // API Key ID generated in Oasis platform
   api_key_secret = "" // API Key Secret generated in Oasis platform
-  organization   = "" // Your Oasis organization where you want to create the resources
 }
 ```
 
-If you already followed the setup instructions from Getting Started guide, you can use those keys here.
+The provider can also be setup with a default organization and project to manage resources in:
+
+```hcl
+provider "oasis" {
+  api_key_id     = "" // API Key ID generated in Oasis platform
+  api_key_secret = "" // API Key Secret generated in Oasis platform
+  organization   = "" // Oasis Organization ID
+  project        = "" // Project ID within the specified organization
+}
+```
+
+The other options you can provide are:
+- `oasis_endpoint` for the endpoint you want to manage the resources in (by default set to: `api.cloud.arangodb.com`).
+- `api_port_suffix` for the Oasis API Port Suffix (by default set to `:443`).
