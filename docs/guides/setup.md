@@ -6,7 +6,7 @@ description: |-
 
 # Setup
 
-When using the provider, you need to set up api_key_id and api_key_secret. Both parameters can be generated in the Oasis Dashboard. Once you are logged in, navigate to the [API Keys](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account and click the New API key button.
+When using the provider, you need to set up api_key_id and api_key_secret. Both parameters can be generated in the Oasis Dashboard. Once you are logged in, navigate to the **[API Keys](https://cloud.arangodb.com/dashboard/user/api-keys)** tab of your user account and click the New API key button.
 
 ```hcl
 terraform {
