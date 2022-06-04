@@ -13,7 +13,7 @@ Terraform Provider Oasis is a plugin for Terraform that allows for the full life
 
 
 You need to supply proper credentials to the provider before it can be used. API keys serve as the credentials to the provider. You can obtain the keys from the Oasis dashboard.
-Log in to the Oasis dashboard and open the [**API Keys**](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account. Click the New API key button to generate a new key, which can be used with ArangoDB's public API.
+Log in to the Oasis dashboard and open the [**API Keys**](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account. Click the **New API key** button to generate a new key, which can be used with ArangoDB's public API.
 
 ```hcl
 provider "oasis" {
