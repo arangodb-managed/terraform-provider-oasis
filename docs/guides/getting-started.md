@@ -1,13 +1,13 @@
 ---
 page_title: "Getting started with Oasis Terraform Provider"
 description: |-
-    Guide to getting started with the ArangoDB Oasis Terraform Provider
+    Guide to getting started with the ArangoDB Cloud (Oasis) Terraform Provider
 ---
 
 # Getting started with Oasis Terraform Provider
-ArangoDB Oasis, the ArangoDB Cloud, provides ArangoDB databases as a Service (DBaaS). It enables you to use the entire functionality of an ArangoDB cluster deployment without the need to run or manage the system yourself.
+ArangoDB Cloud (Oasis), provides ArangoDB databases as a Service (DBaaS). It enables you to use the entire functionality of an ArangoDB deployment without the need to run or manage the system yourself.
 
-Terraform Provider Oasis is a plugin for Terraform that allows for the full lifecycle management of ArangoDB Cloud resources.
+Terraform Provider Oasis is a plugin for Terraform that allows for the full lifecycle management of ArangoDB Cloud (Oasis) resources.
 
 ## Provider Setup
 
