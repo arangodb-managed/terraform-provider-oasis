@@ -29,9 +29,12 @@ check:
 
 prepare-release: binaries
 	gpg-agent --daemon --default-cache-ttl 7200
+	sleep 3
 	echo -e "${GPG_PRIVATE_KEY}" | gpg --import --batch --no-tty
 	echo "hello world" > temp.txt
+	sleep 3
 	gpg --detach-sig --yes -v --output=/dev/null --pinentry-mode loopback --passphrase "${PASSPHRASE}" temp.txt
+	sleep 3
 	cd assets ; gpg --detach-sign $(PROJECT)-${VERSION}_SHA256SUMS
 	rm temp.txt
 
