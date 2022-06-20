@@ -36,6 +36,30 @@ jobs:
           paths:
             - "/go/pkg/mod"
 
+  deploy-release:
+    executor: go-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: cp go.sum go.sum.orig
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum.orig" }}
+      - run: |
+          make all prepare-release
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            github-release release --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG}
+            sleep 10
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis-${CIRCLE_TAG}-darwin-amd64.zip --file ./assets/terraform-provider-oasis-${CIRCLE_TAG}-darwin-amd64.zip
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis-${CIRCLE_TAG}-darwin-arm64.zip --file ./assets/terraform-provider-oasis-${CIRCLE_TAG}-darwin-arm64.zip
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis-${CIRCLE_TAG}-linux-amd64.zip --file ./assets/terraform-provider-oasis-${CIRCLE_TAG}-linux-amd64.zip
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis-${CIRCLE_TAG}-linux-arm64.zip --file ./assets/terraform-provider-oasis-${CIRCLE_TAG}-linux-arm64.zip
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis-${CIRCLE_TAG}_SHA256SUMS --file ./assets/terraform-provider-oasis-${CIRCLE_TAG}_SHA256SUMS
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis-${CIRCLE_TAG}_SHA256SUMS.sig --file ./assets/terraform-provider-oasis-${CIRCLE_TAG}_SHA256SUMS.sig
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis-${CIRCLE_TAG}_manifest.json --file ./terraform-registry-manifest.json
+
 workflows:
   version: 2
   build_test_store_artifacts:
@@ -44,6 +68,14 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - deploy-release:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
   nightly:
     triggers:
       - schedule:
