@@ -12,16 +12,23 @@ clean:
 
 binaries:
 	CGO_ENABLED=0 gox \
-		-osarch="linux/amd64 linux/arm darwin/amd64 darwin/arm64" \
+		-osarch="linux/amd64 linux/arm linux/arm64 darwin/amd64 darwin/arm64" \
 		-ldflags="-X main.projectVersion=${VERSION} -X main.projectBuild=${COMMIT}" \
-		-output="bin/{{.OS}}/{{.Arch}}/$(PROJECT)" \
+		-output="bin/{{.OS}}/{{.Arch}}/$(PROJECT)-${VERSION}" \
 		-tags="netgo" \
 		./...
 	mkdir -p assets
-	zip -r assets/$(PROJECT).zip bin/*
+	cd bin/linux/amd64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-linux-amd64.zip $(PROJECT)-${VERSION}
+	cd bin/linux/arm64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-linux-arm64.zip  $(PROJECT)-${VERSION}
+	cd bin/darwin/amd64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-darwin-amd64.zip $(PROJECT)-${VERSION}
+	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-darwin-arm64.zip $(PROJECT)-${VERSION}
+	cd assets ; shasum -a 256 *.zip > $(PROJECT)-${VERSION}_SHA256SUMS
 
 check:
 	zutano go check ./...
+
+prepare-release: binaries
+	cd assets ; gpg --detach-sign $(PROJECT)-${VERSION}_SHA256SUMS
 
 .PHONY: test
 test:
