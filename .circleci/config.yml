@@ -53,7 +53,7 @@ jobs:
             github-release release --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG}
             sleep 10
             github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis_${CIRCLE_TAG:1}_darwin_amd64.zip --file ./assets/terraform-provider-oasis_${CIRCLE_TAG:1}_darwin_amd64.zip
-            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis_${CIRCLE_TAG:1}_darwin_arm64.zip --file ./assets/terraform-provider-oasis_${CIRCLE_TAG:1}_darwin-arm64.zip
+            github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis_${CIRCLE_TAG:1}_darwin_arm64.zip --file ./assets/terraform-provider-oasis_${CIRCLE_TAG:1}_darwin_arm64.zip
             github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis_${CIRCLE_TAG:1}_linux_amd64.zip --file ./assets/terraform-provider-oasis_${CIRCLE_TAG:1}_linux_amd64.zip
             github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis_${CIRCLE_TAG:1}_linux_arm64.zip --file ./assets/terraform-provider-oasis_${CIRCLE_TAG:1}_linux_arm64.zip
             github-release upload --user ${CIRCLE_PROJECT_USERNAME} --repo ${CIRCLE_PROJECT_REPONAME} --tag ${CIRCLE_TAG} --name terraform-provider-oasis_${CIRCLE_TAG:1}_SHA256SUMS --file ./assets/terraform-provider-oasis_${CIRCLE_TAG:1}_SHA256SUMS
