@@ -14,29 +14,21 @@ binaries:
 	CGO_ENABLED=0 gox \
 		-osarch="linux/amd64 linux/arm linux/arm64 darwin/amd64 darwin/arm64" \
 		-ldflags="-X main.projectVersion=${VERSION} -X main.projectBuild=${COMMIT}" \
-		-output="bin/{{.OS}}/{{.Arch}}/$(PROJECT)-${VERSION}" \
+		-output="bin/{{.OS}}/{{.Arch}}/$(PROJECT)-$(VERSION)" \
 		-tags="netgo" \
 		./...
 	mkdir -p assets
-	cd bin/linux/amd64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-linux-amd64.zip $(PROJECT)-${VERSION}
-	cd bin/linux/arm64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-linux-arm64.zip  $(PROJECT)-${VERSION}
-	cd bin/darwin/amd64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-darwin-amd64.zip $(PROJECT)-${VERSION}
-	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)-${VERSION}-darwin-arm64.zip $(PROJECT)-${VERSION}
-	cd assets ; shasum -a 256 *.zip > $(PROJECT)-${VERSION}_SHA256SUMS
+	cd bin/linux/amd64 ; zip -D ../../../assets/$(PROJECT)-$(VERSION)-linux-amd64.zip $(PROJECT)-$(VERSION)
+	cd bin/linux/arm64 ; zip -D ../../../assets/$(PROJECT)-$(VERSION)-linux-arm64.zip  $(PROJECT)-$(VERSION)
+	cd bin/darwin/amd64 ; zip -D ../../../assets/$(PROJECT)-$(VERSION)-darwin-amd64.zip $(PROJECT)-$(VERSION)
+	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)-$(VERSION)-darwin-arm64.zip $(PROJECT)-$(VERSION)
+	cd assets ; shasum -a 256 *.zip > $(PROJECT)-$(VERSION)_SHA256SUMS
 
 check:
 	zutano go check ./...
 
 prepare-release: binaries
-	gpg-agent --daemon --default-cache-ttl 7200
-	sleep 3
-	echo -e "${GPG_PRIVATE_KEY}" | gpg --import --batch --no-tty
-	echo "hello world" > temp.txt
-	sleep 3
-	gpg --detach-sig --yes -v --output=/dev/null --pinentry-mode loopback --passphrase "${PASSPHRASE}" temp.txt
-	sleep 3
-	cd assets ; gpg --detach-sign $(PROJECT)-${VERSION}_SHA256SUMS
-	rm temp.txt
+	PROJECT=$(PROJECT) VERSION=$(VERSION) ./sign.sh
 
 .PHONY: test
 test:
