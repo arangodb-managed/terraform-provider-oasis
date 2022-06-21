@@ -21,7 +21,7 @@ binaries:
 	cd bin/linux/amd64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_linux_amd64.zip $(PROJECT)-$(VERSION)
 	cd bin/linux/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_linux_arm64.zip  $(PROJECT)-$(VERSION)
 	cd bin/darwin/amd64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_amd64.zip $(PROJECT)-$(VERSION)
-	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin-arm64.zip $(PROJECT)-$(VERSION)
+	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_arm64.zip $(PROJECT)-$(VERSION)
 	cd assets ; shasum -a 256 *.zip > $(PROJECT)_$(VERSION)_SHA256SUMS
 
 check:
