@@ -23,6 +23,8 @@ binaries:
 	cd bin/darwin/amd64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_amd64.zip $(PROJECT)-$(VERSION)
 	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_arm64.zip $(PROJECT)-$(VERSION)
 	cd assets ; shasum -a 256 *.zip > $(PROJECT)_$(VERSION)_SHA256SUMS
+	cp -f terraform-registry-manifest.json assets
+	cd assets ; shasum -a 256 *.zip terraform-registry-manifest.json > $(PROJECT)_$(VERSION)_SHA256SUMS
 
 check:
 	zutano go check ./...
