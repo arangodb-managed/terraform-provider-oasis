@@ -1,16 +1,11 @@
-# ArangoDB Oasis Terraform Provider
+# ArangoDB Oasis Terraform Provider [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/arangodb-managed/terraform-provider-oasis?label=release)](https://github.com/arangodb-managed/terraform-provider-oasis/releases) [![CircleCI](https://dl.circleci.com/status-badge/img/gh/arangodb-managed/terraform-provider-oasis/tree/master.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/arangodb-managed/terraform-provider-oasis/tree/master)
 
-![ArangoDB Oasis](https://cloud.arangodb.com/assets/logos/arangodb-oasis-logo-whitebg-right.png)
+
+![ArangoDB Oasis](https://cloud.arangodb.com/assets/logos/arangodb-oasis-logo-whitebg-right.png) 
 
 The Terraform Oasis provider is a plugin for Terraform that allows for the full lifecycle management of ArangoDB Cloud resources.
 
-## Project status: Preview
-
-Note that this provider is currently in preview.
-
-**That means that its API may still change.**
-
-We welcome your feedback!
+## Project status: GA
 
 ## Maintainers
 
@@ -18,15 +13,7 @@ This provider plugin is maintained by the team at [ArangoDB](https://www.arangod
 
 ## Installation
 
-Downloading the [latest released binaries](https://github.com/arangodb-managed/terraform-provider-oasis/releases),
-extract the zip archive and install the binary for your platform in your preferred location.
-
-Or to build from source, run:
-
-```bash
-git clone https://github.com/arangodb-managed/terraform-provider-oasis.git
-make
-```
+Please follow the [Getting Started](https://registry.terraform.io/providers/arangodb-managed/oasis/latest/docs/guides/getting-started) guide in the official documentation page.
 
 ## Requirements
 

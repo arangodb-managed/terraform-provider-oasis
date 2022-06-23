@@ -16,6 +16,16 @@ You need to supply proper credentials to the provider before it can be used. API
 Log in to the Oasis dashboard and open the [**API Keys**](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account. Click the **New API key** button to generate a new key, which can be used with ArangoDB's public API.
 
 ```hcl
+terraform {
+  required_version = ">= 0.13.0"
+  required_providers {
+    oasis = {
+      source  = "arangodb-managed/oasis"
+      version = ">=2.1.0"
+    }
+  }
+}
+
 provider "oasis" {
   api_key_id     = "" // API Key ID generated in Oasis platform
   api_key_secret = "" // API Key Secret generated in Oasis platform
