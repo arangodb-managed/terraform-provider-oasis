@@ -14,14 +14,14 @@ binaries:
 	CGO_ENABLED=0 gox \
 		-osarch="linux/amd64 linux/arm linux/arm64 darwin/amd64 darwin/arm64" \
 		-ldflags="-X main.projectVersion=${VERSION} -X main.projectBuild=${COMMIT}" \
-		-output="bin/{{.OS}}/{{.Arch}}/$(PROJECT)-v$(VERSION)" \
+		-output="bin/{{.OS}}/{{.Arch}}/$(PROJECT)_v$(VERSION)" \
 		-tags="netgo" \
 		./...
 	mkdir -p assets
-	cd bin/linux/amd64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_linux_amd64.zip $(PROJECT)-v$(VERSION)
-	cd bin/linux/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_linux_arm64.zip  $(PROJECT)-v$(VERSION)
-	cd bin/darwin/amd64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_amd64.zip $(PROJECT)-v$(VERSION)
-	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_arm64.zip $(PROJECT)-v$(VERSION)
+	cd bin/linux/amd64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_linux_amd64.zip $(PROJECT)_v$(VERSION)
+	cd bin/linux/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_linux_arm64.zip  $(PROJECT)_v$(VERSION)
+	cd bin/darwin/amd64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_amd64.zip $(PROJECT)_v$(VERSION)
+	cd bin/darwin/arm64 ; zip -D ../../../assets/$(PROJECT)_$(VERSION)_darwin_arm64.zip $(PROJECT)_v$(VERSION)
 	cp -f terraform-registry-manifest.json assets/$(PROJECT)_$(VERSION)_manifest.json
 	cd assets ; shasum -a 256 *.zip *.json > $(PROJECT)_$(VERSION)_SHA256SUMS
 
