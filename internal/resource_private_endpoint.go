@@ -115,7 +115,7 @@ func resourcePrivateEndpoint() *schema.Resource {
 							Type:        schema.TypeList,
 							Description: "Private Endpoint Resource Private Endpoint AWS Principal field",
 							MinItems:    1,
-							Optional:    true,
+							Required:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									privateEndpointAWSPrincipalAccountIdFieldName: {

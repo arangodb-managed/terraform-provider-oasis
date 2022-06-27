@@ -142,9 +142,9 @@ Optional:
 <a id="nestedblock--aws"></a>
 ### Nested Schema for `aws`
 
-Optional:
+Required:
 
-- `principal` (Block List) Private Endpoint Resource Private Endpoint AWS Principal field (see [below for nested schema](#nestedblock--aws--principal))
+- `principal` (Block List, Min: 1) Private Endpoint Resource Private Endpoint AWS Principal field (see [below for nested schema](#nestedblock--aws--principal))
 
 <a id="nestedblock--aws--principal"></a>
 ### Nested Schema for `aws.principal`
