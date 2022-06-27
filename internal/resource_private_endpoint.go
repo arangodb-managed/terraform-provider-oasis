@@ -40,6 +40,13 @@ const (
 	// AKS field names
 	privateEndpointAKSFieldName                      = "aks"
 	privateEndpointAKSClientSubscriptionIdsFieldName = "az_client_subscription_ids"
+
+	// AWS field names
+	privateEndpointAWSFieldName                   = "aws"
+	privateEndpointAWSPrincipalFieldName          = "principal"
+	privateEndpointAWSPrincipalAccountIdFieldName = "account_id"
+	privateEndpointAWSPrincipalUserNamesFieldName = "user_names"
+	privateEndpointAWSPrincipalRoleNamesFieldName = "role_names"
 )
 
 // resourcePrivateEndpoint defines a Private Endpoint Oasis resource.
@@ -71,25 +78,67 @@ func resourcePrivateEndpoint() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Private Endpoint Resource Private Endpoint DNS Names field (list of dns names)",
 				Optional:    true,
-				MinItems:    1,
+				MinItems:    0,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			privateEndpointAKSFieldName: {
 				Type:        schema.TypeList,
 				Description: "Private Endpoint Resource Private Endpoint AKS field",
 				Optional:    true,
-				MinItems:    1,
+				MaxItems:    1,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return new == ""
+					return old == "1" && new == "0"
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						privateEndpointAKSClientSubscriptionIdsFieldName: {
 							Type:        schema.TypeList,
 							Description: "Private Endpoint Resource Private Endpoint AKS Subscription IDS field (list of subscription ids)",
-							Optional:    true,
-							MinItems:    1,
+							Required:    true,
+							MaxItems:    1,
 							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
+			privateEndpointAWSFieldName: {
+				Type:        schema.TypeList,
+				Description: "Private Endpoint Resource Private Endpoint AWS field",
+				Optional:    true,
+				MaxItems:    1,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return old == "1" && new == "0"
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						privateEndpointAWSPrincipalFieldName: {
+							Type:        schema.TypeList,
+							Description: "Private Endpoint Resource Private Endpoint AWS Principal field",
+							MinItems:    1,
+							Required:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									privateEndpointAWSPrincipalAccountIdFieldName: {
+										Type:        schema.TypeString,
+										Description: "Private Endpoint Resource Private Endpoint AWS Principal Account Id field",
+										Required:    true,
+									},
+									privateEndpointAWSPrincipalUserNamesFieldName: {
+										Type:        schema.TypeList,
+										Description: "Private Endpoint Resource Private Endpoint AWS Principal User Names field",
+										Optional:    true,
+										MinItems:    1,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+									},
+									privateEndpointAWSPrincipalRoleNamesFieldName: {
+										Type:        schema.TypeList,
+										Description: "Private Endpoint Resource Private Endpoint AWS Principal Role Names field",
+										Optional:    true,
+										MinItems:    1,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -131,6 +180,7 @@ func flattenPrivateEndpointResource(privateEndpoint *network.PrivateEndpointServ
 		privateEndpointDeploymentFieldName:  privateEndpoint.GetDeploymentId(),
 		privateEndpointDNSNamesFieldName:    privateEndpoint.GetAlternateDnsNames(),
 		privateEndpointAKSFieldName:         flattenAKSResource(privateEndpoint.GetAks()),
+		privateEndpointAWSFieldName:         flattenAWSResource(privateEndpoint.GetAws()),
 	}
 }
 
@@ -140,6 +190,28 @@ func flattenAKSResource(privateEndpointAKS *network.PrivateEndpointService_Aks) 
 		map[string]interface{}{
 			privateEndpointAKSClientSubscriptionIdsFieldName: privateEndpointAKS.GetClientSubscriptionIds(),
 		},
+	}
+}
+
+// flattenAWSResource will take an AWS Resource part of a Private Endpoint and create a sub map for terraform schema.
+func flattenAWSResource(privateEndpointAWS *network.PrivateEndpointService_Aws) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			privateEndpointAWSPrincipalFieldName: flattenAWSPrincipals(privateEndpointAWS.GetAwsPrincipals()),
+		},
+	}
+}
+
+// flattenAWSPrincipals will take an AWS Principal Resource part of a Private Endpoint and create a sub map for terraform schema.
+func flattenAWSPrincipals(privateEndpointAWSPrincipals []*network.PrivateEndpointService_AwsPrincipals) []interface{} {
+	var principals = make(map[string]interface{})
+	for _, principal := range privateEndpointAWSPrincipals {
+		principals[privateEndpointAWSPrincipalAccountIdFieldName] = principal.GetAccountId()
+		principals[privateEndpointAWSPrincipalRoleNamesFieldName] = principal.GetRoleNames()
+		principals[privateEndpointAWSPrincipalUserNamesFieldName] = principal.GetUserNames()
+	}
+	return []interface{}{
+		principals,
 	}
 }
 
@@ -159,14 +231,11 @@ func resourcePrivateEndpointCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	result, err := nwc.CreatePrivateEndpointService(client.ctxWithToken, expanded)
-	fmt.Println("created: ", result)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to create private endpoint service")
-		fmt.Println("error: ", result)
 		return diag.FromErr(err)
 	}
 
-	fmt.Println("no error: ", result)
 	if result != nil {
 		d.SetId(result.Id)
 	}
@@ -218,6 +287,13 @@ func expandPrivateEndpointResource(d *schema.ResourceData) (*network.PrivateEndp
 		}
 		ret.Aks = subscriptionIds
 	}
+	if v, ok := d.GetOk(privateEndpointAWSFieldName); ok {
+		awsResource, err := expandAWSResource(v.([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		ret.Aws = awsResource
+	}
 	return ret, nil
 }
 
@@ -239,6 +315,54 @@ func expandAKSResource(s []interface{}) (aksResource *network.PrivateEndpointSer
 		}
 	}
 	return
+}
+
+// expandAWSResource gathers AWS Resource data from the Terraform store
+func expandAWSResource(s []interface{}) (*network.PrivateEndpointService_Aws, error) {
+	awsResource := &network.PrivateEndpointService_Aws{}
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if i, ok := item[privateEndpointAWSPrincipalFieldName]; ok {
+			awsPrincipals, err := expandAWSPrincipal(i.([]interface{}))
+			if err != nil {
+				return nil, err
+			}
+			awsResource.AwsPrincipals = awsPrincipals
+		}
+	}
+	return awsResource, nil
+}
+
+// expandAWSPrincipal gathers AWS Resource Principal data from the Terraform store
+func expandAWSPrincipal(s []interface{}) ([]*network.PrivateEndpointService_AwsPrincipals, error) {
+	principals := make([]*network.PrivateEndpointService_AwsPrincipals, len(s))
+	for i, v := range s {
+		principal := &network.PrivateEndpointService_AwsPrincipals{}
+		item := v.(map[string]interface{})
+		if accountId, ok := item[privateEndpointAWSPrincipalAccountIdFieldName]; ok {
+			principal.AccountId = accountId.(string)
+		}
+		if roleNames, ok := item[privateEndpointAWSPrincipalRoleNamesFieldName]; ok {
+			roles, ok := roleNames.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("failed to parse field %s", privateEndpointAWSPrincipalRoleNamesFieldName)
+			}
+			for _, addr := range roles {
+				principal.RoleNames = append(principal.RoleNames, addr.(string))
+			}
+		}
+		if userNames, ok := item[privateEndpointAWSPrincipalUserNamesFieldName]; ok {
+			users, ok := userNames.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("failed to parse field %s", privateEndpointAWSPrincipalUserNamesFieldName)
+			}
+			for _, addr := range users {
+				principal.UserNames = append(principal.UserNames, addr.(string))
+			}
+		}
+		principals[i] = principal
+	}
+	return principals, nil
 }
 
 // resourcePrivateEndpointDelete will delete the Terraform PrivateEndpoint resource
@@ -277,11 +401,18 @@ func resourcePrivateEndpointUpdate(ctx context.Context, d *schema.ResourceData, 
 		privateEndpoint.AlternateDnsNames = dnsNames
 	}
 	if d.HasChange(privateEndpointAKSFieldName) {
-		aksResource, err := expandAKSResource(d.Get(privateEndpointAKSClientSubscriptionIdsFieldName).([]interface{}))
+		aksResource, err := expandAKSResource(d.Get(privateEndpointAKSFieldName).([]interface{}))
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		privateEndpoint.Aks = aksResource
+	}
+	if d.HasChange(privateEndpointAWSFieldName) {
+		awsResource, err := expandAWSResource(d.Get(privateEndpointAWSFieldName).([]interface{}))
+		if err != nil {
+			diag.FromErr(err)
+		}
+		privateEndpoint.Aws = awsResource
 	}
 
 	_, err = nwc.UpdatePrivateEndpointService(client.ctxWithToken, privateEndpoint)

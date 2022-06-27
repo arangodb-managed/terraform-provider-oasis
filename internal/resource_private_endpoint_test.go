@@ -93,9 +93,6 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 		Description:       "test-description",
 		DeploymentId:      deploymentId,
 		AlternateDnsNames: []string{"test.example.com"},
-		Aks: &network.PrivateEndpointService_Aks{
-			ClientSubscriptionIds: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
-		},
 	}
 
 	expected := map[string]interface{}{
@@ -103,15 +100,64 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 		privateEndpointDescriptionFieldName: "test-description",
 		privateEndpointDeploymentFieldName:  deploymentId,
 		privateEndpointDNSNamesFieldName:    []string{"test.example.com"},
-		privateEndpointAKSFieldName: []interface{}{
+	}
+
+	t.Run("flattening with aks field", func(tt *testing.T) {
+		expectedAks := []interface{}{
 			map[string]interface{}{
 				privateEndpointAKSClientSubscriptionIdsFieldName: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
 			},
-		},
-	}
+		}
+		expected[privateEndpointAKSFieldName] = expectedAks
+		expected[privateEndpointAWSFieldName] = []interface{}{map[string]interface{}{
+			privateEndpointAWSPrincipalFieldName: []interface{}{
+				map[string]interface{}{},
+			},
+		}}
 
-	flattened := flattenPrivateEndpointResource(privateEndpoint)
-	assert.Equal(t, expected, flattened)
+		rawAks := &network.PrivateEndpointService_Aks{
+			ClientSubscriptionIds: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
+		}
+		privateEndpoint.Aks = rawAks
+
+		flattened := flattenPrivateEndpointResource(privateEndpoint)
+		assert.Equal(tt, expected, flattened)
+		privateEndpoint.Aks = nil
+	})
+
+	t.Run("flattening with aws field", func(tt *testing.T) {
+		expectedAws := []interface{}{map[string]interface{}{
+			privateEndpointAWSPrincipalFieldName: []interface{}{
+				map[string]interface{}{
+					privateEndpointAWSPrincipalAccountIdFieldName: "123123123123",
+					privateEndpointAWSPrincipalUserNamesFieldName: []string{"test@arangodb.com"},
+					privateEndpointAWSPrincipalRoleNamesFieldName: []string{"test"},
+				},
+			},
+		}}
+		var subIDs []string
+		expected[privateEndpointAWSFieldName] = expectedAws
+		expected[privateEndpointAKSFieldName] = []interface{}{
+			map[string]interface{}{
+				privateEndpointAKSClientSubscriptionIdsFieldName: subIDs,
+			},
+		}
+
+		rawAws := &network.PrivateEndpointService_Aws{
+			AwsPrincipals: []*network.PrivateEndpointService_AwsPrincipals{
+				{
+					AccountId: "123123123123",
+					UserNames: []string{"test@arangodb.com"},
+					RoleNames: []string{"test"},
+				},
+			},
+		}
+		privateEndpoint.Aws = rawAws
+
+		flattened := flattenPrivateEndpointResource(privateEndpoint)
+		assert.Equal(tt, expected, flattened)
+	})
+
 }
 
 // TestExpandPrivateEndpoint tests the Oasis Private Endpoint expansion for Terraform schema compatibility.
@@ -121,27 +167,65 @@ func TestExpandPrivateEndpoint(t *testing.T) {
 		privateEndpointNameFieldName:        "test-private-endpoint",
 		privateEndpointDescriptionFieldName: "test-description",
 		privateEndpointDeploymentFieldName:  deploymentId,
-		privateEndpointAKSFieldName: []interface{}{
-			map[string]interface{}{
-				privateEndpointAKSClientSubscriptionIdsFieldName: []interface{}{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
-			},
-		},
 	}
 	expected := &network.PrivateEndpointService{
 		Name:         "test-private-endpoint",
 		Description:  "test-description",
 		DeploymentId: deploymentId,
-		Aks: &network.PrivateEndpointService_Aks{
-			ClientSubscriptionIds: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
-		},
 	}
 
-	s := resourcePrivateEndpoint().Schema
-	resourceData := schema.TestResourceDataRaw(t, s, raw)
-	expandedPrivateEndpoint, err := expandPrivateEndpointResource(resourceData)
-	assert.NoError(t, err)
+	t.Run("expansion with aks field", func(tt *testing.T) {
+		rawAks := []interface{}{
+			map[string]interface{}{
+				privateEndpointAKSClientSubscriptionIdsFieldName: []interface{}{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
+			},
+		}
+		raw[privateEndpointAKSFieldName] = rawAks
 
-	assert.Equal(t, expected, expandedPrivateEndpoint)
+		expectedAks := &network.PrivateEndpointService_Aks{
+			ClientSubscriptionIds: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
+		}
+		expected.Aks = expectedAks
+
+		s := resourcePrivateEndpoint().Schema
+		resourceData := schema.TestResourceDataRaw(t, s, raw)
+		expandedPrivateEndpoint, err := expandPrivateEndpointResource(resourceData)
+		assert.NoError(t, err)
+
+		assert.Equal(t, expected, expandedPrivateEndpoint)
+	})
+
+	t.Run("expansion with aws field", func(tt *testing.T) {
+		rawAws := []interface{}{map[string]interface{}{
+			privateEndpointAWSPrincipalFieldName: []interface{}{
+				map[string]interface{}{
+					privateEndpointAWSPrincipalAccountIdFieldName: "123123123123",
+					privateEndpointAWSPrincipalUserNamesFieldName: []interface{}{"test@arangodb.com"},
+					privateEndpointAWSPrincipalRoleNamesFieldName: []interface{}{"test"},
+				},
+			},
+		}}
+		raw[privateEndpointAWSFieldName] = rawAws
+
+		expectedAws := &network.PrivateEndpointService_Aws{
+			AwsPrincipals: []*network.PrivateEndpointService_AwsPrincipals{
+				{
+					AccountId: "123123123123",
+					UserNames: []string{"test@arangodb.com"},
+					RoleNames: []string{"test"},
+				},
+			},
+		}
+		expected.Aws = expectedAws
+
+		s := resourcePrivateEndpoint().Schema
+		resourceData := schema.TestResourceDataRaw(t, s, raw)
+		expandedPrivateEndpoint, err := expandPrivateEndpointResource(resourceData)
+		assert.NoError(t, err)
+
+		assert.Equal(t, expected, expandedPrivateEndpoint)
+	})
+
 }
 
 // testPrivateEndpointConfig contains the Terraform resource definitions for testing usage
