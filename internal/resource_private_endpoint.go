@@ -95,7 +95,7 @@ func resourcePrivateEndpoint() *schema.Resource {
 							Type:        schema.TypeList,
 							Description: "Private Endpoint Resource Private Endpoint AKS Subscription IDS field (list of subscription ids)",
 							Optional:    true,
-							MinItems:    0,
+							MaxItems:    1,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 					},
@@ -103,7 +103,7 @@ func resourcePrivateEndpoint() *schema.Resource {
 			},
 			privateEndpointAWSFieldName: {
 				Type:        schema.TypeList,
-				Description: "Private Endpoint Resource Private Endpoint AKS field",
+				Description: "Private Endpoint Resource Private Endpoint AWS field",
 				Optional:    true,
 				MaxItems:    1,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
@@ -114,7 +114,7 @@ func resourcePrivateEndpoint() *schema.Resource {
 						privateEndpointAWSPrincipalFieldName: {
 							Type:        schema.TypeList,
 							Description: "Private Endpoint Resource Private Endpoint AWS Principal field",
-							MinItems:    0,
+							MinItems:    1,
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{

@@ -89,9 +89,9 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
   dns_names   = ["test.example.com", "test2.example.com"]
   aws {
     principal {
-      account_id = "123123123123"
-      user_names = ["test@arangodb.com"]
-      role_names = ["test"]
+      account_id = "123123123123"        // 12 digit AWS Account Identifier
+      user_names = ["test@arangodb.com"] // User names (IAM User(s) that are able to setup the private endpoint)
+      role_names = ["test"]              // Role names (IAM role(s) that are able to setup the endpoint)
     }
   }
 }

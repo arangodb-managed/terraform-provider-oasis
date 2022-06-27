@@ -104,9 +104,9 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
   dns_names   = ["test.example.com", "test2.example.com"]
   aws {
     principal {
-      account_id = "123123123123"
-      user_names = ["test@arangodb.com"]
-      role_names = ["test"]
+      account_id = "123123123123"        // 12 digit AWS Account Identifier
+      user_names = ["test@arangodb.com"] // User names (IAM User(s) that are able to setup the private endpoint)
+      role_names = ["test"]              // Role names (IAM role(s) that are able to setup the endpoint)
     }
   }
 }
@@ -123,7 +123,7 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
 ### Optional
 
 - `aks` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AKS field (see [below for nested schema](#nestedblock--aks))
-- `aws` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AKS field (see [below for nested schema](#nestedblock--aws))
+- `aws` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AWS field (see [below for nested schema](#nestedblock--aws))
 - `description` (String) Private Endpoint Resource Private Endpoint Description field
 - `dns_names` (List of String) Private Endpoint Resource Private Endpoint DNS Names field (list of dns names)
 
