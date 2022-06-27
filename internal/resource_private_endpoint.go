@@ -94,7 +94,7 @@ func resourcePrivateEndpoint() *schema.Resource {
 						privateEndpointAKSClientSubscriptionIdsFieldName: {
 							Type:        schema.TypeList,
 							Description: "Private Endpoint Resource Private Endpoint AKS Subscription IDS field (list of subscription ids)",
-							Optional:    true,
+							Required:    true,
 							MaxItems:    1,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
