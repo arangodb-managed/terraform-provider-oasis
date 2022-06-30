@@ -134,7 +134,7 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
 <a id="nestedblock--aks"></a>
 ### Nested Schema for `aks`
 
-Optional:
+Required:
 
 - `az_client_subscription_ids` (List of String) Private Endpoint Resource Private Endpoint AKS Subscription IDS field (list of subscription ids)
 

@@ -88,6 +88,7 @@ func Provider() *schema.Provider {
 			"oasis_organization_invite":          resourceOrganizationInvite(),
 			"oasis_auditlog":                     resourceAuditLog(),
 			"oasis_private_endpoint":             resourcePrivateEndpoint(),
+			"oasis_iam_policy":                   resourceIAMPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"oasis_project":                       dataSourceOasisProject(),
