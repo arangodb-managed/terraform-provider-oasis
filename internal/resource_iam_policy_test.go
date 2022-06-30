@@ -22,12 +22,13 @@ package provider
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"testing"
 
-	iam "github.com/arangodb-managed/apis/iam/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
+
+	iam "github.com/arangodb-managed/apis/iam/v1"
 )
 
 // TestFlattenIAMPolicy tests the Oasis IAM Policy flattening for Terraform schema compatibility.
