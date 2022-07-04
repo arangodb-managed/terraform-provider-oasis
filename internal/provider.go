@@ -88,6 +88,7 @@ func Provider() *schema.Provider {
 			"oasis_organization_invite":          resourceOrganizationInvite(),
 			"oasis_auditlog":                     resourceAuditLog(),
 			"oasis_private_endpoint":             resourcePrivateEndpoint(),
+			"oasis_iam_policy":                   resourceIAMPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"oasis_project":                       dataSourceOasisProject(),
@@ -98,6 +99,7 @@ func Provider() *schema.Provider {
 			"oasis_backup":                        dataSourceOasisBackup(),
 			"oasis_cloud_provider":                dataSourceOasisCloudProvider(),
 			"oasis_region":                        dataSourceOasisRegion(),
+			"oasis_current_user":                  dataSourceOasisCurrentUser(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
