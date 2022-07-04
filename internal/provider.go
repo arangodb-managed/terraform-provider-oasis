@@ -99,6 +99,7 @@ func Provider() *schema.Provider {
 			"oasis_backup":                        dataSourceOasisBackup(),
 			"oasis_cloud_provider":                dataSourceOasisCloudProvider(),
 			"oasis_region":                        dataSourceOasisRegion(),
+			"oasis_current_user":                  dataSourceOasisCurrentUser(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

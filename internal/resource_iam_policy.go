@@ -23,6 +23,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -133,7 +134,7 @@ func expandToIAMPolicy(d *schema.ResourceData) (*iam.RoleBindingsRequest, error)
 }
 
 // expandIAMPolicyBindings gathers IAM Policy Binding data from the Terraform store
-func expandIAMPolicyBindings(s []interface{}) ([]*iam.RoleBinding, error) {
+func expandIAMPolicyBindings(s []interface{}) ([]*iam.RoleBinding, diag.Diagnostics) {
 	bindings := make([]*iam.RoleBinding, len(s))
 	for i, v := range s {
 		binding := &iam.RoleBinding{}
@@ -142,11 +143,21 @@ func expandIAMPolicyBindings(s []interface{}) ([]*iam.RoleBinding, error) {
 			binding.RoleId = role.(string)
 		}
 
-		if group, ok := item[iamPolicyGroupFieldName]; ok {
-			binding.MemberId = iam.CreateMemberIDFromGroupID(group.(string))
-		} else if user, ok := item[iamPolicyUserFieldName]; ok {
-			binding.MemberId = iam.CreateMemberIDFromUserID(user.(string))
+		group := item[iamPolicyGroupFieldName].(string)
+		user := item[iamPolicyUserFieldName].(string)
+
+		if len(group) > 0 && len(user) > 0 || len(group) == 0 && len(user) == 0 {
+			return nil, diag.Errorf("invalid values for %s and %s fields", iamPolicyGroupFieldName, iamPolicyUserFieldName)
 		}
+
+		if len(group) > 0 {
+			binding.MemberId = iam.CreateMemberIDFromGroupID(group)
+		}
+
+		if len(user) > 0 {
+			binding.MemberId = iam.CreateMemberIDFromUserID(user)
+		}
+
 		bindings[i] = binding
 	}
 	return bindings, nil
@@ -165,8 +176,12 @@ func flattenIAMPolicyBindings(iamBindings []*iam.RoleBinding) []interface{} {
 	var bindings = make(map[string]interface{})
 	for _, binding := range iamBindings {
 		bindings[iamPolicyRoleFieldName] = binding.GetRoleId()
-		bindings[iamPolicyUserFieldName] = binding.GetMemberId()
-		bindings[iamPolicyGroupFieldName] = binding.GetMemberId()
+		if strings.Contains(binding.GetMemberId(), "group") {
+			bindings[iamPolicyGroupFieldName] = binding.GetMemberId()
+		}
+		if strings.Contains(binding.GetMemberId(), "user") {
+			bindings[iamPolicyUserFieldName] = binding.GetMemberId()
+		}
 	}
 	return []interface{}{
 		bindings,

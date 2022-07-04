@@ -50,7 +50,6 @@ func TestFlattenIAMPolicy(t *testing.T) {
 			map[string]interface{}{
 				iamPolicyGroupFieldName: "group:300480957",
 				iamPolicyRoleFieldName:  "test-role",
-				iamPolicyUserFieldName:  "group:300480957",
 			},
 		},
 	}

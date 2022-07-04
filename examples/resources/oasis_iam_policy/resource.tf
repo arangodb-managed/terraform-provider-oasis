@@ -27,9 +27,12 @@ resource "oasis_iam_group" "my_iam_group" {
   organization = oasis_organization.oasis_test_organization.id
 }
 
+// Load in an Oasis Current User within an organization
+data "oasis_current_user" "oasis_test_current_user" {}
+
 // Terraform created IAM Policy. This resource uses the computed ID value of the
 // previously defined organization resource and IAM group resource.
-resource "oasis_iam_policy" "my_iam_policy" {
+resource "oasis_iam_policy" "my_iam_policy_group" {
   url = "/Organization/${oasis_organization.oasis_test_organization.id}"
 
   binding {
@@ -40,5 +43,10 @@ resource "oasis_iam_policy" "my_iam_policy" {
   binding {
     role  = "auditlog-archive-viewer"
     group = oasis_iam_group.my_iam_group.id
+  }
+
+  binding {
+    role = "auditlog-archive-viewer"
+    user = data.oasis_current_user.oasis_test_current_user.id
   }
 }
