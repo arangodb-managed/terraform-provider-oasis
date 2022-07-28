@@ -158,6 +158,31 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 		assert.Equal(tt, expected, flattened)
 	})
 
+	t.Run("flattening with gcp field", func(tt *testing.T) {
+		expectedGcp := []interface{}{
+			map[string]interface{}{
+				privateEndpointGCPProjectsFieldName: []string{"project1"},
+			},
+		}
+		expected[privateEndpointGCPFieldName] = expectedGcp
+		expected[privateEndpointAWSFieldName] = []interface{}{map[string]interface{}{
+			privateEndpointAWSPrincipalFieldName: []interface{}{
+				map[string]interface{}{},
+			},
+		}}
+		var subIDs []string
+		expected[privateEndpointAKSFieldName] = []interface{}{map[string]interface{}{
+			privateEndpointAKSClientSubscriptionIdsFieldName: subIDs,
+		}}
+		rawGcp := &network.PrivateEndpointService_Gcp{
+			Projects: []string{"project1"},
+		}
+		privateEndpoint.Gcp = rawGcp
+
+		flattened := flattenPrivateEndpointResource(privateEndpoint)
+		assert.Equal(tt, expected, flattened)
+		privateEndpoint.Gcp = nil
+	})
 }
 
 // TestExpandPrivateEndpoint tests the Oasis Private Endpoint expansion for Terraform schema compatibility.
