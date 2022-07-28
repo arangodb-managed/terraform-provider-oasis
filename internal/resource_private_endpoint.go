@@ -148,6 +148,26 @@ func resourcePrivateEndpoint() *schema.Resource {
 					},
 				},
 			},
+			privateEndpointGCPFieldName: {
+				Type:        schema.TypeList,
+				Description: "Private Endpoint Resource Private Endpoint GCP field",
+				Optional:    true,
+				MaxItems:    1,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return old == "1" && new == "0"
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						privateEndpointGCPProjectsFieldName: {
+							Type:        schema.TypeList,
+							Description: "Private Endpoint Resource Private Endpoint GCP Projects field (list of project ids)",
+							Required:    true,
+							MaxItems:    1,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -186,6 +206,7 @@ func flattenPrivateEndpointResource(privateEndpoint *network.PrivateEndpointServ
 		privateEndpointDNSNamesFieldName:    privateEndpoint.GetAlternateDnsNames(),
 		privateEndpointAKSFieldName:         flattenAKSResource(privateEndpoint.GetAks()),
 		privateEndpointAWSFieldName:         flattenAWSResource(privateEndpoint.GetAws()),
+		privateEndpointGCPFieldName:         flattenGCPResource(privateEndpoint.GetGcp()),
 	}
 }
 
@@ -203,6 +224,15 @@ func flattenAWSResource(privateEndpointAWS *network.PrivateEndpointService_Aws) 
 	return []interface{}{
 		map[string]interface{}{
 			privateEndpointAWSPrincipalFieldName: flattenAWSPrincipals(privateEndpointAWS.GetAwsPrincipals()),
+		},
+	}
+}
+
+// flattenGCPResource will take an GCP Resource part of a Private Endpoint and create a sub map for terraform schema.
+func flattenGCPResource(privateEndpointGCP *network.PrivateEndpointService_Gcp) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			privateEndpointGCPProjectsFieldName: privateEndpointGCP.GetProjects(),
 		},
 	}
 }
