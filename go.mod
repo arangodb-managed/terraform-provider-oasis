@@ -1,7 +1,7 @@
 module github.com/arangodb-managed/terraform-provider-oasis
 
 require (
-	github.com/arangodb-managed/apis v0.74.13-0.20220726100341-3264c4e68996
+	github.com/arangodb-managed/apis v0.74.13
 	github.com/arangodb-managed/log-helper v0.2.5
 	github.com/gogo/protobuf v1.3.2
 	github.com/hashicorp/terraform-plugin-docs v0.8.1
