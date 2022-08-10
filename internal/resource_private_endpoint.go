@@ -23,6 +23,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -47,6 +48,10 @@ const (
 	privateEndpointAWSPrincipalAccountIdFieldName = "account_id"
 	privateEndpointAWSPrincipalUserNamesFieldName = "user_names"
 	privateEndpointAWSPrincipalRoleNamesFieldName = "role_names"
+
+	// GCP field names
+	privateEndpointGCPFieldName         = "gcp"
+	privateEndpointGCPProjectsFieldName = "projects"
 )
 
 // resourcePrivateEndpoint defines a Private Endpoint Oasis resource.
@@ -143,6 +148,26 @@ func resourcePrivateEndpoint() *schema.Resource {
 					},
 				},
 			},
+			privateEndpointGCPFieldName: {
+				Type:        schema.TypeList,
+				Description: "Private Endpoint Resource Private Endpoint GCP field",
+				Optional:    true,
+				MaxItems:    1,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return old == "1" && new == "0"
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						privateEndpointGCPProjectsFieldName: {
+							Type:        schema.TypeList,
+							Description: "Private Endpoint Resource Private Endpoint GCP Projects field (list of project ids)",
+							Required:    true,
+							MaxItems:    1,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -181,6 +206,7 @@ func flattenPrivateEndpointResource(privateEndpoint *network.PrivateEndpointServ
 		privateEndpointDNSNamesFieldName:    privateEndpoint.GetAlternateDnsNames(),
 		privateEndpointAKSFieldName:         flattenAKSResource(privateEndpoint.GetAks()),
 		privateEndpointAWSFieldName:         flattenAWSResource(privateEndpoint.GetAws()),
+		privateEndpointGCPFieldName:         flattenGCPResource(privateEndpoint.GetGcp()),
 	}
 }
 
@@ -198,6 +224,15 @@ func flattenAWSResource(privateEndpointAWS *network.PrivateEndpointService_Aws) 
 	return []interface{}{
 		map[string]interface{}{
 			privateEndpointAWSPrincipalFieldName: flattenAWSPrincipals(privateEndpointAWS.GetAwsPrincipals()),
+		},
+	}
+}
+
+// flattenGCPResource will take an GCP Resource part of a Private Endpoint and create a sub map for terraform schema.
+func flattenGCPResource(privateEndpointGCP *network.PrivateEndpointService_Gcp) []interface{} {
+	return []interface{}{
+		map[string]interface{}{
+			privateEndpointGCPProjectsFieldName: privateEndpointGCP.GetProjects(),
 		},
 	}
 }
@@ -281,11 +316,11 @@ func expandPrivateEndpointResource(d *schema.ResourceData) (*network.PrivateEndp
 		ret.AlternateDnsNames = dnsNames
 	}
 	if v, ok := d.GetOk(privateEndpointAKSFieldName); ok {
-		subscriptionIds, err := expandAKSResource(v.([]interface{}))
+		aksResource, err := expandAKSResource(v.([]interface{}))
 		if err != nil {
 			return nil, err
 		}
-		ret.Aks = subscriptionIds
+		ret.Aks = aksResource
 	}
 	if v, ok := d.GetOk(privateEndpointAWSFieldName); ok {
 		awsResource, err := expandAWSResource(v.([]interface{}))
@@ -293,6 +328,13 @@ func expandPrivateEndpointResource(d *schema.ResourceData) (*network.PrivateEndp
 			return nil, err
 		}
 		ret.Aws = awsResource
+	}
+	if v, ok := d.GetOk(privateEndpointGCPFieldName); ok {
+		gcpResource, err := expandGCPResource(v.([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		ret.Gcp = gcpResource
 	}
 	return ret, nil
 }
@@ -365,6 +407,26 @@ func expandAWSPrincipal(s []interface{}) ([]*network.PrivateEndpointService_AwsP
 	return principals, nil
 }
 
+// expandGCPResource gathers GCP Resource data from the terraform store
+func expandGCPResource(s []interface{}) (gcpResource *network.PrivateEndpointService_Gcp, err error) {
+	for _, v := range s {
+		item := v.(map[string]interface{})
+		if projects, ok := item[privateEndpointGCPProjectsFieldName]; ok {
+			projects, ok := projects.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("failed to parse field %s", privateEndpointGCPProjectsFieldName)
+			}
+			if gcpResource == nil {
+				gcpResource = &network.PrivateEndpointService_Gcp{}
+			}
+			for _, addr := range projects {
+				gcpResource.Projects = append(gcpResource.Projects, addr.(string))
+			}
+		}
+	}
+	return
+}
+
 // resourcePrivateEndpointDelete will delete the Terraform PrivateEndpoint resource
 func resourcePrivateEndpointDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	d.SetId("")
@@ -413,6 +475,13 @@ func resourcePrivateEndpointUpdate(ctx context.Context, d *schema.ResourceData, 
 			diag.FromErr(err)
 		}
 		privateEndpoint.Aws = awsResource
+	}
+	if d.HasChange(privateEndpointGCPFieldName) {
+		gcpResource, err := expandGCPResource(d.Get(privateEndpointGCPFieldName).([]interface{}))
+		if err != nil {
+			diag.FromErr(err)
+		}
+		privateEndpoint.Gcp = gcpResource
 	}
 
 	_, err = nwc.UpdatePrivateEndpointService(client.ctxWithToken, privateEndpoint)

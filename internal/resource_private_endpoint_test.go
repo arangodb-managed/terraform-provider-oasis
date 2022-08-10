@@ -114,6 +114,10 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 				map[string]interface{}{},
 			},
 		}}
+		var projects []string
+		expected[privateEndpointGCPFieldName] = []interface{}{map[string]interface{}{
+			privateEndpointGCPProjectsFieldName: projects,
+		}}
 
 		rawAks := &network.PrivateEndpointService_Aks{
 			ClientSubscriptionIds: []string{"ba3f371b-a5e3-47bf-b097-dc3bb0a052a5"},
@@ -142,6 +146,10 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 				privateEndpointAKSClientSubscriptionIdsFieldName: subIDs,
 			},
 		}
+		var projects []string
+		expected[privateEndpointGCPFieldName] = []interface{}{map[string]interface{}{
+			privateEndpointGCPProjectsFieldName: projects,
+		}}
 
 		rawAws := &network.PrivateEndpointService_Aws{
 			AwsPrincipals: []*network.PrivateEndpointService_AwsPrincipals{
@@ -156,8 +164,34 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 
 		flattened := flattenPrivateEndpointResource(privateEndpoint)
 		assert.Equal(tt, expected, flattened)
+		privateEndpoint.Aws = nil
 	})
 
+	t.Run("flattening with gcp field", func(tt *testing.T) {
+		expectedGcp := []interface{}{
+			map[string]interface{}{
+				privateEndpointGCPProjectsFieldName: []string{"project1"},
+			},
+		}
+		expected[privateEndpointGCPFieldName] = expectedGcp
+		expected[privateEndpointAWSFieldName] = []interface{}{map[string]interface{}{
+			privateEndpointAWSPrincipalFieldName: []interface{}{
+				map[string]interface{}{},
+			},
+		}}
+		var subIDs []string
+		expected[privateEndpointAKSFieldName] = []interface{}{map[string]interface{}{
+			privateEndpointAKSClientSubscriptionIdsFieldName: subIDs,
+		}}
+		rawGcp := &network.PrivateEndpointService_Gcp{
+			Projects: []string{"project1"},
+		}
+		privateEndpoint.Gcp = rawGcp
+
+		flattened := flattenPrivateEndpointResource(privateEndpoint)
+		assert.Equal(tt, expected, flattened)
+		privateEndpoint.Gcp = nil
+	})
 }
 
 // TestExpandPrivateEndpoint tests the Oasis Private Endpoint expansion for Terraform schema compatibility.
