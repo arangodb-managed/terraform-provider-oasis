@@ -220,6 +220,7 @@ func TestFlattenBackup(t *testing.T) {
 		DeploymentId:   "123456",
 		BackupPolicyId: "456123",
 		Url:            "test-url",
+		RegionId:       "gcp-europe-west-4",
 	}
 
 	expected := map[string]interface{}{
@@ -228,6 +229,7 @@ func TestFlattenBackup(t *testing.T) {
 		backupDeploymentIDFieldName: "123456",
 		backupPolicyIDFieldName:     "456123",
 		backupURLFieldName:          "test-url",
+		backupRegionIDFieldName:     "gcp-europe-west-4",
 	}
 
 	flattened := flattenBackupResource(backup)

@@ -46,7 +46,7 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 	res := "terraform-multi-region-backup-" + acctest.RandString(10)
 	name := "multi-region-backup-" + acctest.RandString(10)
 	sourceBackupID := acctest.RandString((10))
-	regionID := ""
+	regionID := "gcp-europe-west-4"
 
 	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
@@ -73,8 +73,8 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplDiskPerformanceFieldName, "dp30"),
 					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplTAndCAcceptedFieldName, "true"),
 
-					resource.TestCheckResourceAttr("oasis_multi_region_backup."+res, backupSourceBackupID, sourceBackupID),
-					resource.TestCheckResourceAttr("oasis_multi_region_backup."+res, backupRegionID, regionID),
+					resource.TestCheckResourceAttr("oasis_multi_region_backup."+res, backupSourceBackupIDFieldName, sourceBackupID),
+					resource.TestCheckResourceAttr("oasis_multi_region_backup."+res, backupRegionIDFieldName, regionID),
 				),
 			},
 		},

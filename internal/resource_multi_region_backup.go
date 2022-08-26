@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	backupSourceBackupID = "source_backup_id"
-	backupRegionID       = "region_id"
+	backupSourceBackupIDFieldName = "source_backup_id"
+	backupRegionIDFieldName       = "region_id"
 )
 
 // resourceBackup defines a Multi Region Backup Oasis resource.
@@ -40,12 +40,12 @@ func resourceMultiRegionBackup() *schema.Resource {
 		Description:   "Oasis Backup Resource",
 		CreateContext: resourceCopyBackup,
 		Schema: map[string]*schema.Schema{
-			backupSourceBackupID: {
+			backupSourceBackupIDFieldName: {
 				Type:        schema.TypeString,
 				Description: "Oasis backup resource identifier field",
 				Required:    true,
 			},
-			backupRegionID: {
+			backupRegionIDFieldName: {
 				Type:        schema.TypeString,
 				Description: "Oasis cloud provider region identifier field",
 				Required:    true,
@@ -63,14 +63,14 @@ func resourceCopyBackup(ctx context.Context, d *schema.ResourceData, m interface
 	}
 	backupc := backup.NewBackupServiceClient(client.conn)
 	sourceBackupID := ""
-	if v, ok := d.GetOk(backupSourceBackupID); ok {
+	if v, ok := d.GetOk(backupSourceBackupIDFieldName); ok {
 		sourceBackupID = v.(string)
 	} else {
 		return diag.Errorf("Source backup identifier required")
 	}
 
 	regionID := ""
-	if v, ok := d.GetOk(backupRegionID); ok {
+	if v, ok := d.GetOk(backupRegionIDFieldName); ok {
 		regionID = v.(string)
 	} else {
 		return diag.Errorf("Region identifier required")
