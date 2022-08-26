@@ -3,12 +3,12 @@
 page_title: "oasis_multi_region_backup Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  Oasis Backup Resource
+  Oasis Multi Region Backup Resource
 ---
 
 # oasis_multi_region_backup (Resource)
 
-Oasis Backup Resource
+Oasis Multi Region Backup Resource
 
 
 
