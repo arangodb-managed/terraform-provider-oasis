@@ -39,6 +39,9 @@ func resourceMultiRegionBackup() *schema.Resource {
 	return &schema.Resource{
 		Description:   "Oasis Multi Region Backup Resource",
 		CreateContext: resourceCopyBackup,
+		ReadContext:   resourceBackupRead,
+		UpdateContext: resourceBackupUpdate,
+		DeleteContext: resourceBackupDelete,
 		Schema: map[string]*schema.Schema{
 			backupSourceBackupIDFieldName: {
 				Type:        schema.TypeString,
