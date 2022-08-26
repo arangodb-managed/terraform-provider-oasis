@@ -126,6 +126,7 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
 - `aws` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AWS field (see [below for nested schema](#nestedblock--aws))
 - `description` (String) Private Endpoint Resource Private Endpoint Description field
 - `dns_names` (List of String) Private Endpoint Resource Private Endpoint DNS Names field (list of dns names)
+- `gcp` (Block List, Max: 1) Private Endpoint Resource Private Endpoint GCP field (see [below for nested schema](#nestedblock--gcp))
 
 ### Read-Only
 
@@ -157,5 +158,14 @@ Optional:
 
 - `role_names` (List of String) Private Endpoint Resource Private Endpoint AWS Principal Role Names field
 - `user_names` (List of String) Private Endpoint Resource Private Endpoint AWS Principal User Names field
+
+
+
+<a id="nestedblock--gcp"></a>
+### Nested Schema for `gcp`
+
+Required:
+
+- `projects` (List of String) Private Endpoint Resource Private Endpoint GCP Projects field (list of project ids)
 
 

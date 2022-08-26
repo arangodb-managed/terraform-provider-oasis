@@ -37,7 +37,7 @@ const (
 // resourceBackup defines a Multi Region Backup Oasis resource.
 func resourceMultiRegionBackup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Oasis Backup Resource",
+		Description:   "Oasis Multi Region Backup Resource",
 		CreateContext: resourceCopyBackup,
 		Schema: map[string]*schema.Schema{
 			backupSourceBackupIDFieldName: {
