@@ -258,5 +258,6 @@ func flattenBackupResource(backup *backup.Backup) map[string]interface{} {
 		backupURLFieldName:          backup.GetUrl(),
 		backupPolicyIDFieldName:     backup.GetBackupPolicyId(),
 		backupDeploymentIDFieldName: backup.GetDeploymentId(),
+		backupRegionID:              backup.GetRegionId(),
 	}
 }

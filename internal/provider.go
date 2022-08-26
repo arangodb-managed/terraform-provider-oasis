@@ -79,6 +79,7 @@ func Provider() *schema.Provider {
 			"oasis_ipallowlist":                  resourceIPAllowlist(),
 			"oasis_certificate":                  resourceCertificate(),
 			"oasis_backup":                       resourceBackup(),
+			"oasis_multi_region_backup":          resourceMultiRegionBackup(),
 			"oasis_backup_policy":                resourceBackupPolicy(),
 			"oasis_project":                      resourceProject(),
 			"oasis_example_dataset_installation": resourceExampleDatasetInstallation(),
