@@ -47,8 +47,6 @@ func TestAccResourceIAMGroup(t *testing.T) {
 	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
 
-	fmt.Println(orgID)
-
 	name := acctest.RandString(5)
 
 	resource.Test(t, resource.TestCase{

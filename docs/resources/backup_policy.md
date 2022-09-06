@@ -97,6 +97,7 @@ resource "oasis_backup_policy" "my_backup_policy" {
 
 ### Optional
 
+- `additional_region_ids` (List of String) Backup Policy Additional Region Identifiers where backup should be cloned
 - `description` (String) Backup Policy Resource Backup Policy Description field
 - `is_paused` (Boolean) Backup Policy Resource Backup Policy Is Paused field
 - `locked` (Boolean) Backup Policy Resource Backup Policy Locked field
