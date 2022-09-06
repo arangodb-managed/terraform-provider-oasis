@@ -331,13 +331,14 @@ func resourceBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData, m i
 		policy.Schedule = expandBackupPolicySchedule(d.Get(backupPolicyScheduleFieldName).([]interface{}))
 	}
 
-	// if v, ok := d.GetOk(backupPolicyAdditionalRegionIDs); ok {
-	// 	additionalRegionIDs, err := expandAdditionalRegionList(v.([]interface{}))
-	// 	if err != nil {
-	// 		return diag.FromErr(err)
-	// 	}
-	// 	policy.AdditionalRegionIds = additionalRegionIDs
-	// }
+	if v, ok := d.GetOk(backupPolicyAdditionalRegionIDs); ok {
+		additionalRegionIDs, err := expandAdditionalRegionList(v.([]interface{}))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		policy.AdditionalRegionIds = additionalRegionIDs
+	}
+
 	// Make sure we are sending the right schedule. The coming back schedule can contain invalid
 	// field items for different schedule. We make sure here that the right one is sent after an
 	// update. This check can be removed once terraform allows conflict checks for list items.
