@@ -56,7 +56,9 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 			// 	ExpectError: regexp.MustCompile("Region identifier required"),
 			// },
 			{
-				Config: testMultiRegionBackupConfig(projectID, resourceName, regionID),
+				ImportState:       true,
+				ImportStateVerify: true,
+				Config:            testMultiRegionBackupConfig(projectID, resourceName, regionID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplNameFieldName, "oasis_multi_region_deployment"),
 					resource.TestCheckResourceAttr("oasis_backup.backup", backupNameFieldName, "oasis_backup"),

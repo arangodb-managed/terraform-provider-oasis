@@ -23,98 +23,114 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
-	common "github.com/arangodb-managed/apis/common/v1"
 )
 
 const (
-	backupSourceBackupIDFieldName = "source_backup_id"
+	// Multi region Backup field names
 	backupRegionIDFieldName       = "region_id"
+	backupSourceBackupIDFieldName = "source_backup_id"
 )
 
-// resourceBackup defines a Multi Region Backup Oasis resource.
+// resourceMultiRegionBackup defines a Multi Region Backup Oasis resource.
 func resourceMultiRegionBackup() *schema.Resource {
 	return &schema.Resource{
-		Description: "Oasis Multi Region Backup Resource",
-
-		CreateContext: resourceCopyBackup,
-		ReadContext:   resourceMultiRegionBackupRead,
-		// UpdateContext: resourceBackupUpdate,
+		Description:   "Oasis Backup Resource",
+		CreateContext: resourceMultiRegionBackupCreate,
+		ReadContext:   resourceBackupRead,
+		UpdateContext: resourceBackupUpdate,
 		DeleteContext: resourceBackupDelete,
-
 		Schema: map[string]*schema.Schema{
 			backupSourceBackupIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis backup source backup identifier field",
-				Required:    true,
+				Description: "Oasis Backup Resource Region Identifier",
+				Optional:    true,
 			},
 			backupRegionIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis cloud provider region identifier field",
-				Required:    true,
+				Description: "Oasis Backup Resource Region Identifier",
+				Optional:    true,
+			},
+
+			// backup fields used to return the backup information
+			backupNameFieldName: {
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Name field, generated based on source backup",
+				Computed:    true,
+			},
+			backupDescriptionFieldName: {
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Description field, generated based on source backup",
+				Computed:    true,
+			},
+			backupUploadFieldName: {
+				Type:        schema.TypeBool,
+				Description: "Oasis Backup Resource Backup Upload field, generated based on source backup",
+				Computed:    true,
+			},
+			backupDeploymentIDFieldName: {
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Deployment ID field, generated based on source backup",
+				Computed:    true,
+			},
+			backupURLFieldName: {
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup URL field, generated based on source backup",
+				Computed:    true,
+			},
+			backupPolicyIDFieldName: {
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Backup Policy ID field, generated based on source backup",
+				Computed:    true,
+			},
+
+			backupAutoDeleteAtFieldName: {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Oasis Backup Resource Backup Auto Delete At field, generated based on source backup",
 			},
 		},
 	}
 }
 
-// resourceCopyBackup will copy backup resource to given region.
-func resourceCopyBackup(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+// resourceMultiRegionBackupCreate will take the schema data from the Terraform config file and call the Oasis client
+// to initiate a copy procedure for a given backup and region identifier.
+func resourceMultiRegionBackupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
 		client.log.Error().Err(err).Msg("Failed to connect to api")
 		return diag.FromErr(err)
 	}
+
+	req := &backup.CopyBackupRequest{}
+	if v, ok := d.GetOk(backupSourceBackupIDFieldName); ok && strings.TrimSpace(v.(string)) != "" {
+		req.SourceBackupId = v.(string)
+	} else {
+		err := fmt.Errorf("unable to find parse field %s", backupSourceBackupIDFieldName)
+		client.log.Error().Err(err).Msg("Failed to expand on backup")
+		return diag.FromErr(err)
+	}
+	if v, ok := d.GetOk(backupRegionIDFieldName); ok && strings.TrimSpace(v.(string)) != "" {
+		req.RegionId = v.(string)
+	} else {
+		err := fmt.Errorf("unable to find parse field %s", backupRegionIDFieldName)
+		client.log.Error().Err(err).Msg("Failed to expand on backup")
+		return diag.FromErr(err)
+	}
+
 	backupc := backup.NewBackupServiceClient(client.conn)
-	sourceBackupID := ""
-	if v, ok := d.GetOk(backupSourceBackupIDFieldName); ok {
-		sourceBackupID = v.(string)
-	} else {
-		return diag.Errorf("Source backup identifier required")
-	}
 
-	regionID := ""
-	if v, ok := d.GetOk(backupRegionIDFieldName); ok {
-		regionID = v.(string)
-	} else {
-		return diag.Errorf("Region identifier required")
-	}
-
-	bu, err := backupc.CopyBackup(client.ctxWithToken, &backup.CopyBackupRequest{
-		SourceBackupId: sourceBackupID,
-		RegionId:       regionID,
-	})
+	backup, err := backupc.CopyBackup(client.ctxWithToken, req)
 	if err != nil {
-		client.log.Error().Err(err).Msg("Failed to copy backup")
-		d.SetId("")
+		client.log.Error().Err(err).Msg("Failed to create backup")
 		return diag.FromErr(err)
-	}
-
-	// TODO remove after debugging
-	fmt.Println("=> bu", bu.GetName(), bu.GetId(), bu.GetCreatedAt(), bu.GetRegionId(), bu.GetDescription(), bu.GetBackupPolicyId(), bu.GetUrl())
-
-	d.SetId(bu.GetId())
-
-	return resourceMultiRegionBackupRead(ctx, d, m)
-}
-
-// resourceMultiRegionBackupRead will gather information from the Terraform store and display it accordingly.
-func resourceMultiRegionBackupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*Client)
-	if err := client.Connect(); err != nil {
-		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return diag.FromErr(err)
-	}
-
-	backupc := backup.NewBackupServiceClient(client.conn)
-	backup, err := backupc.GetBackup(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
-	if err != nil || backup == nil {
-		client.log.Error().Err(err).Str("backup-id", d.Id()).Msg("Failed to find backup")
-		d.SetId("")
-		return diag.FromErr(err)
+	} else {
+		d.SetId(backup.GetId())
 	}
 
 	for k, v := range flattenBackupResource(backup) {
@@ -122,5 +138,6 @@ func resourceMultiRegionBackupRead(ctx context.Context, d *schema.ResourceData, 
 			return diag.FromErr(err)
 		}
 	}
+
 	return nil
 }
