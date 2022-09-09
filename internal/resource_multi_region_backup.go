@@ -112,14 +112,14 @@ func resourceMultiRegionBackupCreate(ctx context.Context, d *schema.ResourceData
 		req.SourceBackupId = v.(string)
 	} else {
 		err := fmt.Errorf("unable to find parse field %s", backupSourceBackupIDFieldName)
-		client.log.Error().Err(err).Msg("Failed to expand on backup")
+		client.log.Error().Err(err).Msg("Source backup identifier required")
 		return diag.FromErr(err)
 	}
 	if v, ok := d.GetOk(backupRegionIDFieldName); ok && strings.TrimSpace(v.(string)) != "" {
 		req.RegionId = v.(string)
 	} else {
 		err := fmt.Errorf("unable to find parse field %s", backupRegionIDFieldName)
-		client.log.Error().Err(err).Msg("Failed to expand on backup")
+		client.log.Error().Err(err).Msg("Region identifier required")
 		return diag.FromErr(err)
 	}
 
