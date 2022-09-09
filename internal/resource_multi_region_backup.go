@@ -22,11 +22,13 @@ package provider
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
+	common "github.com/arangodb-managed/apis/common/v1"
 )
 
 const (
@@ -37,15 +39,17 @@ const (
 // resourceBackup defines a Multi Region Backup Oasis resource.
 func resourceMultiRegionBackup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Oasis Multi Region Backup Resource",
+		Description: "Oasis Multi Region Backup Resource",
+
 		CreateContext: resourceCopyBackup,
-		ReadContext:   resourceBackupRead,
-		UpdateContext: resourceBackupUpdate,
+		ReadContext:   resourceMultiRegionBackupRead,
+		// UpdateContext: resourceBackupUpdate,
 		DeleteContext: resourceBackupDelete,
+
 		Schema: map[string]*schema.Schema{
 			backupSourceBackupIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis backup resource identifier field",
+				Description: "Oasis backup source backup identifier field",
 				Required:    true,
 			},
 			backupRegionIDFieldName: {
@@ -87,8 +91,36 @@ func resourceCopyBackup(ctx context.Context, d *schema.ResourceData, m interface
 		client.log.Error().Err(err).Msg("Failed to copy backup")
 		d.SetId("")
 		return diag.FromErr(err)
-	} else {
-		d.SetId(bu.GetId())
 	}
-	return resourceBackupRead(ctx, d, m)
+
+	// TODO remove after debugging
+	fmt.Println("=> bu", bu.GetName(), bu.GetId(), bu.GetCreatedAt(), bu.GetRegionId(), bu.GetDescription(), bu.GetBackupPolicyId(), bu.GetUrl())
+
+	d.SetId(bu.GetId())
+
+	return resourceMultiRegionBackupRead(ctx, d, m)
+}
+
+// resourceMultiRegionBackupRead will gather information from the Terraform store and display it accordingly.
+func resourceMultiRegionBackupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return diag.FromErr(err)
+	}
+
+	backupc := backup.NewBackupServiceClient(client.conn)
+	backup, err := backupc.GetBackup(client.ctxWithToken, &common.IDOptions{Id: d.Id()})
+	if err != nil || backup == nil {
+		client.log.Error().Err(err).Str("backup-id", d.Id()).Msg("Failed to find backup")
+		d.SetId("")
+		return diag.FromErr(err)
+	}
+
+	for k, v := range flattenBackupResource(backup) {
+		if err := d.Set(k, v); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+	return nil
 }

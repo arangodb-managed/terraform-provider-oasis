@@ -31,7 +31,7 @@ resource "oasis_deployment" "my_aks_oneshard_deployment" {
   }
 
   version {
-    db_version = "3.8.6"
+    db_version = "3.8.7"
   }
 
   configuration {
@@ -67,7 +67,7 @@ resource "oasis_deployment" "my_aws_oneshard_deployment" {
   }
 
   version {
-    db_version = "3.8.6"
+    db_version = "3.8.7"
   }
 
   configuration {

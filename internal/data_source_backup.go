@@ -125,5 +125,6 @@ func flattenBackupObject(backup *backup.Backup) map[string]interface{} {
 		backupDataSourcePolicyIDFieldName:     backup.GetBackupPolicyId(),
 		backupDataSourceDeploymentIDFieldName: backup.GetDeploymentId(),
 		backupDataSourceCreatedAtFieldName:    backup.GetCreatedAt().String(),
+		backupRegionIDFieldName:               backup.GetRegionId(),
 	}
 }

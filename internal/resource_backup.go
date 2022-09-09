@@ -86,6 +86,11 @@ func resourceBackup() *schema.Resource {
 				Description: "Oasis Backup Resource Backup Policy ID field",
 				Optional:    true,
 			},
+			backupRegionIDFieldName: {
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Region Identifier",
+				Optional:    true,
+			},
 			backupAutoDeleteAtFieldName: {
 				Type:        schema.TypeInt,
 				Optional:    true,

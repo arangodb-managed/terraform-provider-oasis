@@ -94,7 +94,7 @@ func testBackupConfig(project, res, name string) string {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.8.6"
+    db_version = "3.8.7"
   }
   security {
     disable_foxx_authentication = false
@@ -133,7 +133,7 @@ func testBackupConfigIncomplete(project, res, name string) string {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.8.6"
+    db_version = "3.8.7"
   }
   security {
     disable_foxx_authentication = false

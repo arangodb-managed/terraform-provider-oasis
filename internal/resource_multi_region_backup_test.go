@@ -24,16 +24,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
-
-	backup "github.com/arangodb-managed/apis/backup/v1"
-	common "github.com/arangodb-managed/apis/common/v1"
 )
 
 // TestAccResourceMultiRegionBackup verifies the Oasis Multi Region Backup resource is created along with the specified properties
@@ -43,14 +38,12 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 	}
 	t.Parallel()
 
-	res := "terraform-multi-region-backup-" + acctest.RandString(10)
-	name := "multi-region-backup-" + acctest.RandString(10)
-	sourceBackupID := acctest.RandString((10))
-	regionID := "gcp-europe-west-4"
+	resourceName := "terraform-multi-region-backup-" + acctest.RandString(10)
+	regionID := "gcp-europe-west4"
 
 	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
-	pid, err := FetchProjectID(context.Background(), orgID, testAccProvider)
+	projectID, err := FetchProjectID(context.Background(), orgID, testAccProvider)
 	require.NoError(t, err)
 
 	resource.Test(t, resource.TestCase{
@@ -58,23 +51,16 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 		ProviderFactories: testProviderFactories,
 		CheckDestroy:      testAccCheckDestroyBackup,
 		Steps: []resource.TestStep{
+			// {
+			// 	Config:      testMultiRegionBackupConfig(projectID, resourceName, ""),
+			// 	ExpectError: regexp.MustCompile("Region identifier required"),
+			// },
 			{
-				Config:      testMultiRegionBackupConfigIncomplete(pid, res, name, sourceBackupID),
-				ExpectError: regexp.MustCompile("region ID missing"),
-			},
-			{
-				Config:      testMultiRegionBackupConfig("", res, name, sourceBackupID, regionID),
-				ExpectError: regexp.MustCompile("Project ID missing"),
-			},
-			{
-				Config: testMultiRegionBackupConfig(pid, res, name, sourceBackupID, regionID),
+				Config: testMultiRegionBackupConfig(projectID, resourceName, regionID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplNameFieldName, "oasis_test_dep_tf"),
-					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplDiskPerformanceFieldName, "dp30"),
-					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplTAndCAcceptedFieldName, "true"),
-
-					resource.TestCheckResourceAttr("oasis_multi_region_backup."+res, backupSourceBackupIDFieldName, sourceBackupID),
-					resource.TestCheckResourceAttr("oasis_multi_region_backup."+res, backupRegionIDFieldName, regionID),
+					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplNameFieldName, "oasis_multi_region_deployment"),
+					resource.TestCheckResourceAttr("oasis_backup.backup", backupNameFieldName, "oasis_backup"),
+					resource.TestCheckResourceAttr("oasis_multi_region_backup."+resourceName, backupRegionIDFieldName, regionID),
 				),
 			},
 		},
@@ -82,95 +68,47 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 }
 
 // testMultiRegionBackupConfig contains the Terraform resource definitions for testing usage
-func testMultiRegionBackupConfig(project, res, name, sourceBackupID, regionID string) string {
-	return fmt.Sprintf(`resource "oasis_deployment" "my_oneshard_deployment" {
-  terms_and_conditions_accepted = "true"
-  project = "%s" 
-  name = "%s"
-  location {
-    region = "gcp-europe-west4"
-  }
-  version {
-    db_version = "3.8.6"
-  }
-  security {
-    disable_foxx_authentication = false
-  }
-  disk_performance = "dp30"
-  configuration {
-    model = "oneshard"
-    node_size_id = "c4-a8"
-    node_disk_size = 20
-	maximum_node_disk_size = 40
-  }
-  notification_settings {
-    email_addresses = [
-      "test@arangodb.com"
-    ]
-  }
-}
-
-resource "oasis_multi_region_backup" "%s" {
-  source_backup_id = "%s"
-  region_id = "%s"
-}
-`, project, res, name, sourceBackupID, regionID)
-}
-
-// testMultiRegionBackupConfigIncomplete contains the incomplete Terraform resource definitions for regression testing (expected failure)
-func testMultiRegionBackupConfigIncomplete(project, res, name, sourceBackupID string) string {
-	return fmt.Sprintf(`resource "oasis_deployment" "my_oneshard_deployment" {
-  terms_and_conditions_accepted = "true"
-  project = "%s" 
-  name = "%s"
-  location {
-    region = "gcp-europe-west4"
-  }
-  version {
-    db_version = "3.8.6"
-  }
-  security {
-    disable_foxx_authentication = false
-  }
-  disk_performance = "dp30"
-  configuration {
-    model = "oneshard"
-    node_size_id = "c4-a8"
-    node_disk_size = 20
-	maximum_node_disk_size = 40
-  }
-  notification_settings {
-    email_addresses = [
-      "test@arangodb.com"
-    ]
-  }
-}
-
-resource "oasis_multi_region_backup" "%s" {
-    source_backup_id = "%s"
-    region_id = ""
-}
-`, project, res, name, sourceBackupID)
-}
-
-// testAccMultiRegionCheckDestroyBackup verifies the Terraform oasis_multi_region_backup resource cleanup.
-func testAccMultiRegionCheckDestroyBackup(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
-	if err := client.Connect(); err != nil {
-		client.log.Error().Err(err).Msg("Failed to connect to api")
-		return err
-	}
-	backupc := backup.NewBackupServiceClient(client.conn)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "oasis_multi_region_backup" {
-			continue
+func testMultiRegionBackupConfig(project, backupResource, regionID string) string {
+	return fmt.Sprintf(`
+	resource "oasis_deployment" "my_oneshard_deployment" {
+		terms_and_conditions_accepted = "true"
+		project = "%s" 
+		name = "oasis_multi_region_deployment"
+		location {
+			region = "gcp-europe-west4"
 		}
-
-		if _, err := backupc.GetBackup(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
-			return fmt.Errorf("backup still present")
+		version {
+			db_version = "3.8.7"
+		}
+		security {
+			disable_foxx_authentication = false
+		}
+		disk_performance = "dp30"
+		configuration {
+			model = "oneshard"
+			node_size_id = "c4-a8"
+			node_disk_size = 20
+			maximum_node_disk_size = 40
+		}
+		notification_settings {
+			email_addresses = [
+			"test@arangodb.com"
+			]
 		}
 	}
 
-	return nil
+	resource "oasis_backup" "backup" {
+		name = "oasis_backup"
+		description = "test backup description update from terraform"
+		deployment_id = oasis_deployment.my_oneshard_deployment.id
+		upload = true
+		auto_deleted_at = 20
+		backup_policy_id = "456123"
+	}
+
+	resource "oasis_multi_region_backup" "%s" {
+		source_backup_id = oasis_backup.backup.id
+		region_id = "%s"
+	}
+`, project, backupResource, regionID)
 }
