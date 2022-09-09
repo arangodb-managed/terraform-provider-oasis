@@ -16,6 +16,6 @@ provider "oasis" {
 
 
 resource "oasis_multi_region_backup" "backup" {
-	source_backup_id = "" // make sure backup is uploaded
-	region_id = "" // set to the oasis region identifier other than the deployment region
+  source_backup_id = "" // make sure backup is uploaded
+  region_id = "" // set to the oasis region identifier other than the deployment region
 }
