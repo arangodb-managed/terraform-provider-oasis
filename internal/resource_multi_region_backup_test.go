@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -51,10 +52,10 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 		ProviderFactories: testProviderFactories,
 		CheckDestroy:      testAccCheckDestroyBackup,
 		Steps: []resource.TestStep{
-			// {
-			// 	Config:      testMultiRegionBackupConfig(projectID, resourceName, ""),
-			// 	ExpectError: regexp.MustCompile("Region identifier required"),
-			// },
+			{
+				Config:      testMultiRegionBackupConfig(projectID, resourceName, ""),
+				ExpectError: regexp.MustCompile("Region identifier required"),
+			},
 			{
 				ImportState:       true,
 				ImportStateVerify: true,
