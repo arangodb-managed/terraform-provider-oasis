@@ -25,7 +25,7 @@ datasets = {
     },
     {
       "id" = "gcp"
-      "name" = "Google Compute Platform"
+      "name" = "Google Cloud Platform"
     },
   ])
 }
