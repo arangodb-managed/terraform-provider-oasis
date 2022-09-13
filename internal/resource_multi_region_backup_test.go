@@ -40,7 +40,7 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "terraform-multi-region-backup-" + acctest.RandString(10)
-	regionID := "gcp-europe-west4"
+	regionID := "gcp-us-central1"
 
 	orgID, err := FetchOrganizationID()
 	require.NoError(t, err)
