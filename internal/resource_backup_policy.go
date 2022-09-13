@@ -138,7 +138,7 @@ func resourceBackupPolicy() *schema.Resource {
 			},
 			backupPolicyAdditionalRegionIDs: {
 				Type:        schema.TypeList,
-				Description: "Backup Policy Additional Region Identifiers where backup should be cloned",
+				Description: "Backup Policy Resource Additional Region Identifiers where backup should be cloned",
 				Optional:    true,
 				MinItems:    1,
 				Elem:        &schema.Schema{Type: schema.TypeString},
