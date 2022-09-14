@@ -29,10 +29,53 @@ provider "oasis" {
   organization   = "" // Your Oasis organization where you want to create the resources
 }
 
+// Create Project
+resource "oasis_project" "oasis_test_project" {
+  name        = "Terraform Oasis Project"
+  description = "A test Oasis project within an organization from the Terraform Provider"
+}
 
+// Create Deployment
+resource "oasis_deployment" "my_oneshard_deployment" {
+  terms_and_conditions_accepted = "true"
+  project                       = oasis_project.oasis_test_project.id // Project id where deployment will be created
+  name                          = "oasis_multi_region_deployment"
+  location {
+    region = "gcp-europe-west4"
+  }
+  version {
+    db_version = "3.8.7"
+  }
+  security {
+    disable_foxx_authentication = false
+  }
+  disk_performance = "dp30"
+  configuration {
+    model                  = "oneshard"
+    node_size_id           = "c4-a8"
+    node_disk_size         = 20
+    maximum_node_disk_size = 40
+  }
+  notification_settings {
+    email_addresses = [
+      "test@arangodb.com"
+    ]
+  }
+}
+
+// Create Backup
+resource "oasis_backup" "backup" {
+  name            = "oasis_backup"
+  description     = "test backup description update from terraform"
+  deployment_id   = oasis_deployment.my_oneshard_deployment.id
+  upload          = true
+  auto_deleted_at = 3 // auto delete after 3 days
+}
+
+// Create Multi Region Backup
 resource "oasis_multi_region_backup" "backup" {
-  source_backup_id = "" // make sure backup is uploaded
-  region_id        = "" // set to the oasis region identifier other than the deployment region
+  source_backup_id = oasis_backup.backup.id // Existing backup ID that is already uploaded
+  region_id        = "gcp-us-central1"      // Oasis region identifier, which is other than the deployment region
 }
 ```
 
