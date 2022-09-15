@@ -3,7 +3,7 @@ terraform {
   required_providers {
     oasis = {
       source  = "arangodb-managed/oasis"
-      version = ">=2.1.0"
+      version = ">2.1.4"
     }
   }
 }
@@ -29,7 +29,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.8.7"
+    db_version = "3.8.6"
   }
   security {
     disable_foxx_authentication = false
@@ -59,6 +59,6 @@ resource "oasis_backup" "backup" {
 
 // Create Multi Region Backup
 resource "oasis_multi_region_backup" "backup" {
-  source_backup_id = oasis_backup.backup.id // Existing backup ID that is already uploaded
+  source_backup_id = oasis_backup.backup.id // Existing backup ID
   region_id        = "gcp-us-central1"      // Oasis region identifier, which is other than the deployment region
 }

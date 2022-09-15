@@ -40,7 +40,7 @@ const (
 // resourceMultiRegionBackup defines a Multi Region Backup Oasis resource.
 func resourceMultiRegionBackup() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Oasis Backup Resource",
+		Description:   "Oasis Multi Region Backup Resource",
 		CreateContext: resourceMultiRegionBackupCreate,
 		ReadContext:   resourceBackupRead,
 		UpdateContext: resourceBackupUpdate,
@@ -48,51 +48,51 @@ func resourceMultiRegionBackup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			backupSourceBackupIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Region Identifier",
+				Description: "Oasis Multi Region Backup Resource Region Identifier",
 				Optional:    true,
 			},
 			backupRegionIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Region Identifier",
+				Description: "Oasis Multi Region Backup Resource Region Identifier",
 				Optional:    true,
 			},
 
 			// backup fields used to return the backup information
 			backupNameFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Name field, generated based on source backup",
+				Description: "Oasis Multi Region Backup Resource Backup Name field, generated based on source backup",
 				Computed:    true,
 			},
 			backupDescriptionFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Description field, generated based on source backup",
+				Description: "Oasis Multi Region Backup Resource Backup Description field, generated based on source backup",
 				Computed:    true,
 			},
 			backupUploadFieldName: {
 				Type:        schema.TypeBool,
-				Description: "Oasis Backup Resource Backup Upload field, generated based on source backup",
+				Description: "Oasis Multi Region Backup Resource Backup Upload field, generated based on source backup",
 				Computed:    true,
 			},
 			backupDeploymentIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Deployment ID field, generated based on source backup",
+				Description: "Oasis Multi Region Backup Resource Backup Deployment ID field, generated based on source backup",
 				Computed:    true,
 			},
 			backupURLFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup URL field, generated based on source backup",
+				Description: "Oasis Multi Region Backup Resource Backup URL field, generated based on source backup",
 				Computed:    true,
 			},
 			backupPolicyIDFieldName: {
 				Type:        schema.TypeString,
-				Description: "Oasis Backup Resource Backup Policy ID field, generated based on source backup",
+				Description: "Oasis Multi Region Backup Resource Backup Policy ID field, generated based on source backup",
 				Computed:    true,
 			},
 
 			backupAutoDeleteAtFieldName: {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "Oasis Backup Resource Backup Auto Delete At field, generated based on source backup",
+				Description: "Oasis Multi Region Backup Resource Backup Auto Delete At field, generated based on source backup",
 			},
 		},
 	}

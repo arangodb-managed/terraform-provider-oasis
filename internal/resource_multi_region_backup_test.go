@@ -27,8 +27,11 @@ import (
 	"regexp"
 	"testing"
 
+	backup "github.com/arangodb-managed/apis/backup/v1"
+	common "github.com/arangodb-managed/apis/common/v1"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,16 +53,14 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testProviderFactories,
-		CheckDestroy:      testAccCheckDestroyBackup,
+		CheckDestroy:      testAccCheckDestroyMultiRegionBackup,
 		Steps: []resource.TestStep{
 			{
 				Config:      testMultiRegionBackupConfig(projectID, resourceName, ""),
 				ExpectError: regexp.MustCompile("Region identifier required"),
 			},
 			{
-				ImportState:       true,
-				ImportStateVerify: true,
-				Config:            testMultiRegionBackupConfig(projectID, resourceName, regionID),
+				Config: testMultiRegionBackupConfig(projectID, resourceName, regionID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("oasis_deployment.my_oneshard_deployment", deplNameFieldName, "oasis_multi_region_deployment"),
 					resource.TestCheckResourceAttr("oasis_backup.backup", backupNameFieldName, "oasis_backup"),
@@ -75,13 +76,13 @@ func testMultiRegionBackupConfig(project, backupResource, regionID string) strin
 	return fmt.Sprintf(`
 	resource "oasis_deployment" "my_oneshard_deployment" {
 		terms_and_conditions_accepted = "true"
-		project = "%s" 
+		project = "%s"
 		name = "oasis_multi_region_deployment"
 		location {
 			region = "gcp-europe-west4"
 		}
 		version {
-			db_version = "3.8.7"
+			db_version = "3.8.6"
 		}
 		security {
 			disable_foxx_authentication = false
@@ -114,4 +115,26 @@ func testMultiRegionBackupConfig(project, backupResource, regionID string) strin
 		region_id = "%s"
 	}
 `, project, backupResource, regionID)
+}
+
+// testAccCheckDestroyMultiRegionBackup verifies the Terraform oasis_multi_region_backup resource cleanup.
+func testAccCheckDestroyMultiRegionBackup(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
+	if err := client.Connect(); err != nil {
+		client.log.Error().Err(err).Msg("Failed to connect to api")
+		return err
+	}
+	backupc := backup.NewBackupServiceClient(client.conn)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "oasis_backup" && rs.Type != "oasis_multi_region_backup" {
+			continue
+		}
+
+		if _, err := backupc.GetBackup(client.ctxWithToken, &common.IDOptions{Id: rs.Primary.ID}); !common.IsNotFound(err) {
+			return fmt.Errorf("backup still present")
+		}
+	}
+
+	return nil
 }

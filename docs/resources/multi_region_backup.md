@@ -3,12 +3,12 @@
 page_title: "oasis_multi_region_backup Resource - terraform-provider-oasis"
 subcategory: ""
 description: |-
-  Oasis Backup Resource
+  Oasis Multi Region Backup Resource
 ---
 
 # oasis_multi_region_backup (Resource)
 
-Oasis Backup Resource
+Oasis Multi Region Backup Resource
 
 ## Example Usage
 
@@ -18,7 +18,7 @@ terraform {
   required_providers {
     oasis = {
       source  = "arangodb-managed/oasis"
-      version = ">=2.1.0"
+      version = ">2.1.4"
     }
   }
 }
@@ -44,7 +44,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4"
   }
   version {
-    db_version = "3.8.7"
+    db_version = "3.8.6"
   }
   security {
     disable_foxx_authentication = false
@@ -74,7 +74,7 @@ resource "oasis_backup" "backup" {
 
 // Create Multi Region Backup
 resource "oasis_multi_region_backup" "backup" {
-  source_backup_id = oasis_backup.backup.id // Existing backup ID that is already uploaded
+  source_backup_id = oasis_backup.backup.id // Existing backup ID
   region_id        = "gcp-us-central1"      // Oasis region identifier, which is other than the deployment region
 }
 ```
@@ -84,18 +84,18 @@ resource "oasis_multi_region_backup" "backup" {
 
 ### Optional
 
-- `region_id` (String) Oasis Backup Resource Region Identifier
-- `source_backup_id` (String) Oasis Backup Resource Region Identifier
+- `region_id` (String) Oasis Multi Region Backup Resource Region Identifier
+- `source_backup_id` (String) Oasis Multi Region Backup Resource Region Identifier
 
 ### Read-Only
 
-- `auto_deleted_at` (Number) Oasis Backup Resource Backup Auto Delete At field, generated based on source backup
-- `backup_policy_id` (String) Oasis Backup Resource Backup Policy ID field, generated based on source backup
-- `deployment_id` (String) Oasis Backup Resource Backup Deployment ID field, generated based on source backup
-- `description` (String) Oasis Backup Resource Backup Description field, generated based on source backup
+- `auto_deleted_at` (Number) Oasis Multi Region Backup Resource Backup Auto Delete At field, generated based on source backup
+- `backup_policy_id` (String) Oasis Multi Region Backup Resource Backup Policy ID field, generated based on source backup
+- `deployment_id` (String) Oasis Multi Region Backup Resource Backup Deployment ID field, generated based on source backup
+- `description` (String) Oasis Multi Region Backup Resource Backup Description field, generated based on source backup
 - `id` (String) The ID of this resource.
-- `name` (String) Oasis Backup Resource Backup Name field, generated based on source backup
-- `upload` (Boolean) Oasis Backup Resource Backup Upload field, generated based on source backup
-- `url` (String) Oasis Backup Resource Backup URL field, generated based on source backup
+- `name` (String) Oasis Multi Region Backup Resource Backup Name field, generated based on source backup
+- `upload` (Boolean) Oasis Multi Region Backup Resource Backup Upload field, generated based on source backup
+- `url` (String) Oasis Multi Region Backup Resource Backup URL field, generated based on source backup
 
 
