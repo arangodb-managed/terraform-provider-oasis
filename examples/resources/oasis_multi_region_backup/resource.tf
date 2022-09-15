@@ -3,7 +3,7 @@ terraform {
   required_providers {
     oasis = {
       source  = "arangodb-managed/oasis"
-      version = ">2.1.4"
+      version = ">=2.1.5"
     }
   }
 }
@@ -27,9 +27,6 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   name                          = "oasis_multi_region_deployment"
   location {
     region = "gcp-europe-west4"
-  }
-  version {
-    db_version = "3.8.6"
   }
   security {
     disable_foxx_authentication = false

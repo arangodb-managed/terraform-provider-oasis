@@ -45,10 +45,6 @@ resource "oasis_deployment" "my_aks_oneshard_deployment" {
     region = "aks-westus2"
   }
 
-  version {
-    db_version = "3.8.6"
-  }
-
   configuration {
     model = "oneshard"
   }
@@ -79,10 +75,6 @@ resource "oasis_deployment" "my_aws_oneshard_deployment" {
 
   location {
     region = "aws-us-east-2"
-  }
-
-  version {
-    db_version = "3.8.6"
   }
 
   configuration {

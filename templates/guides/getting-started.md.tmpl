@@ -61,10 +61,6 @@ resource "oasis_deployment" "my_oneshard_deployment" {
     region = "gcp-europe-west4"
   }
 
-  version {
-    db_version = "3.8.6"
-  }
-
   configuration {
     model = "oneshard"
   }

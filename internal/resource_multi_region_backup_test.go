@@ -57,7 +57,7 @@ func TestAccResourceMultiRegionBackup(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testMultiRegionBackupConfig(projectID, resourceName, ""),
-				ExpectError: regexp.MustCompile("Region identifier required"),
+				ExpectError: regexp.MustCompile("unable to find parse field region_id"),
 			},
 			{
 				Config: testMultiRegionBackupConfig(projectID, resourceName, regionID),
@@ -80,9 +80,6 @@ func testMultiRegionBackupConfig(project, backupResource, regionID string) strin
 		name = "oasis_multi_region_deployment"
 		location {
 			region = "gcp-europe-west4"
-		}
-		version {
-			db_version = "3.8.6"
 		}
 		security {
 			disable_foxx_authentication = false
@@ -107,7 +104,6 @@ func testMultiRegionBackupConfig(project, backupResource, regionID string) strin
 		deployment_id = oasis_deployment.my_oneshard_deployment.id
 		upload = true
 		auto_deleted_at = 20
-		backup_policy_id = "456123"
 	}
 
 	resource "oasis_multi_region_backup" "%s" {
@@ -127,7 +123,7 @@ func testAccCheckDestroyMultiRegionBackup(s *terraform.State) error {
 	backupc := backup.NewBackupServiceClient(client.conn)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "oasis_backup" && rs.Type != "oasis_multi_region_backup" {
+		if rs.Type != "oasis_multi_region_backup" {
 			continue
 		}
 

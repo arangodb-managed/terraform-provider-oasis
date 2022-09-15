@@ -28,9 +28,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   location {
     region = "gcp-europe-west4"
   }
-  version {
-    db_version = "3.8.6"
-  }
+
   configuration {
     model          = "oneshard"
     node_size_id   = "c4-a8"

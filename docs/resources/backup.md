@@ -43,9 +43,7 @@ resource "oasis_deployment" "my_oneshard_deployment" {
   location {
     region = "gcp-europe-west4"
   }
-  version {
-    db_version = "3.8.6"
-  }
+
   configuration {
     model          = "oneshard"
     node_size_id   = "c4-a8"
@@ -82,12 +80,12 @@ resource "oasis_backup" "my_backup" {
 - `auto_deleted_at` (Number) Oasis Backup Resource Backup Auto Delete At field
 - `backup_policy_id` (String) Oasis Backup Resource Backup Policy ID field
 - `description` (String) Oasis Backup Resource Backup Description field
-- `region_id` (String) Oasis Backup Resource Region Identifier
 - `upload` (Boolean) Oasis Backup Resource Backup Upload field
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `region_id` (String) Oasis Backup Resource Region Identifier
 - `url` (String) Oasis Backup Resource Backup URL field
 
 
