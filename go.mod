@@ -1,7 +1,7 @@
 module github.com/arangodb-managed/terraform-provider-oasis
 
 require (
-	github.com/arangodb-managed/apis v0.74.13
+	github.com/arangodb-managed/apis v0.74.14
 	github.com/arangodb-managed/log-helper v0.2.5
 	github.com/gogo/protobuf v1.3.2
 	github.com/hashicorp/terraform-plugin-docs v0.8.1
@@ -12,7 +12,7 @@ require (
 )
 
 require (
-	github.com/Masterminds/goutils v1.1.0 // indirect
+	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.0 // indirect
 	github.com/agext/levenshtein v1.2.2 // indirect
