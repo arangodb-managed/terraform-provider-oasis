@@ -1,4 +1,4 @@
-# Example: Backup
+# Example: Multi Region Backup
 
 This example shows how to use the Terraform Oasis provider to create an Oasis Multi Region backup inside a Deployment.
 
