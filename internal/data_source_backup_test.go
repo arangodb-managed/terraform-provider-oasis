@@ -41,6 +41,7 @@ func TestFlattenBackupObject(t *testing.T) {
 		CreatedAt:      createdAtTimeStamp,
 		BackupPolicyId: "test-policy-id",
 		DeploymentId:   "test-dep-id",
+		RegionId:       "gcp-europe-west4",
 	}
 
 	expected := map[string]interface{}{
@@ -51,6 +52,7 @@ func TestFlattenBackupObject(t *testing.T) {
 		backupDataSourceCreatedAtFieldName:    "2022-01-01T01:01:01Z",
 		backupDataSourceDeploymentIDFieldName: "test-dep-id",
 		backupDataSourcePolicyIDFieldName:     "test-policy-id",
+		backupRegionIDFieldName:               "gcp-europe-west4",
 	}
 
 	got := flattenBackupObject(&backup)

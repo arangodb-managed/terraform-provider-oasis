@@ -74,6 +74,9 @@ const (
 	hourlySchedule  = "Hourly"
 	dailySchedule   = "Daily"
 	monthlySchedule = "Monthly"
+
+	// Additional region identifiers where backup should be cloned
+	backupPolicyAdditionalRegionIDs = "additional_region_ids"
 )
 
 // resourceBackupPolicy defines a BackupPolicy oasis resource.
@@ -132,6 +135,13 @@ func resourceBackupPolicy() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Backup Policy Resource Backup Policy Email Notification field",
 				Required:    true,
+			},
+			backupPolicyAdditionalRegionIDs: {
+				Type:        schema.TypeList,
+				Description: "Backup Policy Resource Additional Region Identifiers where backup should be cloned",
+				Optional:    true,
+				MinItems:    1,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			backupPolicyScheduleFieldName: {
 				Type:        schema.TypeList,
@@ -320,6 +330,15 @@ func resourceBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData, m i
 	if d.HasChange(backupPolicyScheduleFieldName) {
 		policy.Schedule = expandBackupPolicySchedule(d.Get(backupPolicyScheduleFieldName).([]interface{}))
 	}
+
+	if v, ok := d.GetOk(backupPolicyAdditionalRegionIDs); ok {
+		additionalRegionIDs, err := expandAdditionalRegionList(v.([]interface{}))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		policy.AdditionalRegionIds = additionalRegionIDs
+	}
+
 	// Make sure we are sending the right schedule. The coming back schedule can contain invalid
 	// field items for different schedule. We make sure here that the right one is sent after an
 	// update. This check can be removed once terraform allows conflict checks for list items.
@@ -395,6 +414,7 @@ func flattenBackupPolicyResource(policy *backup.BackupPolicy) map[string]interfa
 		backupPolictEmailNotificationFieldName: policy.GetEmailNotification(),
 		backupPolicyScheduleFieldName:          schedule,
 		backupPolicyLockedFieldName:            policy.GetLocked(),
+		backupPolicyAdditionalRegionIDs:        policy.GetAdditionalRegionIds(),
 	}
 	if policy.GetRetentionPeriod() != nil {
 		seconds := policy.GetRetentionPeriod().GetSeconds()
@@ -498,6 +518,13 @@ func expandBackupPolicyResource(d *schema.ResourceData) (*backup.BackupPolicy, e
 	}
 	if v, ok := d.GetOk(backupPolicyLockedFieldName); ok {
 		ret.Locked = v.(bool)
+	}
+	if v, ok := d.GetOk(backupPolicyAdditionalRegionIDs); ok {
+		additionalRegionIDs, err := expandAdditionalRegionList(v.([]interface{}))
+		if err != nil {
+			return ret, err
+		}
+		ret.AdditionalRegionIds = additionalRegionIDs
 	}
 	return ret, nil
 }
@@ -668,4 +695,19 @@ func resourceBackupPolicyDelete(ctx context.Context, d *schema.ResourceData, m i
 	}
 	d.SetId("") // called automatically, but added to be explicit
 	return nil
+}
+
+// expandAdditionalRegionList creates a string list of items from an interface slice. It also
+// verifies if a given string item is empty or not. In case it's empty, an error is thrown.
+func expandAdditionalRegionList(list []interface{}) ([]string, error) {
+	additionalRegionIDs := []string{}
+	for _, v := range list {
+		if v, ok := v.(string); ok {
+			if v == "" {
+				continue
+			}
+			additionalRegionIDs = append(additionalRegionIDs, v)
+		}
+	}
+	return additionalRegionIDs, nil
 }

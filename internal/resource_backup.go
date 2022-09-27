@@ -86,6 +86,12 @@ func resourceBackup() *schema.Resource {
 				Description: "Oasis Backup Resource Backup Policy ID field",
 				Optional:    true,
 			},
+			backupRegionIDFieldName: {
+				Type:        schema.TypeString,
+				Description: "Oasis Backup Resource Region Identifier",
+				Computed:    true,
+				ForceNew:    true,
+			},
 			backupAutoDeleteAtFieldName: {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -258,5 +264,6 @@ func flattenBackupResource(backup *backup.Backup) map[string]interface{} {
 		backupURLFieldName:          backup.GetUrl(),
 		backupPolicyIDFieldName:     backup.GetBackupPolicyId(),
 		backupDeploymentIDFieldName: backup.GetDeploymentId(),
+		backupRegionIDFieldName:     backup.GetRegionId(),
 	}
 }

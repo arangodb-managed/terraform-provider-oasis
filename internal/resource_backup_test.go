@@ -88,14 +88,12 @@ func TestAccResourceBackup(t *testing.T) {
 func testBackupConfig(project, res, name string) string {
 	return fmt.Sprintf(`resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
-  project = "%s" 
+  project = "%s"
   name = "oasis_test_dep_tf"
   location {
     region = "gcp-europe-west4"
   }
-  version {
-    db_version = "3.8.6"
-  }
+
   security {
     disable_foxx_authentication = false
   }
@@ -127,14 +125,12 @@ resource "oasis_backup" "%s" {
 func testBackupConfigIncomplete(project, res, name string) string {
 	return fmt.Sprintf(`resource "oasis_deployment" "my_oneshard_deployment" {
   terms_and_conditions_accepted = "true"
-  project = "%s" 
+  project = "%s"
   name = "oasis_test_dep_tf"
   location {
     region = "gcp-europe-west4"
   }
-  version {
-    db_version = "3.8.6"
-  }
+
   security {
     disable_foxx_authentication = false
   }
@@ -220,6 +216,7 @@ func TestFlattenBackup(t *testing.T) {
 		DeploymentId:   "123456",
 		BackupPolicyId: "456123",
 		Url:            "test-url",
+		RegionId:       "gcp-europe-west-4",
 	}
 
 	expected := map[string]interface{}{
@@ -228,6 +225,7 @@ func TestFlattenBackup(t *testing.T) {
 		backupDeploymentIDFieldName: "123456",
 		backupPolicyIDFieldName:     "456123",
 		backupURLFieldName:          "test-url",
+		backupRegionIDFieldName:     "gcp-europe-west-4",
 	}
 
 	flattened := flattenBackupResource(backup)

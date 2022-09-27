@@ -33,14 +33,15 @@ import (
 
 func TestFlattenBackupPolicy(t *testing.T) {
 	policy := &backup.BackupPolicy{
-		Name:              "test-policy",
-		Description:       "test-description",
-		DeploymentId:      "123456",
-		IsPaused:          true,
-		Upload:            true,
-		RetentionPeriod:   types.DurationProto(200 * time.Hour),
-		EmailNotification: "None",
-		Locked:            true,
+		Name:                "test-policy",
+		Description:         "test-description",
+		DeploymentId:        "123456",
+		IsPaused:            true,
+		Upload:              true,
+		RetentionPeriod:     types.DurationProto(200 * time.Hour),
+		EmailNotification:   "None",
+		Locked:              true,
+		AdditionalRegionIds: []string{"aks-westeurope"},
 	}
 
 	expected := map[string]interface{}{
@@ -52,6 +53,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		backupPolicyRetentionPeriodFieldName:   200,
 		backupPolictEmailNotificationFieldName: "None",
 		backupPolicyLockedFieldName:            true,
+		backupPolicyAdditionalRegionIDs:        []string{"aks-westeurope"},
 	}
 
 	t.Run("with hourly schedule", func(tt *testing.T) {
@@ -168,16 +170,18 @@ func TestExpandBackupPolicy(t *testing.T) {
 		backupPolicyRetentionPeriodFieldName:   200,
 		backupPolictEmailNotificationFieldName: "None",
 		backupPolicyLockedFieldName:            true,
+		backupPolicyAdditionalRegionIDs:        []interface{}{"aks-westeurope"},
 	}
 	expected := &backup.BackupPolicy{
-		Name:              "test-policy",
-		Description:       "test-description",
-		DeploymentId:      "123456",
-		IsPaused:          true,
-		Upload:            true,
-		RetentionPeriod:   types.DurationProto(200 * time.Hour),
-		EmailNotification: "None",
-		Locked:            true,
+		Name:                "test-policy",
+		Description:         "test-description",
+		DeploymentId:        "123456",
+		IsPaused:            true,
+		Upload:              true,
+		RetentionPeriod:     types.DurationProto(200 * time.Hour),
+		EmailNotification:   "None",
+		Locked:              true,
+		AdditionalRegionIds: []string{"aks-westeurope"},
 	}
 	t.Run("test hourly schedule", func(tt *testing.T) {
 		rawSchedule := []interface{}{
