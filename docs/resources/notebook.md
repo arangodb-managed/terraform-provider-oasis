@@ -17,16 +17,15 @@ terraform {
   required_version = ">= 0.13.0"
   required_providers {
     oasis = {
-      source  = "arangodb.com/managed/oasis"
-      version = ">=1.5.1"
+      source  = "arangodb-managed/oasis"
+      version = ">=2.1.7"
     }
   }
 }
 
 provider "oasis" {
-  api_key_id     = "flcs1vpiwgwplc4o5nqy"                 // API Key ID generated in Oasis platform
-  api_key_secret = "b1312b43-6ae7-095b-9db3-3036a545394c" // API Key Secret generated in Oasis platform
-  organization   = "_support"                             // Your Oasis organization where you want to create the resources
+  api_key_id     = "" // API Key ID generated in Oasis platform
+  api_key_secret = "" // API Key Secret generated in Oasis platform
 }
 
 // Create Project
