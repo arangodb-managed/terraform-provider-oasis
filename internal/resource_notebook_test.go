@@ -23,20 +23,21 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/require"
+	"github.com/gogo/protobuf/types"
 	"os"
 	"regexp"
 	"testing"
 	"time"
 
-	common "github.com/arangodb-managed/apis/common/v1"
-	nb "github.com/arangodb-managed/apis/notebook/v1"
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	common "github.com/arangodb-managed/apis/common/v1"
+	nb "github.com/arangodb-managed/apis/notebook/v1"
 )
 
 // TestAccResourceNotebook verifies the Oasis Notebook resource is created along with the specified properties
@@ -104,8 +105,8 @@ func testNotebookConfig(project, notebookResource string) string {
 		deployment_id = oasis_deployment.my_oneshard_deployment.id
 		name          = "Test-Notebook"
 		model {
-    		notebook_model_id = "basic"
-    		disk_size         = "10"
+			notebook_model_id = "basic"
+			disk_size         = "10"
   		}
 	}
 `, project, notebookResource)

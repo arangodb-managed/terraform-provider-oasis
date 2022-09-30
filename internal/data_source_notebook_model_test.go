@@ -21,9 +21,11 @@
 package provider
 
 import (
-	nb "github.com/arangodb-managed/apis/notebook/v1"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	nb "github.com/arangodb-managed/apis/notebook/v1"
 )
 
 func TestFlattenNotebookModel(t *testing.T) {
