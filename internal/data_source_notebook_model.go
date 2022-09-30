@@ -131,7 +131,7 @@ func dataSourceOasisNotebookModelRead(ctx context.Context, data *schema.Resource
 	return nil
 }
 
-// flattenNotebookModels takes result of datasets and converts them into a terraform consumable format.
+// flattenNotebookModels takes result of datasets and converts them into a Terraform consumable format.
 func flattenNotebookModels(id string, items []*nb.NotebookModel) map[string]interface{} {
 	return map[string]interface{}{
 		notebookModelDataSourceDeploymentIdFieldName: id,
@@ -139,7 +139,7 @@ func flattenNotebookModels(id string, items []*nb.NotebookModel) map[string]inte
 	}
 }
 
-// flattenNotebookModel converts the list of datasets it into a Terraform consumable format.
+// flattenNotebookModel converts the list of datasets into a Terraform consumable format.
 func flattenNotebookModelList(items []*nb.NotebookModel) []interface{} {
 	ret := make([]interface{}, 0)
 	for _, v := range items {
