@@ -28,7 +28,7 @@ import (
 	nb "github.com/arangodb-managed/apis/notebook/v1"
 )
 
-func TestFlattenNotebookModel(t *testing.T) {
+func TestFlattenNotebookModels(t *testing.T) {
 	items := &nb.NotebookModelList{
 		Items: []*nb.NotebookModel{
 			{
@@ -55,5 +55,30 @@ func TestFlattenNotebookModel(t *testing.T) {
 		},
 	}
 	flattened := flattenNotebookModels("test-depl-id", items.Items)
+	assert.Equal(t, expected, flattened)
+}
+
+func TestFlattenNotebookModelList(t *testing.T) {
+	items := []*nb.NotebookModel{
+		{
+			Id:          "test-list-id",
+			Name:        "test-name",
+			Cpu:         4,
+			Memory:      10,
+			MaxDiskSize: 10,
+			MinDiskSize: 5,
+		}}
+	expected := []interface{}{
+		map[string]interface{}{
+			notebookModelDataSourceIdFieldName:          "test-list-id",
+			notebookModelDataSourceNameFieldName:        "test-name",
+			notebookModelDataSourceCPUFieldName:         float32(4),
+			notebookModelDataSourceMemoryFieldName:      int32(10),
+			notebookModelDataSourceMaxDiskSizeFieldName: int32(10),
+			notebookModelDataSourceMinDiskSizeFieldName: int32(5),
+		},
+	}
+
+	flattened := flattenNotebookModelList(items)
 	assert.Equal(t, expected, flattened)
 }

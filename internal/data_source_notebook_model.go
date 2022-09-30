@@ -97,7 +97,7 @@ func dataSourceOasisNotebookModel() *schema.Resource {
 	}
 }
 
-// dataSourceOasisNotebookModelRead reloads the resource object from the terraform store.
+// dataSourceOasisNotebookModelRead reloads the resource object from the Terraform store.
 func dataSourceOasisNotebookModelRead(ctx context.Context, data *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*Client)
 	if err := client.Connect(); err != nil {
@@ -135,12 +135,12 @@ func dataSourceOasisNotebookModelRead(ctx context.Context, data *schema.Resource
 func flattenNotebookModels(id string, items []*nb.NotebookModel) map[string]interface{} {
 	return map[string]interface{}{
 		notebookModelDataSourceDeploymentIdFieldName: id,
-		notebookModelDataSourceItemsFieldName:        flattenNotebokModel(items),
+		notebookModelDataSourceItemsFieldName:        flattenNotebookModelList(items),
 	}
 }
 
-// flattenNotebokModel converts the list of datasets it into a Terraform consumable format.
-func flattenNotebokModel(items []*nb.NotebookModel) []interface{} {
+// flattenNotebookModel converts the list of datasets it into a Terraform consumable format.
+func flattenNotebookModelList(items []*nb.NotebookModel) []interface{} {
 	ret := make([]interface{}, 0)
 	for _, v := range items {
 		ret = append(ret, map[string]interface{}{

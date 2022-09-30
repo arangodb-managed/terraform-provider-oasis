@@ -112,7 +112,7 @@ func testNotebookConfig(project, notebookResource string) string {
 `, project, notebookResource)
 }
 
-// TestFlattenOrganization tests the Oasis Organization flattening for Terraform schema compatibility.
+// TestFlattenNotebook tests the Oasis Notebook flattening for Terraform schema compatibility.
 func TestFlattenNotebook(t *testing.T) {
 	created, _ := types.TimestampProto(time.Date(2022, 03, 03, 1, 1, 1, 0, time.UTC))
 
