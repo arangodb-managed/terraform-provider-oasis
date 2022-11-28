@@ -128,7 +128,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		deplDiskPerformanceFieldName:                      "dp-1",
 		deplDisableScheduledRootPasswordRotationFieldName: true,
 		deplLockedFieldName:                               false,
-		deplDeploymentProfileFieldName:                    deploymentProfileTestID,
+		deplDeploymentProfileIDFieldName:                  deploymentProfileTestID,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -320,7 +320,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		deplDiskPerformanceFieldName:                      "dp-2",
 		deplDisableScheduledRootPasswordRotationFieldName: false,
 		deplLockedFieldName:                               false,
-		deplDeploymentProfileFieldName:                    deploymentProfileTestID,
+		deplDeploymentProfileIDFieldName:                  deploymentProfileTestID,
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
