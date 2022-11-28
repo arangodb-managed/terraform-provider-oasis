@@ -22,6 +22,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -58,6 +59,7 @@ const (
 	deplDiskPerformanceFieldName                         = "disk_performance"
 	deplDisableScheduledRootPasswordRotationFieldName    = "disable_scheduled_root_password_rotation"
 	deplLockedFieldName                                  = "locked"
+	deplDeploymentProfileFieldName                       = "deployment_profile"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -249,6 +251,12 @@ func resourceDeployment() *schema.Resource {
 				Description: "Deployment Resource Deployment Locked field",
 				Optional:    true,
 			},
+
+			deplDeploymentProfileFieldName: {
+				Type:        schema.TypeString,
+				Description: "Deployment Resource Deployment Profile ID field",
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -422,6 +430,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		diskPerformanceID                     string
 		scheduledRootPasswordRotationDisabled bool
 		locked                                bool
+		deploymentProfileID                   string
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
@@ -479,6 +488,10 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		locked = v.(bool)
 	}
 
+	if v, ok := d.GetOk(deplDeploymentProfileFieldName); ok {
+		deploymentProfileID = v.(string)
+	}
+
 	return &data.Deployment{
 		Name:                      name,
 		Description:               description,
@@ -499,6 +512,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		DiskPerformanceId:                      diskPerformanceID,
 		IsScheduledRootPasswordRotationEnabled: !scheduledRootPasswordRotationDisabled,
 		Locked:                                 locked,
+		DeploymentProfileId:                    deploymentProfileID,
 	}, nil
 }
 
@@ -638,6 +652,9 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 	if notificationSetting != nil {
 		result[deplNotificationConfigurationFieldName] = notificationSetting
 	}
+	if depl.GetDeploymentProfileId() != "" {
+		result[deplDeploymentProfileFieldName] = depl.GetDeploymentProfileId()
+	}
 	return result
 }
 
@@ -775,6 +792,10 @@ func resourceDeploymentUpdate(ctx context.Context, d *schema.ResourceData, m int
 
 	if d.HasChange(deplLockedFieldName) {
 		depl.Locked = d.Get(deplLockedFieldName).(bool)
+	}
+
+	if d.HasChange(deplDeploymentProfileFieldName) {
+		return diag.FromErr(errors.New("deployment profile id cannot be changed"))
 	}
 
 	if res, err := datac.UpdateDeployment(client.ctxWithToken, depl); err != nil {
