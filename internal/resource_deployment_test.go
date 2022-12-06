@@ -69,6 +69,7 @@ func TestResourceDeployment(t *testing.T) {
 
 // TestFlattenDeploymentResource tests the Oasis Deployment flattening for Terraform schema compatibility.
 func TestFlattenDeploymentResource(t *testing.T) {
+	deploymentProfileTestID := acctest.RandString(10)
 	depl := &data.Deployment{
 		Name:        "test-name",
 		Description: "test-desc",
@@ -91,6 +92,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		DiskPerformanceId:                      "dp-1",
 		IsScheduledRootPasswordRotationEnabled: false,
 		Locked:                                 false,
+		DeploymentProfileId:                    deploymentProfileTestID,
 	}
 	flattened := flattenDeployment(depl)
 	expected := map[string]interface{}{
@@ -126,6 +128,7 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		deplDiskPerformanceFieldName:                      "dp-1",
 		deplDisableScheduledRootPasswordRotationFieldName: true,
 		deplLockedFieldName:                               false,
+		deplDeploymentProfileIDFieldName:                  deploymentProfileTestID,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -258,6 +261,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 
 // TestExpandingDeploymentResource tests the Oasis Deployment expansion for Terraform schema compatibility.
 func TestExpandingDeploymentResource(t *testing.T) {
+	deploymentProfileTestID := acctest.RandString(10)
 	depl := &data.Deployment{
 		Name:        "test-name",
 		Description: "test-desc",
@@ -281,6 +285,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		DiskPerformanceId:                      "dp-2",
 		IsScheduledRootPasswordRotationEnabled: true,
 		Locked:                                 false,
+		DeploymentProfileId:                    deploymentProfileTestID,
 	}
 	raw := map[string]interface{}{
 		deplProjectFieldName:     "123456789",
@@ -315,6 +320,7 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		deplDiskPerformanceFieldName:                      "dp-2",
 		deplDisableScheduledRootPasswordRotationFieldName: false,
 		deplLockedFieldName:                               false,
+		deplDeploymentProfileIDFieldName:                  deploymentProfileTestID,
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)

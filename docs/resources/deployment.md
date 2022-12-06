@@ -18,7 +18,7 @@ terraform {
   required_providers {
     oasis = {
       source  = "arangodb-managed/oasis"
-      version = ">=2.1.0"
+      version = ">=2.1.8"
     }
   }
 }
@@ -97,6 +97,7 @@ resource "oasis_deployment" "my_sharded_deployment" {
 
 ### Optional
 
+- `deployment_profile_id` (String) Deployment Resource Deployment Profile ID field
 - `description` (String) Deployment Resource Deployment Description field
 - `disable_scheduled_root_password_rotation` (Boolean) Deployment Resource Deployment Scheduled Root Password Rotation field
 - `disk_performance` (String) Deployment Resource Deployment Disk Performance field
