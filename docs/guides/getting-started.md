@@ -5,15 +5,15 @@ description: |-
 ---
 
 # Getting started with Oasis Terraform Provider
-ArangoDB Cloud (Oasis), provides ArangoDB databases as a Service (DBaaS). It enables you to use the entire functionality of an ArangoDB deployment without the need to run or manage the system yourself.
+ArangoGraph Insights Platform (formerly called Oasis), provides ArangoDB databases as a Service (DBaaS). It enables you to use the entire functionality of an ArangoDB deployment without the need to run or manage the system yourself.
 
-Terraform Provider Oasis is a plugin for Terraform that allows for the full lifecycle management of ArangoDB Cloud (Oasis) resources.
+Terraform Provider Oasis is a plugin for Terraform that allows for the full lifecycle management of ArangoGraph Insights Platform (formerly called Oasis) resources.
 
 ## Provider Setup
 
 
 You need to supply proper credentials to the provider before it can be used. API keys serve as the credentials to the provider. You can obtain the keys from the Oasis dashboard.
-Log in to the Oasis dashboard and open the [**API Keys**](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account. Click the **New API key** button to generate a new key, which can be used with ArangoDB's public API.
+Log in to the ArangoGraph Insights Platform (formerly called Oasis) dashboard and open the [**API Keys**](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account. Click the **New API key** button to generate a new key, which can be used with ArangoDB's public API.
 
 ```hcl
 terraform {
