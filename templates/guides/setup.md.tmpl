@@ -6,7 +6,7 @@ description: |-
 
 # Setup
 
-When using the provider, you need to set up api_key_id and api_key_secret. Both parameters can be generated in the Oasis Dashboard. Once you are logged in, navigate to the [**API Keys**](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account and click the **New API** key button.
+When using the provider, you need to set up api_key_id and api_key_secret. Both parameters can be generated in the ArangoGraph Insights Platform (formerly called Oasis) Dashboard. Once you are logged in, navigate to the [**API Keys**](https://cloud.arangodb.com/dashboard/user/api-keys) tab of your user account and click the **New API** key button.
 
 ```hcl
 terraform {
@@ -20,8 +20,8 @@ terraform {
 }
 
 provider "oasis" {
-  api_key_id     = "" // API Key ID generated in Oasis platform
-  api_key_secret = "" // API Key Secret generated in Oasis platform
+  api_key_id     = "" // API Key ID generated in ArangoGraph Insights Platform platform
+  api_key_secret = "" // API Key Secret generated in ArangoGraph Insights Platform platform
 }
 ```
 
@@ -29,13 +29,13 @@ The provider can also be setup with a default organization and project to manage
 
 ```hcl
 provider "oasis" {
-  api_key_id     = "" // API Key ID generated in Oasis platform
-  api_key_secret = "" // API Key Secret generated in Oasis platform
-  organization   = "" // Oasis Organization ID
+  api_key_id     = "" // API Key ID generated in ArangoGraph Insights Platform
+  api_key_secret = "" // API Key Secret generated in ArangoGraph Insights Platform
+  organization   = "" // Organization ID within ArangoGraph Insights Platform 
   project        = "" // Project ID within the specified organization
 }
 ```
 
 The other options you can provide are:
 - `oasis_endpoint` for the endpoint you want to manage the resources in (by default set to: `api.cloud.arangodb.com`).
-- `api_port_suffix` for the Oasis API Port Suffix (by default set to `:443`).
+- `api_port_suffix` for the ArangoGraph Insights Platform API Port Suffix (by default set to `:443`).

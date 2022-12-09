@@ -1,9 +1,9 @@
 # ArangoDB Oasis Terraform Provider [![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/arangodb-managed/terraform-provider-oasis?label=release)](https://github.com/arangodb-managed/terraform-provider-oasis/releases) [![CircleCI](https://dl.circleci.com/status-badge/img/gh/arangodb-managed/terraform-provider-oasis/tree/master.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/arangodb-managed/terraform-provider-oasis/tree/master)
 
 
-![ArangoDB Oasis](https://cloud.arangodb.com/assets/logos/arangodb-oasis-logo-whitebg-right.png) 
+<img src="https://cloud.arangodb.com/assets/logos/arangograph-logo-auth.svg" alt="ArangoGraph Insights Platform" width="400" />
 
-The Terraform Oasis provider is a plugin for Terraform that allows for the full lifecycle management of ArangoDB Cloud resources.
+The Terraform Oasis provider is a plugin for Terraform that allows for the full lifecycle management of ArangoGraph Insights Platform's (formerly called Oasis) resources.
 
 ## Project status: GA
 

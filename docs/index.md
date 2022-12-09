@@ -2,12 +2,12 @@
 layout: ""
 page_title: "Provider: Oasis"
 description: |-
-  The Oasis Terraform provider allows full lifecycle management of ArangoDB Cloud resources.
+  The Oasis Terraform provider allows full lifecycle management of ArangoGraph Insights Platform (formerly called Oasis) resources.
 ---
 
 # Oasis Provider
 
-The Terraform Oasis provider is a plugin for Terraform that allows for the full lifecycle management of ArangoDB Cloud resources.
+The Terraform Oasis provider is a plugin for Terraform that allows for the full lifecycle management of ArangoGraph Insights Platform resources.
 
 Api keys can be generated and viewed under the user's dashboard view on the API Keys tab.
 On a logged in view, navigate to [API Keys](https://cloud.arangodb.com/dashboard/user/api-keys) and hit the button
