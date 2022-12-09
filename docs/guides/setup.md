@@ -20,8 +20,8 @@ terraform {
 }
 
 provider "oasis" {
-  api_key_id     = "" // API Key ID generated in ArangoGraph Insights Platform (formerly called Oasis) platform
-  api_key_secret = "" // API Key Secret generated in ArangoGraph Insights Platform (formerly called Oasis) platform
+  api_key_id     = "" // API Key ID generated in ArangoGraph Insights Platform platform
+  api_key_secret = "" // API Key Secret generated in ArangoGraph Insights Platform platform
 }
 ```
 
@@ -29,13 +29,13 @@ The provider can also be setup with a default organization and project to manage
 
 ```hcl
 provider "oasis" {
-  api_key_id     = "" // API Key ID generated in ArangoGraph Insights Platform (formerly called Oasis) platform
-  api_key_secret = "" // API Key Secret generated in ArangoGraph Insights Platform (formerly called Oasis) platform
-  organization   = "" // Organization ID within ArangoGraph Insights Platform (formerly called Oasis)
+  api_key_id     = "" // API Key ID generated in ArangoGraph Insights Platform
+  api_key_secret = "" // API Key Secret generated in ArangoGraph Insights Platform
+  organization   = "" // Organization ID within ArangoGraph Insights Platform 
   project        = "" // Project ID within the specified organization
 }
 ```
 
 The other options you can provide are:
 - `oasis_endpoint` for the endpoint you want to manage the resources in (by default set to: `api.cloud.arangodb.com`).
-- `api_port_suffix` for the ArangoGraph Insights Platform (formerly called Oasis) API Port Suffix (by default set to `:443`).
+- `api_port_suffix` for the ArangoGraph Insights Platform API Port Suffix (by default set to `:443`).
