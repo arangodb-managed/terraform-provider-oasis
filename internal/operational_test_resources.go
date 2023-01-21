@@ -32,7 +32,7 @@ import (
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
 
-//FetchOrganizationID finds and retrieves the first Organization ID it finds for a user.
+// FetchOrganizationID finds and retrieves the first Organization ID it finds for a user.
 func FetchOrganizationID() (string, error) {
 	orgID := os.Getenv("OASIS_TEST_ORGANIZATION_ID")
 	if orgID == "" {

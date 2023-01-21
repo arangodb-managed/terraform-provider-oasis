@@ -17,8 +17,7 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Gergely Brautigam
-//
+
 package provider
 
 import (
