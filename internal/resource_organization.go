@@ -36,6 +36,11 @@ const (
 	organizationNameFieldName        = "name"
 	organizationDescriptionFieldName = "description"
 	organizationLockFieldName        = "locked"
+	authenticationProvidersFieldName = "authentication_providers"
+	enableGithubFieldName            = "enable_github"
+	enableGoogleFieldName            = "enable_google"
+	enableUsernamePasswordFieldName  = "enable_username_password"
+	enableMicrosoftFieldName         = "enable_microsoft"
 )
 
 // resourceOrganization defines an Organization Oasis resource.
@@ -62,6 +67,41 @@ func resourceOrganization() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Organization Resource Organization Lock field",
 				Optional:    true,
+			},
+			authenticationProvidersFieldName: {
+				Type:        schema.TypeList,
+				Description: "Authentication Provider field",
+				Computed:    true,
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+
+						enableGithubFieldName: {
+							Type:        schema.TypeBool,
+							Description: "Organization Resource Enable Github Login field",
+							Optional:    true,
+							Default:     false,
+						},
+						enableGoogleFieldName: {
+							Type:        schema.TypeBool,
+							Description: "Organization Resource Enable Google Login field",
+							Optional:    true,
+							Default:     false,
+						},
+						enableUsernamePasswordFieldName: {
+							Type:        schema.TypeBool,
+							Description: "Organization Resource Enable Username Password Login field",
+							Optional:    true,
+							Default:     false,
+						},
+						enableMicrosoftFieldName: {
+							Type:        schema.TypeBool,
+							Description: "Organization Resource Enable Microsoft Login field",
+							Optional:    true,
+							Default:     false,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -132,7 +172,9 @@ func expandOrganizationResource(d *schema.ResourceData) (*rm.Organization, error
 	if v, ok := d.GetOk(organizationLockFieldName); ok {
 		ret.Locked = v.(bool)
 	}
-
+	if v, ok := d.GetOk(authenticationProvidersFieldName); ok {
+		ret.AuthenticationProviders = expandAuthenticationProviders(v.([]interface{}))
+	}
 	return ret, nil
 }
 
@@ -178,7 +220,9 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	if d.HasChange(organizationLockFieldName) {
 		organization.Locked = d.Get(organizationLockFieldName).(bool)
 	}
-
+	if v, ok := d.GetOk(authenticationProvidersFieldName); ok {
+		organization.AuthenticationProviders = expandAuthenticationProviders(v.([]interface{}))
+	}
 	res, err := rmc.UpdateOrganization(client.ctxWithToken, organization)
 	if err != nil {
 		client.log.Error().Err(err).Msg("Failed to update Organization")
@@ -191,9 +235,46 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 // flattenOrganizationResource will take an Organization object and turn it into a flat map for terraform digestion.
 func flattenOrganizationResource(organization *rm.Organization) map[string]interface{} {
-	return map[string]interface{}{
+	result := map[string]interface{}{
 		organizationNameFieldName:        organization.GetName(),
 		organizationDescriptionFieldName: organization.GetDescription(),
 		organizationLockFieldName:        organization.GetLocked(),
 	}
+	if organization.GetAuthenticationProviders() != nil {
+		result[authenticationProvidersFieldName] = flattenAuthenticationProviders(organization.GetAuthenticationProviders())
+	}
+	return result
+}
+
+// flattenAuthenticationProviders will take a AuthenticationProviders Spec object and turn it into a flat map for terraform digestion.
+func flattenAuthenticationProviders(p *rm.AuthenticationProviders) []interface{} {
+	providers := make(map[string]interface{})
+	providers[enableGithubFieldName] = p.GetEnableGithub()
+	providers[enableGoogleFieldName] = p.GetEnableGoogle()
+	providers[enableMicrosoftFieldName] = p.GetEnableMicrosoft()
+	providers[enableUsernamePasswordFieldName] = p.GetEnableUsernamePassword()
+	return []interface{}{
+		providers,
+	}
+}
+
+// expandAuthenticationProviders will take a terraform flat map schema data and turn it into an ArangoGraph AuthenticationProviders.
+func expandAuthenticationProviders(p []interface{}) *rm.AuthenticationProviders {
+	result := &rm.AuthenticationProviders{}
+	for _, v := range p {
+		item := v.(map[string]interface{})
+		if i, ok := item[enableGithubFieldName]; ok {
+			result.EnableGithub = i.(bool)
+		}
+		if i, ok := item[enableGoogleFieldName]; ok {
+			result.EnableGoogle = i.(bool)
+		}
+		if i, ok := item[enableMicrosoftFieldName]; ok {
+			result.EnableMicrosoft = i.(bool)
+		}
+		if i, ok := item[enableUsernamePasswordFieldName]; ok {
+			result.EnableUsernamePassword = i.(bool)
+		}
+	}
+	return result
 }
