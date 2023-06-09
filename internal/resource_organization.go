@@ -41,6 +41,7 @@ const (
 	enableGoogleFieldName            = "enable_google"
 	enableUsernamePasswordFieldName  = "enable_username_password"
 	enableMicrosoftFieldName         = "enable_microsoft"
+	enableSso                        = "enable_sso"
 )
 
 // resourceOrganization defines an Organization Oasis resource.
@@ -97,6 +98,12 @@ func resourceOrganization() *schema.Resource {
 						enableMicrosoftFieldName: {
 							Type:        schema.TypeBool,
 							Description: "Organization Resource Enable Microsoft Login field",
+							Optional:    true,
+							Default:     false,
+						},
+						enableSso: {
+							Type:        schema.TypeBool,
+							Description: "Organization Resource Enable Single Sign On(SSO) Login field",
 							Optional:    true,
 							Default:     false,
 						},
@@ -253,6 +260,7 @@ func flattenAuthenticationProviders(p *rm.AuthenticationProviders) []interface{}
 	providers[enableGoogleFieldName] = p.GetEnableGoogle()
 	providers[enableMicrosoftFieldName] = p.GetEnableMicrosoft()
 	providers[enableUsernamePasswordFieldName] = p.GetEnableUsernamePassword()
+	providers[enableSso] = p.GetEnableSso()
 	return []interface{}{
 		providers,
 	}
@@ -274,6 +282,9 @@ func expandAuthenticationProviders(p []interface{}) *rm.AuthenticationProviders 
 		}
 		if i, ok := item[enableUsernamePasswordFieldName]; ok {
 			result.EnableUsernamePassword = i.(bool)
+		}
+		if i, ok := item[enableSso]; ok {
+			result.EnableSso = i.(bool)
 		}
 	}
 	return result
