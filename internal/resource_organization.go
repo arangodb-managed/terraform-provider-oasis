@@ -41,7 +41,7 @@ const (
 	enableGoogleFieldName            = "enable_google"
 	enableUsernamePasswordFieldName  = "enable_username_password"
 	enableMicrosoftFieldName         = "enable_microsoft"
-	enableSso                        = "enable-sso"
+	enableSso                        = "enable_sso"
 )
 
 // resourceOrganization defines an Organization Oasis resource.
