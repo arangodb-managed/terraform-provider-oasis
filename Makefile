@@ -63,6 +63,6 @@ update-modules:
 	test -f go.mod || go mod init
 	go get \
 		$(shell zutano go mod latest \
-			github.com/arangodb-managed/apis@OAS-7446 \
+			github.com/arangodb-managed/apis \
 		)
 	go mod tidy
