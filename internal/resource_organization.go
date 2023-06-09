@@ -103,7 +103,7 @@ func resourceOrganization() *schema.Resource {
 						},
 						enableSso: {
 							Type:        schema.TypeBool,
-							Description: "Organization Resource Enable SSO Login field",
+							Description: "Organization Resource Enable Single Sign On(SSO) Login field",
 							Optional:    true,
 							Default:     false,
 						},
