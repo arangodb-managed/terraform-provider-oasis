@@ -147,6 +147,7 @@ func TestFlattenOrganization(t *testing.T) {
 				enableGoogleFieldName:           true,
 				enableMicrosoftFieldName:        true,
 				enableUsernamePasswordFieldName: true,
+				enableSso:                       true,
 			},
 		}
 		organization.AuthenticationProviders = expandAuthenticationProviders(authProviderData)
@@ -156,6 +157,7 @@ func TestFlattenOrganization(t *testing.T) {
 				enableGoogleFieldName:           true,
 				enableMicrosoftFieldName:        true,
 				enableUsernamePasswordFieldName: true,
+				enableSso:                       true,
 			},
 		}
 		flattened := flattenOrganizationResource(organization)
