@@ -60,6 +60,7 @@ const (
 	deplDisableScheduledRootPasswordRotationFieldName    = "disable_scheduled_root_password_rotation"
 	deplLockedFieldName                                  = "locked"
 	deplDeploymentProfileIDFieldName                     = "deployment_profile_id"
+	deplIsPlatformAuthEnabled                            = "is_platform_authentication_enabled"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -257,6 +258,13 @@ func resourceDeployment() *schema.Resource {
 				Description: "Deployment Resource Deployment Profile ID field",
 				Optional:    true,
 			},
+
+			deplIsPlatformAuthEnabled: {
+				Type:        schema.TypeBool,
+				Description: "Deployment Resource Deployment Is Platform Authentication Enabled field",
+				Optional:    true,
+				Default:     false,
+			},
 		},
 	}
 }
@@ -431,6 +439,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		scheduledRootPasswordRotationDisabled bool
 		locked                                bool
 		deploymentProfileID                   string
+		isPlatformAuthenticationEnabled       bool
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
@@ -492,6 +501,10 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		deploymentProfileID = v.(string)
 	}
 
+	if v, ok := d.GetOk(deplIsPlatformAuthEnabled); ok {
+		isPlatformAuthenticationEnabled = v.(bool)
+	}
+
 	return &data.Deployment{
 		Name:                      name,
 		Description:               description,
@@ -513,6 +526,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		IsScheduledRootPasswordRotationEnabled: !scheduledRootPasswordRotationDisabled,
 		Locked:                                 locked,
 		DeploymentProfileId:                    deploymentProfileID,
+		IsPlatformAuthenticationEnabled:        isPlatformAuthenticationEnabled,
 	}, nil
 }
 
@@ -648,6 +662,7 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 		deplDiskPerformanceFieldName:                      depl.GetDiskPerformanceId(),
 		deplDisableScheduledRootPasswordRotationFieldName: !depl.GetIsScheduledRootPasswordRotationEnabled(),
 		deplLockedFieldName:                               depl.GetLocked(),
+		deplIsPlatformAuthEnabled:                         depl.GetIsPlatformAuthenticationEnabled(),
 	}
 	if notificationSetting != nil {
 		result[deplNotificationConfigurationFieldName] = notificationSetting

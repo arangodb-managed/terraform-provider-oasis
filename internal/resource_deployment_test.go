@@ -129,6 +129,68 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		deplDisableScheduledRootPasswordRotationFieldName: true,
 		deplLockedFieldName:                               false,
 		deplDeploymentProfileIDFieldName:                  deploymentProfileTestID,
+		deplIsPlatformAuthEnabled:                         false,
+	}
+	assert.Equal(t, expected, flattened)
+}
+
+// TestFlattenDeploymentResourcePlatformAuthentication tests the Oasis Deployment flattening with PlatformAuthentication set to true.
+func TestFlattenDeploymentResourcePlatformAuthentication(t *testing.T) {
+	depl := &data.Deployment{
+		Name:        "test-name",
+		Description: "test-desc",
+		ProjectId:   "123456789",
+		RegionId:    "gcp-europe-west4",
+		Version:     "3.9.1",
+		Certificates: &data.Deployment_CertificateSpec{
+			CaCertificateId: "certificate-id",
+		},
+		IpallowlistId:             "ip-allowlist",
+		DisableFoxxAuthentication: true,
+		Model: &data.Deployment_ModelSpec{
+			Model:        "oneshard",
+			NodeSizeId:   "a8",
+			NodeCount:    3,
+			NodeDiskSize: 32,
+		},
+		IsScheduledRootPasswordRotationEnabled: true,
+		Locked:                                 true,
+		IsPlatformAuthenticationEnabled:        true,
+	}
+	flattened := flattenDeployment(depl)
+	expected := map[string]interface{}{
+		deplProjectFieldName:     "123456789",
+		deplNameFieldName:        "test-name",
+		deplDescriptionFieldName: "test-desc",
+		deplLocationFieldName: []interface{}{
+			map[string]interface{}{
+				deplLocationRegionFieldName: "gcp-europe-west4",
+			},
+		},
+		deplVersionFieldName: []interface{}{
+			map[string]interface{}{
+				deplVersionDbVersionFieldName: "3.9.1",
+			},
+		},
+		deplSecurityFieldName: []interface{}{
+			map[string]interface{}{
+				deplSecurityCaCertificateFieldName:             "certificate-id",
+				deplSecurityIpAllowlistFieldName:               "ip-allowlist",
+				deplSecurityDisableFoxxAuthenticationFieldName: true,
+			},
+		},
+		deplConfigurationFieldName: []interface{}{
+			map[string]interface{}{
+				deplConfigurationModelFieldName:        "oneshard",
+				deplConfigurationNodeSizeIdFieldName:   "a8",
+				deplConfigurationNodeCountFieldName:    3,
+				deplConfigurationNodeDiskSizeFieldName: 32,
+			},
+		},
+		deplDiskPerformanceFieldName:                      "", // Not set
+		deplDisableScheduledRootPasswordRotationFieldName: false,
+		deplLockedFieldName:                               true,
+		deplIsPlatformAuthEnabled:                         true,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -188,6 +250,7 @@ func TestFlattenDeploymentResourceDisableFoxxAuth(t *testing.T) {
 		deplDiskPerformanceFieldName:                      "", // Not set
 		deplDisableScheduledRootPasswordRotationFieldName: false,
 		deplLockedFieldName:                               true,
+		deplIsPlatformAuthEnabled:                         false,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -255,6 +318,7 @@ func TestFlattenDeploymentResourceNotificationSettings(t *testing.T) {
 		deplDiskPerformanceFieldName:                      "",
 		deplDisableScheduledRootPasswordRotationFieldName: true,
 		deplLockedFieldName:                               true,
+		deplIsPlatformAuthEnabled:                         false,
 	}
 	assert.Equal(t, expected, flattened)
 }
@@ -381,7 +445,8 @@ func TestExpandingDeploymentResourceDisableFoxxAuth(t *testing.T) {
 			},
 		},
 		deplDisableScheduledRootPasswordRotationFieldName: false,
-		deplLockedFieldName: true,
+		deplLockedFieldName:       true,
+		deplIsPlatformAuthEnabled: false,
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
@@ -440,7 +505,8 @@ func TestExpandDeploymentOverrideProjectID(t *testing.T) {
 			},
 		},
 		deplDisableScheduledRootPasswordRotationFieldName: true,
-		deplLockedFieldName: true,
+		deplLockedFieldName:       true,
+		deplIsPlatformAuthEnabled: false,
 	}
 	s := resourceDeployment().Schema
 	resourceData := schema.TestResourceDataRaw(t, s, raw)
