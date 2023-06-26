@@ -139,6 +139,30 @@ func TestFlattenOrganization(t *testing.T) {
 		flattened := flattenOrganizationResource(organization)
 		assert.Equal(tt, expected, flattened)
 	})
+
+	t.Run("with auth providers enabled", func(tt *testing.T) {
+		authProviderData := []interface{}{
+			map[string]interface{}{
+				enableGithubFieldName:           true,
+				enableGoogleFieldName:           true,
+				enableMicrosoftFieldName:        true,
+				enableUsernamePasswordFieldName: true,
+				enableSso:                       true,
+			},
+		}
+		organization.AuthenticationProviders = expandAuthenticationProviders(authProviderData)
+		expected[authenticationProvidersFieldName] = []interface{}{
+			map[string]interface{}{
+				enableGithubFieldName:           true,
+				enableGoogleFieldName:           true,
+				enableMicrosoftFieldName:        true,
+				enableUsernamePasswordFieldName: true,
+				enableSso:                       true,
+			},
+		}
+		flattened := flattenOrganizationResource(organization)
+		assert.Equal(tt, expected, flattened)
+	})
 }
 
 // TestExpandOrganization tests the Oasis Organization expansion for Terraform schema compatibility.
