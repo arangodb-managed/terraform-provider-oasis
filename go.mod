@@ -1,7 +1,9 @@
 module github.com/arangodb-managed/terraform-provider-oasis
 
+go 1.20
+
 require (
-	github.com/arangodb-managed/apis v0.79.17
+	github.com/arangodb-managed/apis v0.81.0
 	github.com/arangodb-managed/log-helper v0.2.5
 	github.com/gogo/protobuf v1.3.2
 	github.com/hashicorp/terraform-plugin-docs v0.8.1
@@ -78,8 +80,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
-
-go 1.17
 
 replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+incompatible
 
