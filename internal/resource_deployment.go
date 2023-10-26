@@ -61,6 +61,7 @@ const (
 	deplLockedFieldName                                  = "locked"
 	deplDeploymentProfileIDFieldName                     = "deployment_profile_id"
 	deplIsPlatformAuthEnabled                            = "is_platform_authentication_enabled"
+	deplDropVSTSupportFieldName                          = "drop_vst_support"
 )
 
 func resourceDeployment() *schema.Resource {
@@ -265,6 +266,12 @@ func resourceDeployment() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			deplDropVSTSupportFieldName: {
+				Type:        schema.TypeBool,
+				Description: "Deployment Resource Deployment Drop VST Support field",
+				Optional:    true,
+				Default:     false,
+			},
 		},
 	}
 }
@@ -440,6 +447,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		locked                                bool
 		deploymentProfileID                   string
 		isPlatformAuthenticationEnabled       bool
+		dropVSTSupport                        bool
 	)
 	if v, ok := d.GetOk(deplNameFieldName); ok {
 		name = v.(string)
@@ -504,6 +512,9 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 	if v, ok := d.GetOk(deplIsPlatformAuthEnabled); ok {
 		isPlatformAuthenticationEnabled = v.(bool)
 	}
+	if v, ok := d.GetOk(deplDropVSTSupportFieldName); ok {
+		dropVSTSupport = v.(bool)
+	}
 
 	return &data.Deployment{
 		Name:                      name,
@@ -527,6 +538,7 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 		Locked:                                 locked,
 		DeploymentProfileId:                    deploymentProfileID,
 		IsPlatformAuthenticationEnabled:        isPlatformAuthenticationEnabled,
+		DropVstSupport:                         dropVSTSupport,
 	}, nil
 }
 
@@ -663,6 +675,7 @@ func flattenDeployment(depl *data.Deployment) map[string]interface{} {
 		deplDisableScheduledRootPasswordRotationFieldName: !depl.GetIsScheduledRootPasswordRotationEnabled(),
 		deplLockedFieldName:                               depl.GetLocked(),
 		deplIsPlatformAuthEnabled:                         depl.GetIsPlatformAuthenticationEnabled(),
+		deplDropVSTSupportFieldName:                       depl.GetDropVstSupport(),
 	}
 	if notificationSetting != nil {
 		result[deplNotificationConfigurationFieldName] = notificationSetting
@@ -807,6 +820,9 @@ func resourceDeploymentUpdate(ctx context.Context, d *schema.ResourceData, m int
 
 	if d.HasChange(deplLockedFieldName) {
 		depl.Locked = d.Get(deplLockedFieldName).(bool)
+	}
+	if d.HasChange(deplDropVSTSupportFieldName) {
+		depl.DropVstSupport = d.Get(deplDropVSTSupportFieldName).(bool)
 	}
 
 	if d.HasChange(deplDeploymentProfileIDFieldName) {
