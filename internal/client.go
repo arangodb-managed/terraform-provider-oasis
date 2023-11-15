@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2021 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2023 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,6 @@
 //
 // Copyright holder is ArangoDB GmbH, Cologne, Germany
 //
-// Author Joerg Schad
-// Author Gergely Brautigam
-// Author Robert Stam
-//
 
 package provider
 
@@ -33,11 +29,12 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"github.com/arangodb-managed/apis/common/auth"
+	commonGrpc "github.com/arangodb-managed/apis/common/v1/grpc"
 	iam "github.com/arangodb-managed/apis/iam/v1"
 	lh "github.com/arangodb-managed/log-helper"
 )
 
-// Client is responsible for connecting to the Oasis API
+// Client is responsible for connecting to the Arango Graph API
 type Client struct {
 	ApiKeyID       string
 	ApiKeySecret   string
@@ -50,7 +47,7 @@ type Client struct {
 	log            zerolog.Logger
 }
 
-// Connect connects to oasis api
+// Connect connects to Arango Graph API
 func (c *Client) Connect() error {
 	ctx := context.Background()
 	c.log = lh.MustNew(lh.DefaultConfig())
@@ -66,18 +63,21 @@ func (c *Client) Connect() error {
 		c.log.Error().Err(err).Msg("Could not get Auth Token")
 		return err
 	}
-
-	c.ctxWithToken = auth.WithAccessToken(ctx, token)
+	// Add Access Token
+	ctxWithToken := auth.WithAccessToken(ctx, token)
+	// Add the User Agent as well
+	ua := commonGrpc.CreateUserAgent("terraform-provider-oasis", currentVersion)
+	c.ctxWithToken = commonGrpc.WithUserAgent(ctxWithToken, ua)
 	return nil
 }
 
-// mustDialAPI dials the ArangoDB Oasis API
+// mustDialAPI dials the Arango Graph API
 func (c *Client) mustDialAPI() (*grpc.ClientConn, error) {
 	// Set up a connection to the server.
 	tc := credentials.NewTLS(&tls.Config{})
 	conn, err := grpc.Dial(c.ApiEndpoint+c.ApiPortSuffix, grpc.WithTransportCredentials(tc))
 	if err != nil {
-		c.log.Error().Err(err).Msg("Failed to connect to ArangoDB Oasis API")
+		c.log.Error().Err(err).Msg("Failed to connect to Arango Graph API")
 		return nil, err
 	}
 	return conn, nil

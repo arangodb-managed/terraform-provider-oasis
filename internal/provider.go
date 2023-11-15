@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2023 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,10 +27,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+var (
+	// The version of the currently running plugin
+	currentVersion string
+)
+
 func init() {
 	// Set descriptions to support markdown syntax, this will be used in document generation
 	// and the language server.
 	schema.DescriptionKind = schema.StringMarkdown
+}
+
+// SetVersionAndBuild stores the given version & build
+func SetVersionAndBuild(version, build string) {
+	currentVersion = version
 }
 
 // Provider defines an ArangoDB Oasis Terraform provider.

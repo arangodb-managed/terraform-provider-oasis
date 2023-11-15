@@ -3,7 +3,7 @@ module github.com/arangodb-managed/terraform-provider-oasis
 go 1.20
 
 require (
-	github.com/arangodb-managed/apis v0.83.1
+	github.com/arangodb-managed/apis v0.84.3
 	github.com/arangodb-managed/log-helper v0.2.5
 	github.com/gogo/protobuf v1.3.2
 	github.com/hashicorp/terraform-plugin-docs v0.8.1
