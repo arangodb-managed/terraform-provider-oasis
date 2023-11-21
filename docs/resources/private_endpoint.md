@@ -118,7 +118,7 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
 - `aks` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AKS field (see [below for nested schema](#nestedblock--aks))
 - `aws` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AWS field (see [below for nested schema](#nestedblock--aws))
 - `description` (String) Private Endpoint Resource Private Endpoint Description field
-- `enable_private_dns` (Bool) If set, private DNS zone integration is enabled for this private endpoint service. For GCP this bool is immutable, so can only be set during the creation.
+- `enable_private_dns` (Bool) If set, private DNS zone integration is enabled for this private endpoint service. For GCP this bool is immutable, so can only be set during the creation. For AKS this boolean cannot be set.
 - `dns_names` (List of String) Private Endpoint Resource Private Endpoint DNS Names field (list of dns names)
 - `gcp` (Block List, Max: 1) Private Endpoint Resource Private Endpoint GCP field (see [below for nested schema](#nestedblock--gcp))
 
