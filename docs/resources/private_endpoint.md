@@ -93,6 +93,7 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
   name        = "tf-private-endpoint-test"
   description = "Terraform generated AWS private endpoint"
   deployment  = oasis_deployment.my_aws_oneshard_deployment.id
+  enable_private_dns = true
   dns_names   = ["test.example.com", "test2.example.com"]
   aws {
     principal {
@@ -117,6 +118,7 @@ resource "oasis_private_endpoint" "my_aws_private_endpoint" {
 - `aks` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AKS field (see [below for nested schema](#nestedblock--aks))
 - `aws` (Block List, Max: 1) Private Endpoint Resource Private Endpoint AWS field (see [below for nested schema](#nestedblock--aws))
 - `description` (String) Private Endpoint Resource Private Endpoint Description field
+- `enable_private_dns` (Bool) If set, private DNS zone integration is enabled for this private endpoint service. For GCP this bool is immutable, so can only be set during the creation.
 - `dns_names` (List of String) Private Endpoint Resource Private Endpoint DNS Names field (list of dns names)
 - `gcp` (Block List, Max: 1) Private Endpoint Resource Private Endpoint GCP field (see [below for nested schema](#nestedblock--gcp))
 
