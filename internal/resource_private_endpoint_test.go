@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2022-2023 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -92,14 +92,16 @@ func TestFlattenPrivateEndpoint(t *testing.T) {
 		Name:              "test-private-endpoint",
 		Description:       "test-description",
 		DeploymentId:      deploymentId,
+		EnablePrivateDns:  true,
 		AlternateDnsNames: []string{"test.example.com"},
 	}
 
 	expected := map[string]interface{}{
-		privateEndpointNameFieldName:        "test-private-endpoint",
-		privateEndpointDescriptionFieldName: "test-description",
-		privateEndpointDeploymentFieldName:  deploymentId,
-		privateEndpointDNSNamesFieldName:    []string{"test.example.com"},
+		privateEndpointNameFieldName:              "test-private-endpoint",
+		privateEndpointDescriptionFieldName:       "test-description",
+		privateEndpointDeploymentFieldName:        deploymentId,
+		prirvateEndpointEnablePrivateDNSFieldName: true,
+		privateEndpointDNSNamesFieldName:          []string{"test.example.com"},
 	}
 
 	t.Run("flattening with aks field", func(tt *testing.T) {

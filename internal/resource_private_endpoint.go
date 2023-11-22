@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2022-2023 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,10 +33,11 @@ import (
 
 const (
 	// Private Endpoint field names
-	privateEndpointNameFieldName        = "name"
-	privateEndpointDescriptionFieldName = "description"
-	privateEndpointDeploymentFieldName  = "deployment"
-	privateEndpointDNSNamesFieldName    = "dns_names"
+	privateEndpointNameFieldName              = "name"
+	privateEndpointDescriptionFieldName       = "description"
+	privateEndpointDeploymentFieldName        = "deployment"
+	prirvateEndpointEnablePrivateDNSFieldName = "enable_private_dns"
+	privateEndpointDNSNamesFieldName          = "dns_names"
 
 	// AKS field names
 	privateEndpointAKSFieldName                      = "aks"
@@ -78,6 +79,11 @@ func resourcePrivateEndpoint() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Private Endpoint Resource Private Endpoint Deployment ID field",
 				Required:    true,
+			},
+			prirvateEndpointEnablePrivateDNSFieldName: {
+				Type:        schema.TypeBool,
+				Description: "Private Endpoint Resource Private Endpoint Enable Private DNS field",
+				Optional:    true,
 			},
 			privateEndpointDNSNamesFieldName: {
 				Type:        schema.TypeList,
@@ -200,13 +206,14 @@ func resourcePrivateEndpointRead(ctx context.Context, d *schema.ResourceData, m 
 // flattenPrivateEndpointResource will take a Private Endpoint object and turn it into a flat map for terraform digestion.
 func flattenPrivateEndpointResource(privateEndpoint *network.PrivateEndpointService) map[string]interface{} {
 	return map[string]interface{}{
-		privateEndpointNameFieldName:        privateEndpoint.GetName(),
-		privateEndpointDescriptionFieldName: privateEndpoint.GetDescription(),
-		privateEndpointDeploymentFieldName:  privateEndpoint.GetDeploymentId(),
-		privateEndpointDNSNamesFieldName:    privateEndpoint.GetAlternateDnsNames(),
-		privateEndpointAKSFieldName:         flattenAKSResource(privateEndpoint.GetAks()),
-		privateEndpointAWSFieldName:         flattenAWSResource(privateEndpoint.GetAws()),
-		privateEndpointGCPFieldName:         flattenGCPResource(privateEndpoint.GetGcp()),
+		privateEndpointNameFieldName:              privateEndpoint.GetName(),
+		privateEndpointDescriptionFieldName:       privateEndpoint.GetDescription(),
+		privateEndpointDeploymentFieldName:        privateEndpoint.GetDeploymentId(),
+		prirvateEndpointEnablePrivateDNSFieldName: privateEndpoint.GetEnablePrivateDns(),
+		privateEndpointDNSNamesFieldName:          privateEndpoint.GetAlternateDnsNames(),
+		privateEndpointAKSFieldName:               flattenAKSResource(privateEndpoint.GetAks()),
+		privateEndpointAWSFieldName:               flattenAWSResource(privateEndpoint.GetAws()),
+		privateEndpointGCPFieldName:               flattenGCPResource(privateEndpoint.GetGcp()),
 	}
 }
 
@@ -307,6 +314,9 @@ func expandPrivateEndpointResource(d *schema.ResourceData) (*network.PrivateEndp
 		ret.DeploymentId = v.(string)
 	} else {
 		return nil, fmt.Errorf("unable to find parse field %s", privateEndpointDeploymentFieldName)
+	}
+	if v, ok := d.GetOk(prirvateEndpointEnablePrivateDNSFieldName); ok {
+		ret.EnablePrivateDns = v.(bool)
 	}
 	if v, ok := d.GetOk(privateEndpointDNSNamesFieldName); ok {
 		dnsNames, err := expandPrivateEndpointStringList(v.([]interface{}))
@@ -454,6 +464,9 @@ func resourcePrivateEndpointUpdate(ctx context.Context, d *schema.ResourceData, 
 	}
 	if d.HasChange(privateEndpointDescriptionFieldName) {
 		privateEndpoint.Description = d.Get(privateEndpointDescriptionFieldName).(string)
+	}
+	if d.HasChange(prirvateEndpointEnablePrivateDNSFieldName) {
+		privateEndpoint.EnablePrivateDns = d.Get(prirvateEndpointEnablePrivateDNSFieldName).(bool)
 	}
 	if d.HasChange(privateEndpointDNSNamesFieldName) {
 		dnsNames, err := expandPrivateEndpointStringList(d.Get(privateEndpointDNSNamesFieldName).([]interface{}))
