@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 )
@@ -38,7 +38,7 @@ func TestFlattenBackupPolicy(t *testing.T) {
 		DeploymentId:        "123456",
 		IsPaused:            true,
 		Upload:              true,
-		RetentionPeriod:     types.DurationProto(200 * time.Hour),
+		RetentionPeriod:     durationpb.New(200 * time.Hour),
 		EmailNotification:   "None",
 		Locked:              true,
 		AdditionalRegionIds: []string{"aks-westeurope"},
@@ -178,7 +178,7 @@ func TestExpandBackupPolicy(t *testing.T) {
 		DeploymentId:        "123456",
 		IsPaused:            true,
 		Upload:              true,
-		RetentionPeriod:     types.DurationProto(200 * time.Hour),
+		RetentionPeriod:     durationpb.New(200 * time.Hour),
 		EmailNotification:   "None",
 		Locked:              true,
 		AdditionalRegionIds: []string{"aks-westeurope"},

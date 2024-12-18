@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -99,13 +101,13 @@ func TestFlattenCertificateResource(t *testing.T) {
 		lockedFieldName:                  false,
 	}
 
-	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
-	expires, _ := types.TimestampProto(time.Date(1980, 03, 10, 1, 1, 1, 0, time.UTC))
+	created := timestamppb.New(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
+	expires := timestamppb.New(time.Date(1980, 03, 10, 1, 1, 1, 0, time.UTC))
 	cert := crypto.CACertificate{
 		Name:                    "test-name",
 		Description:             "test-description",
 		ProjectId:               "123456789",
-		Lifetime:                types.DurationProto(1 * time.Hour),
+		Lifetime:                durationpb.New(1 * time.Hour),
 		CreatedAt:               created,
 		ExpiresAt:               expires,
 		IsDefault:               false,

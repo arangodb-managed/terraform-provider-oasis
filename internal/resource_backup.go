@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2022-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -153,8 +153,8 @@ func expandBackupResource(d *schema.ResourceData) (*backup.Backup, error) {
 		return nil, fmt.Errorf("unable to find parse field %s", backupDeploymentIDFieldName)
 	}
 	if v, ok := d.GetOk(backupAutoDeleteAtFieldName); ok {
-		autoDeleteAt, err := types.TimestampProto(time.Now().AddDate(0, 0, v.(int))) // add n days for backup auto deletion
-		if err != nil {
+		autoDeleteAt := timestamppb.New(time.Now().AddDate(0, 0, v.(int))) // add n days for backup auto deletion
+		if err := autoDeleteAt.CheckValid(); err != nil {
 			return nil, fmt.Errorf("unable to parse time for auto delete backup")
 		}
 		ret.AutoDeletedAt = autoDeleteAt
@@ -239,8 +239,8 @@ func resourceBackupUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		backup.Upload = d.Get(backupUploadFieldName).(bool)
 	}
 	if d.HasChange(backupAutoDeleteAtFieldName) {
-		updatedAutoDeleteAt, err := types.TimestampProto(time.Now().AddDate(0, 0, d.Get(backupAutoDeleteAtFieldName).(int)))
-		if err != nil {
+		updatedAutoDeleteAt := timestamppb.New(time.Now().AddDate(0, 0, d.Get(backupAutoDeleteAtFieldName).(int)))
+		if err := updatedAutoDeleteAt.CheckValid(); err != nil {
 			return diag.FromErr(errors.New("unable to parse time for auto delete backup"))
 		}
 		backup.AutoDeletedAt = updatedAutoDeleteAt
