@@ -171,8 +171,8 @@ func flattenCertificateResource(cert *crypto.CACertificate) map[string]interface
 		useWellKnownCertificateFieldName: cert.GetUseWellKnownCertificate(),
 		lifetimeFieldName:                int(cert.GetLifetime().GetSeconds()),
 		isDefaultFieldName:               cert.GetIsDefault(),
-		expiresAtFieldName:               cert.GetExpiresAt().String(),
-		createdAtFieldName:               cert.GetCreatedAt().String(),
+		expiresAtFieldName:               cert.GetExpiresAt().AsTime().Format(time.RFC3339Nano),
+		createdAtFieldName:               cert.GetCreatedAt().AsTime().Format(time.RFC3339Nano),
 		lockedFieldName:                  cert.GetLocked(),
 	}
 	return flatted
