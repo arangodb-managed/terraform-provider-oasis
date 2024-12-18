@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	example "github.com/arangodb-managed/apis/example/v1"
 )
 
 func TestFlattenExampleDatasetInstallations(t *testing.T) {
-	created, _ := types.TimestampProto(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
+	created := timestamppb.New(time.Date(1980, 03, 03, 1, 1, 1, 0, time.UTC))
 	items := &example.ExampleDatasetInstallationList{
 		Items: []*example.ExampleDatasetInstallation{
 			{

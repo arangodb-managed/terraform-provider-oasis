@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package provider
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -152,7 +153,7 @@ func flattenOrganizationObject(org *rm.Organization) map[string]interface{} {
 		orgNameFieldName:        org.GetName(),
 		orgDescriptionFieldName: org.GetDescription(),
 		orgUrlFieldName:         org.GetUrl(),
-		orgCreatedAtFieldName:   org.GetCreatedAt().String(),
+		orgCreatedAtFieldName:   org.GetCreatedAt().AsTime().Format(time.RFC3339Nano),
 		tierFieldName:           flattenTierObject(org.GetTier()),
 	}
 

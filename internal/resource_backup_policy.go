@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -368,9 +368,9 @@ func resourceBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData, m i
 }
 
 // getRetentionPeriod calculates the retention period.
-func getRetentionPeriod(v interface{}) *types.Duration {
+func getRetentionPeriod(v interface{}) *durationpb.Duration {
 	// retention period is given in hours
-	return types.DurationProto((time.Duration(v.(int)) * 60 * 60) * time.Second)
+	return durationpb.New((time.Duration(v.(int)) * 60 * 60) * time.Second)
 }
 
 // resourceBackupPolicyRead will gather information from the terraform store and display it accordingly.

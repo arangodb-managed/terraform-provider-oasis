@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package provider
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -146,7 +147,7 @@ func flattenInstallation(items []*example.ExampleDatasetInstallation) []interfac
 	for _, v := range items {
 		ret = append(ret, map[string]interface{}{
 			installationExampleDatasetIdFieldName: v.GetExampledatasetId(),
-			installationCreatedAtFieldName:        v.GetCreatedAt().String(),
+			installationCreatedAtFieldName:        v.GetCreatedAt().AsTime().Format(time.RFC3339Nano),
 			installationStatusFieldName:           flattenInstallationStatus(v.GetStatus()),
 		})
 	}

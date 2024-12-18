@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
@@ -59,7 +59,7 @@ func TestOasisTermsAndConditionsDataSource_Basic(t *testing.T) {
 }
 
 func TestFlattenTAndCDataSource(t *testing.T) {
-	createdAtTimeStamp, _ := types.TimestampProto(time.Date(1980, 1, 1, 1, 1, 1, 0, time.UTC))
+	createdAtTimeStamp := timestamppb.New(time.Date(1980, 1, 1, 1, 1, 1, 0, time.UTC))
 	term := rm.TermsAndConditions{
 		Id:        "test-id",
 		Content:   "Content",

@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	crypto "github.com/arangodb-managed/apis/crypto/v1"
@@ -171,8 +171,8 @@ func flattenCertificateResource(cert *crypto.CACertificate) map[string]interface
 		useWellKnownCertificateFieldName: cert.GetUseWellKnownCertificate(),
 		lifetimeFieldName:                int(cert.GetLifetime().GetSeconds()),
 		isDefaultFieldName:               cert.GetIsDefault(),
-		expiresAtFieldName:               cert.GetExpiresAt().String(),
-		createdAtFieldName:               cert.GetCreatedAt().String(),
+		expiresAtFieldName:               cert.GetExpiresAt().AsTime().Format(time.RFC3339Nano),
+		createdAtFieldName:               cert.GetCreatedAt().AsTime().Format(time.RFC3339Nano),
 		lockedFieldName:                  cert.GetLocked(),
 	}
 	return flatted
@@ -186,7 +186,7 @@ func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
 		description             string
 		lifetime                int
 		useWellKnownCertificate bool
-		lt                      *types.Duration
+		lt                      *durationpb.Duration
 		locked                  bool
 	)
 	if v, ok := d.GetOk(descriptionFieldName); ok {
@@ -195,7 +195,7 @@ func expandToCertificate(d *schema.ResourceData) *crypto.CACertificate {
 	if v, ok := d.GetOk(lifetimeFieldName); ok {
 		lifetime = v.(int)
 		if lifetime > 0 {
-			lt = types.DurationProto(time.Duration(lifetime) * time.Second)
+			lt = durationpb.New(time.Duration(lifetime) * time.Second)
 		}
 	}
 	if v, ok := d.GetOk(useWellKnownCertificateFieldName); ok {
@@ -245,7 +245,7 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 		cert.UseWellKnownCertificate = d.Get(useWellKnownCertificateFieldName).(bool)
 	}
 	if d.HasChange(lifetimeFieldName) {
-		cert.Lifetime = types.DurationProto(time.Duration(d.Get(lifetimeFieldName).(int)))
+		cert.Lifetime = durationpb.New(time.Duration(d.Get(lifetimeFieldName).(int)))
 	}
 	if d.HasChange(lockedFieldName) {
 		cert.Locked = d.Get(lockedFieldName).(bool)

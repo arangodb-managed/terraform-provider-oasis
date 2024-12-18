@@ -23,6 +23,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -245,24 +246,24 @@ func flattenNotebookResource(notebook *nb.Notebook) map[string]interface{} {
 	}
 	flattened[notebookIsPausedFieldName] = notebook.GetIsPaused()
 	if notebook.GetLastPausedAt() != nil {
-		flattened[notebookLastPausedAtFieldName] = notebook.GetLastPausedAt().String()
+		flattened[notebookLastPausedAtFieldName] = notebook.GetLastPausedAt().AsTime().Format(time.RFC3339Nano)
 	}
 	if notebook.GetLastResumedAt() != nil {
-		flattened[notebookLastResumedAtFieldName] = notebook.GetLastResumedAt().String()
+		flattened[notebookLastResumedAtFieldName] = notebook.GetLastResumedAt().AsTime().Format(time.RFC3339Nano)
 	}
 	if notebook.GetCreatedById() != "" {
 		flattened[notebookCreatedByIdFieldName] = notebook.GetCreatedById()
 	}
+	flattened[notebookCreatedAtFieldName] = notebook.GetCreatedAt()
 	if notebook.GetCreatedAt() != nil {
-		flattened[notebookCreatedAtFieldName] = notebook.GetCreatedAt()
+		flattened[notebookCreatedAtFieldName] = notebook.GetCreatedAt().AsTime().Format(time.RFC3339Nano)
 	}
-	flattened[notebookCreatedAtFieldName] = notebook.GetCreatedAt().String()
 	if notebook.GetModel() != nil {
 		flattened[notebookModelFieldName] = flattenNotebookModelSpecResource(notebook.GetModel())
 	}
 	flattened[notebookIsDeletedFieldName] = notebook.GetIsDeleted()
 	if notebook.GetDeletedAt() != nil {
-		flattened[notebookDeletedAtFieldName] = notebook.GetDeletedAt().String()
+		flattened[notebookDeletedAtFieldName] = notebook.GetDeletedAt().AsTime().Format(time.RFC3339Nano)
 	}
 	if notebook.GetStatus() != nil {
 		flattened[notebookStatusFieldName] = flattenNotebookStatus(notebook.GetStatus())

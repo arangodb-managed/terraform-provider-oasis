@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	rm "github.com/arangodb-managed/apis/resourcemanager/v1"
 )
@@ -69,7 +69,7 @@ func testProjectAccDataSourcePreCheck(t *testing.T) {
 }
 
 func TestFlattenProjectDataSource(t *testing.T) {
-	createdAtTimeStamp, _ := types.TimestampProto(time.Date(1980, 1, 1, 1, 1, 1, 0, time.UTC))
+	createdAtTimeStamp := timestamppb.New(time.Date(1980, 1, 1, 1, 1, 1, 0, time.UTC))
 	proj := rm.Project{
 		Id:             "test-id",
 		Url:            "https://test.url",

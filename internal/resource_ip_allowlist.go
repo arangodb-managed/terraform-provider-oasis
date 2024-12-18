@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -189,7 +190,7 @@ func flattenIPAllowlistResource(ip *security.IPAllowlist) map[string]interface{}
 		ipDescriptionFieldName:             ip.GetDescription(),
 		ipCIDRRangeFieldName:               ip.GetCidrRanges(),
 		ipRemoteInspectionAllowedFieldName: ip.GetRemoteInspectionAllowed(),
-		ipCreatedAtFieldName:               ip.GetCreatedAt().String(),
+		ipCreatedAtFieldName:               ip.GetCreatedAt().AsTime().Format(time.RFC3339Nano),
 		ipIsDeletedFieldName:               ip.GetIsDeleted(),
 		ipLockedFieldName:                  ip.GetLocked(),
 	}

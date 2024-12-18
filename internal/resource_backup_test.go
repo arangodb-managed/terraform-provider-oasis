@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2022-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 	common "github.com/arangodb-managed/apis/common/v1"
@@ -200,8 +200,8 @@ func TestExpandBackup(t *testing.T) {
 		backup, err := expandBackupResource(resourceData)
 		assert.NoError(t, err)
 
-		autoDeleteAt, err := types.TimestampProto(time.Now().AddDate(0, 0, raw[backupAutoDeleteAtFieldName].(int)))
-		assert.NoError(t, err)
+		autoDeleteAt := timestamppb.New(time.Now().AddDate(0, 0, raw[backupAutoDeleteAtFieldName].(int)))
+		assert.NoError(t, autoDeleteAt.CheckValid())
 
 		expected.AutoDeletedAt = autoDeleteAt
 		assert.Equal(t, expected.AutoDeletedAt.GetSeconds(), backup.AutoDeletedAt.GetSeconds())

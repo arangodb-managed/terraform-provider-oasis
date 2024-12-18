@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2022-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	backup "github.com/arangodb-managed/apis/backup/v1"
 )
 
 // TestFlattenBackupObject tests the Oasis Backup flattening for Terraform schema compatibility.
 func TestFlattenBackupObject(t *testing.T) {
-	createdAtTimeStamp, _ := types.TimestampProto(time.Date(2022, 1, 1, 1, 1, 1, 0, time.UTC))
+	createdAtTimeStamp := timestamppb.New(time.Date(2022, 1, 1, 1, 1, 1, 0, time.UTC))
 	backup := backup.Backup{
 		Id:             "test-id",
 		Url:            "https://test.url",

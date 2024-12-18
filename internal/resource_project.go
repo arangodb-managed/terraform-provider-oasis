@@ -23,6 +23,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -145,7 +146,7 @@ func flattenProjectResource(project *rm.Project) map[string]interface{} {
 		projectNameFieldName:         project.GetName(),
 		projectDescriptionFieldName:  project.GetDescription(),
 		projectOrganizationFieldName: project.GetOrganizationId(),
-		projectCreatedAtFieldName:    project.GetCreatedAt().String(),
+		projectCreatedAtFieldName:    project.GetCreatedAt().AsTime().Format(time.RFC3339Nano),
 		projectIsDeletedFieldName:    project.GetIsDeleted(),
 		projectLockedFieldName:       project.GetLocked(),
 	}

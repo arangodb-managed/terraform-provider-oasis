@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2022-2024 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/gogo/protobuf/types"
 	"os"
 	"regexp"
 	"testing"
@@ -35,6 +34,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	common "github.com/arangodb-managed/apis/common/v1"
 	nb "github.com/arangodb-managed/apis/notebook/v1"
@@ -114,7 +114,7 @@ func testNotebookConfig(project, notebookResource string) string {
 
 // TestFlattenNotebook tests the Oasis Notebook flattening for Terraform schema compatibility.
 func TestFlattenNotebook(t *testing.T) {
-	created, _ := types.TimestampProto(time.Date(2022, 03, 03, 1, 1, 1, 0, time.UTC))
+	created := timestamppb.New(time.Date(2022, 03, 03, 1, 1, 1, 0, time.UTC))
 
 	notebook := &nb.Notebook{
 		Id:           "test",
