@@ -65,10 +65,12 @@ workflows:
   build_test_store_artifacts:
     jobs:
       - build:
+          context: agrelease
           filters:
             tags:
               only: /.*/
       - deploy-release:
+          context: agrelease
           requires:
             - build
           filters:
@@ -85,4 +87,5 @@ workflows:
               only: master
     jobs:
       - build:
+          context: agrelease
           update_modules: true
