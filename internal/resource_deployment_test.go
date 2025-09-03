@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2025 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,9 +86,6 @@ func TestFlattenDeploymentResource(t *testing.T) {
 			NodeCount:    3,
 			NodeDiskSize: 32,
 		},
-		DiskAutoSizeSettings: &data.Deployment_DiskAutoSizeSettings{
-			MaximumNodeDiskSize: 40,
-		},
 		DiskPerformanceId:                      "dp-1",
 		IsScheduledRootPasswordRotationEnabled: false,
 		Locked:                                 false,
@@ -118,11 +115,10 @@ func TestFlattenDeploymentResource(t *testing.T) {
 		},
 		deplConfigurationFieldName: []interface{}{
 			map[string]interface{}{
-				deplConfigurationModelFieldName:               "oneshard",
-				deplConfigurationNodeSizeIdFieldName:          "a8",
-				deplConfigurationNodeCountFieldName:           3,
-				deplConfigurationNodeDiskSizeFieldName:        32,
-				deplConfigurationMaximumNodeDiskSizeFieldName: 40,
+				deplConfigurationModelFieldName:        "oneshard",
+				deplConfigurationNodeSizeIdFieldName:   "a8",
+				deplConfigurationNodeCountFieldName:    3,
+				deplConfigurationNodeDiskSizeFieldName: 32,
 			},
 		},
 		deplDiskPerformanceFieldName:                      "dp-1",
@@ -409,9 +405,6 @@ func TestExpandingDeploymentResource(t *testing.T) {
 			NodeCount:    3,
 			NodeDiskSize: 32,
 		},
-		DiskAutoSizeSettings: &data.Deployment_DiskAutoSizeSettings{
-			MaximumNodeDiskSize: 40,
-		},
 		DiskPerformanceId:                      "dp-2",
 		IsScheduledRootPasswordRotationEnabled: true,
 		Locked:                                 false,
@@ -440,11 +433,10 @@ func TestExpandingDeploymentResource(t *testing.T) {
 		},
 		deplConfigurationFieldName: []interface{}{
 			map[string]interface{}{
-				deplConfigurationModelFieldName:               "oneshard",
-				deplConfigurationNodeSizeIdFieldName:          "a8",
-				deplConfigurationNodeCountFieldName:           3,
-				deplConfigurationNodeDiskSizeFieldName:        32,
-				deplConfigurationMaximumNodeDiskSizeFieldName: 40,
+				deplConfigurationModelFieldName:        "oneshard",
+				deplConfigurationNodeSizeIdFieldName:   "a8",
+				deplConfigurationNodeCountFieldName:    3,
+				deplConfigurationNodeDiskSizeFieldName: 32,
 			},
 		},
 		deplDiskPerformanceFieldName:                      "dp-2",

@@ -50,12 +50,19 @@ bootstrap:
 	go get github.com/hashicorp/terraform-plugin-sdk/terraform	
 
 docker:
+ 	# Make "buildx" the default
+	docker buildx install
+	# Create a parallel multi-platform builder
+	docker buildx inspect multiplatform >/dev/null 2>&1 || docker buildx create --name multiplatform --use
+	docker buildx use multiplatform
 	docker build \
+		--platform linux/amd64 \
 		--build-arg=GOARCH=amd64 \
+		$(DOCKER_FLAGS) \
 		-t $(DOCKERIMAGE) .
 
-docker-push:
-	docker push $(DOCKERIMAGE)
+docker-push: DOCKER_FLAGS := $(DOCKER_FLAGS) --push
+docker-push: docker
 
 .PHONY: update-modules
 update-modules:
@@ -63,6 +70,6 @@ update-modules:
 	test -f go.mod || go mod init
 	go get \
 		$(shell zutano go mod latest \
-			github.com/arangodb-managed/apis \
+			github.com/arangodb-managed/apis@OAS-10866-remove-DiskAutoSizeSettings \
 		)
 	go mod tidy

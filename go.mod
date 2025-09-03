@@ -5,7 +5,7 @@ go 1.22.7
 toolchain go1.22.8
 
 require (
-	github.com/arangodb-managed/apis v0.89.1
+	github.com/arangodb-managed/apis v0.89.7-0.20250902113737-36caddb6f69d
 	github.com/arangodb-managed/log-helper v0.2.5
 	github.com/hashicorp/terraform-plugin-docs v0.8.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.13.0

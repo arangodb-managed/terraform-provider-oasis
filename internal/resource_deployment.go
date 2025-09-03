@@ -1,7 +1,7 @@
 //
 // DISCLAIMER
 //
-// Copyright 2020-2022 ArangoDB GmbH, Cologne, Germany
+// Copyright 2020-2025 ArangoDB GmbH, Cologne, Germany
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ const (
 	deplConfigurationNodeSizeIdFieldName                 = "node_size_id"
 	deplConfigurationNodeCountFieldName                  = "node_count"
 	deplConfigurationNodeDiskSizeFieldName               = "node_disk_size"
-	deplConfigurationMaximumNodeDiskSizeFieldName        = "maximum_node_disk_size"
 	deplNotificationConfigurationFieldName               = "notification_settings"
 	deplNotificationConfigurationEmailAddressesFieldName = "email_addresses"
 	deplDiskPerformanceFieldName                         = "disk_performance"
@@ -201,14 +200,6 @@ func resourceDeployment() *schema.Resource {
 							Optional:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								return new == "0"
-							},
-						},
-						deplConfigurationMaximumNodeDiskSizeFieldName: {
-							Type:        schema.TypeInt,
-							Description: "Deployment Resource Deployment Configuration Maximum Node Disk Size field",
-							Optional:    true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return new == ""
 							},
 						},
 					},
@@ -423,11 +414,10 @@ type securityFields struct {
 
 // configuration is a convenient wrapper around the configuration schema for easy parsing
 type configuration struct {
-	model               string
-	nodeSizeId          string
-	nodeCount           int
-	nodeDiskSize        int
-	maximumNodeDiskSize int
+	model        string
+	nodeSizeId   string
+	nodeCount    int
+	nodeDiskSize int
 }
 
 // expandDeploymentResource creates an oasis deployment structure out of a terraform schema model.
@@ -488,12 +478,6 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 			return nil, err
 		}
 	}
-	var autoSizeSettings *data.Deployment_DiskAutoSizeSettings
-	if conf.maximumNodeDiskSize > 0 {
-		autoSizeSettings = &data.Deployment_DiskAutoSizeSettings{
-			MaximumNodeDiskSize: int32(conf.maximumNodeDiskSize),
-		}
-	}
 	if v, ok := d.GetOk(deplDiskPerformanceFieldName); ok {
 		diskPerformanceID = v.(string)
 	}
@@ -532,7 +516,6 @@ func expandDeploymentResource(d *schema.ResourceData, defaultProject string) (*d
 			NodeSizeId:   conf.nodeSizeId,
 		},
 		NotificationSettings:                   notificationSetting,
-		DiskAutoSizeSettings:                   autoSizeSettings,
 		DiskPerformanceId:                      diskPerformanceID,
 		IsScheduledRootPasswordRotationEnabled: !scheduledRootPasswordRotationDisabled,
 		Locked:                                 locked,
@@ -602,9 +585,6 @@ func expandConfiguration(s []interface{}) (conf configuration, err error) {
 		}
 		if i, ok := item[deplConfigurationNodeDiskSizeFieldName]; ok && i.(int) != 0 {
 			conf.nodeDiskSize = i.(int)
-		}
-		if i, ok := item[deplConfigurationMaximumNodeDiskSizeFieldName]; ok && i.(int) != 0 {
-			conf.maximumNodeDiskSize = i.(int)
 		}
 	}
 	return
@@ -723,9 +703,6 @@ func flattenConfigurationData(depl *data.Deployment) []interface{} {
 		deplConfigurationNodeDiskSizeFieldName: int(depl.GetModel().GetNodeDiskSize()),
 		deplConfigurationNodeCountFieldName:    int(depl.GetModel().GetNodeCount()),
 	}
-	if autoSizeSettings := depl.GetDiskAutoSizeSettings(); autoSizeSettings != nil {
-		conf[deplConfigurationMaximumNodeDiskSizeFieldName] = int(autoSizeSettings.GetMaximumNodeDiskSize())
-	}
 	return []interface{}{
 		conf,
 	}
@@ -797,12 +774,6 @@ func resourceDeploymentUpdate(ctx context.Context, d *schema.ResourceData, m int
 		}
 		if conf.nodeCount != 0 {
 			depl.Model.NodeCount = int32(conf.nodeCount)
-		}
-		if conf.maximumNodeDiskSize != 0 {
-			if depl.DiskAutoSizeSettings == nil {
-				depl.DiskAutoSizeSettings = &data.Deployment_DiskAutoSizeSettings{}
-			}
-			depl.DiskAutoSizeSettings.MaximumNodeDiskSize = int32(conf.maximumNodeDiskSize)
 		}
 	}
 	// if we have change on NotificationSettings apply it
